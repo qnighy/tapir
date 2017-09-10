@@ -1,3 +1,6 @@
 [submodule "ruby192"]
 	path = ruby192
 	url = https://github.com/qnighy/ruby-1.9.2p0.git
+[submodule "ruby181"]
+	path = ruby181
+	url = https://github.com/qnighy/ruby-1.8.1.git
