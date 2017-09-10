@@ -18,7 +18,7 @@ else
 EXEC = tapir-x
 endif
 endif
-OBJS = main.o
+OBJS = main.o sdl_misc.o
 CFLAGS += -O2 -Wall -Wextra
 ifeq ($(RGSS),3)
 CPPFLAGS += -I$(RUBY_DIR)/include/ruby-1.9.1/$(RUBY_PLATFORM) \
@@ -46,4 +46,6 @@ $(EXEC): $(OBJS)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 
 %.o: ../src/%.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+	$(CC) -MMD $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+-include $(wildcard *.d)
