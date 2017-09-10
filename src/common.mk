@@ -1,3 +1,5 @@
+PC_LIBS = sdl2 SDL2_image SDL2_ttf
+
 ifeq ($(RGSS),3)
 RUBY_SRC_DIR = ../ruby192
 RUBY_DIR = ../ruby192-build
@@ -21,13 +23,17 @@ CFLAGS += -O2 -Wall -Wextra
 ifeq ($(RGSS),3)
 CPPFLAGS += -I$(RUBY_DIR)/include/ruby-1.9.1/$(RUBY_PLATFORM) \
 	    -I$(RUBY_DIR)/include/ruby-1.9.1 \
+	    $(shell pkg-config $(PC_LIBS) --cflags-only-I) \
 	    -DRGSS=$(RGSS)
 else
 CPPFLAGS += -I$(RUBY_DIR)/lib/ruby/1.8/$(RUBY_PLATFORM) \
+	    $(shell pkg-config $(PC_LIBS) --cflags-only-I) \
 	    -DRGSS=$(RGSS)
 endif
-LDFLAGS += -L$(RUBY_DIR)/lib
-LDLIBS = -lruby-static -lpthread -lrt -ldl -lcrypt -lm
+LDFLAGS += -L$(RUBY_DIR)/lib \
+	   $(shell pkg-config $(PC_LIBS) --libs-only-L --libs-only-other)
+LDLIBS = -lruby-static -lpthread -lrt -ldl -lcrypt -lm \
+	 $(shell pkg-config $(PC_LIBS) --libs-only-l)
 
 all: $(EXEC)
 
