@@ -1,0 +1,3 @@
+[submodule "ruby192"]
+	path = ruby192
+	url = https://github.com/qnighy/ruby-1.9.2p0.git
