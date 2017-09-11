@@ -36,7 +36,7 @@ int main() {
   }
 #endif
 
-  SDL_Delay(1000);
+  loopSDL();
   cleanupSDL();
   return state;
 }
