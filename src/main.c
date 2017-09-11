@@ -9,7 +9,7 @@ RUBY_GLOBAL_SETUP
 
 static VALUE protected_main(VALUE data);
 
-int main() {
+int main(int argc, char **argv) {
   int ruby_argc = 2;
   char *ruby_argv_array[] = {
     (char*)"ruby",
@@ -17,6 +17,10 @@ int main() {
   };
   char **ruby_argv = ruby_argv_array;
   int state = 0;
+
+  if(argc >= 2) {
+    tryChdir(argv[1]);
+  }
 
   initSDL();
 
