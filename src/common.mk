@@ -32,7 +32,8 @@ CPPFLAGS += -I$(RUBY_DIR)/lib/ruby/1.8/$(RUBY_PLATFORM) \
 endif
 LDFLAGS += -L$(RUBY_DIR)/lib \
 	   $(shell pkg-config $(PC_LIBS) --libs-only-L --libs-only-other)
-LDLIBS = -lruby-static -lpthread -lrt -ldl -lcrypt -lm \
+LDLIBS = $(RUBY_SRC_DIR)/ext/zlib/zlib.a -lz \
+	 -lruby-static -lpthread -lrt -ldl -lcrypt -lm \
 	 $(shell pkg-config $(PC_LIBS) --libs-only-l)
 
 all: $(EXEC)

@@ -14,7 +14,8 @@ void initSDL() {
     exit(1);
   }
 
-  window = SDL_CreateWindow("hoge",
+  /* TODO: fetch window title from Game.ini */
+  window = SDL_CreateWindow("tapir",
       SDL_WINDOWPOS_CENTERED,
       SDL_WINDOWPOS_CENTERED,
       window_width, window_height, SDL_WINDOW_SHOWN);

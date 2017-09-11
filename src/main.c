@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <ruby.h>
 #include <SDL.h>
+#include "misc.h"
 #include "sdl_misc.h"
+
+void Init_zlib(void);
 
 #ifdef RUBY_GLOBAL_SETUP
 RUBY_GLOBAL_SETUP
@@ -29,6 +32,7 @@ int main(int argc, char **argv) {
   {
     RUBY_INIT_STACK;
     ruby_init();
+    Init_zlib();
     rb_protect(protected_main, Qnil, &state);
   }
 #else
@@ -36,6 +40,7 @@ int main(int argc, char **argv) {
     (void) ruby_argc;
     (void) ruby_argv;
     ruby_init();
+    Init_zlib();
     rb_protect(protected_main, Qnil, &state);
   }
 #endif
