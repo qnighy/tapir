@@ -40,7 +40,11 @@ int main(int argc, char **argv) {
     (void) ruby_argv;
     ruby_init();
     Init_zlib();
-    rb_protect(main_rb, Qnil, &state);
+    {
+      extern void Init_stack(void *addr);
+      Init_stack(__builtin_frame_address(0));
+      rb_protect(main_rb, Qnil, &state);
+    }
   }
 #endif
 
