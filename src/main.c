@@ -4,8 +4,10 @@
 #include "main_rb.h"
 #include "misc.h"
 #include "sdl_misc.h"
+#include "Graphics.h"
 
 void Init_zlib(void);
+static void Init_RGSS(void);
 
 #ifdef RUBY_GLOBAL_SETUP
 RUBY_GLOBAL_SETUP
@@ -32,6 +34,7 @@ int main(int argc, char **argv) {
     RUBY_INIT_STACK;
     ruby_init();
     Init_zlib();
+    Init_RGSS();
     rb_protect(main_rb, Qnil, &state);
   }
 #else
@@ -40,6 +43,7 @@ int main(int argc, char **argv) {
     (void) ruby_argv;
     ruby_init();
     Init_zlib();
+    Init_RGSS();
     {
       extern void Init_stack(void *addr);
       Init_stack(__builtin_frame_address(0));
@@ -48,7 +52,10 @@ int main(int argc, char **argv) {
   }
 #endif
 
-  loopSDL();
   cleanupSDL();
   return state;
+}
+
+static void Init_RGSS(void) {
+  InitGraphics();
 }
