@@ -100,12 +100,6 @@ VALUE main_rb(VALUE data) {
       "class Sprite\n"
       "  attr_accessor :bitmap, :ox, :oy, :x, :y, :z\n"
       "end\n"
-      "class Table\n"
-      /* TODO: Table._load */
-      "  def self._load(str)\n"
-      "    Table.new\n"
-      "  end\n"
-      "end\n"
       "class Viewport\n"
       "  attr_accessor :z\n"
       "end\n"
