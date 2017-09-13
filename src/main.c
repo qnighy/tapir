@@ -4,6 +4,7 @@
 #include "main_rb.h"
 #include "misc.h"
 #include "sdl_misc.h"
+#include "Bitmap.h"
 #include "Color.h"
 #include "Graphics.h"
 #include "RGSSError.h"
@@ -69,5 +70,6 @@ static void Init_RGSS(void) {
   Init_Color();
   Init_Tone();
   Init_Table();
+  Init_Bitmap();
   Init_Graphics();
 }
