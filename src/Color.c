@@ -8,7 +8,7 @@ struct Color {
 static bool isColor(VALUE obj);
 static struct Color *convertColor(VALUE obj);
 static void rb_color_modify(VALUE obj);
-static void color_mark(struct Color *);
+static void color_mark(struct Color *ptr);
 static VALUE color_alloc(VALUE klass);
 
 VALUE rb_color_new(double red, double green, double blue, double alpha) {
@@ -192,7 +192,12 @@ static VALUE color_alloc(VALUE klass) {
 static VALUE rb_color_m_initialize(int argc, VALUE *argv, VALUE self) {
   switch(argc) {
     case 3:
-      rb_color_set( self, NUM2DBL(argv[0]), NUM2DBL(argv[1]), NUM2DBL(argv[2]), 255.0);
+      rb_color_set(
+          self,
+          NUM2DBL(argv[0]),
+          NUM2DBL(argv[1]),
+          NUM2DBL(argv[2]),
+          255.0);
       break;
     case 4:
       rb_color_set(

@@ -7,6 +7,7 @@
 #include "Color.h"
 #include "Graphics.h"
 #include "Rect.h"
+#include "Tone.h"
 
 void Init_zlib(void);
 static void Init_RGSS(void);
@@ -61,5 +62,6 @@ int main(int argc, char **argv) {
 static void Init_RGSS(void) {
   Init_Rect();
   Init_Color();
+  Init_Tone();
   Init_Graphics();
 }
