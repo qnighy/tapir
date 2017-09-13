@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 dir="$(pwd)"
 cd ruby181
 if [ ! -e configure ]; then
-  autoconf2.59
+  autoconf
 fi
 if [ ! -e Makefile ]; then
   ./configure \
