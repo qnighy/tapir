@@ -1,43 +1,33 @@
 # Tapir
 
-Tapir is a re-implementation project of RGSS/RGSS2/RGSS3 game engines.
+Tapir is a re-implementation project of RGSS/RGSS2/RGSS3 game engines. In other words, Tapir aims to run RPG Maker XP/VX/VX Ace games on Linux (and other platforms).
 
-## Dependencies
+# How to build
 
-It works currently on Linux. Porting to Android is planned.
+Following is the instruction for Ubuntu 16.04. It may also work on another platforms.
 
-It depends on:
-
-- C/C++ Compiler (e.g. GCC)
-- autoconf (used to build Ruby)
-- bison/flex (used to build Ruby)
-- SDL2 and its development package
-
-## How to build
-
-First, build Ruby1.9.2p0.
+## Install dependencies
 
 ```
-$ sudo apt install autoconf bison flex
-$ ./build-ruby192.sh -j4
+$ sudo apt install build-essential autoconf bison flex libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
 ```
 
-Next, build Tapir/Accordion.
+## Compile Ruby
+
+RGSS/RGSS2 are based on Ruby 1.8.1. RGSS3 is based on Ruby 1.9.2p0. These versions with some patches are included in this repository.
 
 ```
-$ cd accordion
+$ git submodule update --init
+$ ./build-ruby181.sh
+$ ./build-ruby192.sh
+```
+
+## Compile tapir
+
+```
 $ make
 ```
 
-## How to use
+This will make three binaries: `accordion/tapir-a`, `violin/tapir-v`, and `xylophone/tapir-x`. Accordion, Violin, and Xylophone are for RGSS3 (VX Ace), RGSS2 (VX), and RGSS (XP), respectively.
 
-1. Install Enterbrain's "RPG Maker VX Ace RTP" on your Windows.
-2. Copy it into `/usr/local/share/Enterbrain`. Make sure that `/usr/local/share/Enterbrain/RGSS3/RPGVXAce/Game.ico` exists.
-3. Copy `accordion/tapir` to the RPG Maker VX Ace game directory, where Game.exe exists.
-4. run `./tapir` in the game directory.
-
-## Compatibility
-
-Currently we are working on the game library. This enables us to run non-extended games, such as Sakusaku.
-
-Some distributed scripts make use of Win32API. So we have to fake the API in order to run these scripts.
+## Run tapir
