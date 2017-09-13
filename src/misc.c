@@ -4,6 +4,21 @@
 #include <unistd.h>
 #include "misc.h"
 
+int32_t saturateInt32(int32_t val, int32_t minval, int32_t maxval) {
+  if(val <= minval) return minval;
+  if(val >= maxval) return maxval;
+  return val;
+}
+
+// Note: original RGSS seems to evaluate to_f twice or more.
+double saturateDouble(double val, double minval, double maxval) {
+  // Note: original RGSS doesn't check NaN.
+  if(val <= minval) return minval;
+  if(val >= maxval) return maxval;
+  if(minval <= val && val <= maxval) return val;
+  rb_raise(rb_eRangeError, "cannot saturate NaN");
+}
+
 union u64d_converter {
   uint64_t u64;
   double d;

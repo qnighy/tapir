@@ -4,6 +4,7 @@
 #include "main_rb.h"
 #include "misc.h"
 #include "sdl_misc.h"
+#include "Color.h"
 #include "Graphics.h"
 #include "Rect.h"
 
@@ -59,5 +60,6 @@ int main(int argc, char **argv) {
 
 static void Init_RGSS(void) {
   Init_Rect();
+  Init_Color();
   Init_Graphics();
 }

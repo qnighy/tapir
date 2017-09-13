@@ -44,7 +44,7 @@ VALUE main_rb(VALUE data) {
       "  def fill_rect(rect, color)\n"
       "  end\n"
       "  def get_pixel(x, y)\n"
-      "    Color.new\n"
+      "    Color.new(0.0, 0.0, 0.0, 0.0)\n"
       "  end\n"
       /* TODO: Bitmap#initialize */
       "  def initialize(*args)\n"
@@ -61,22 +61,10 @@ VALUE main_rb(VALUE data) {
       "  def dispose\n"
       "  end\n"
       "end\n"
-      "class Color\n"
-      "  attr_accessor :red, :green, :blue, :alpha\n"
-      /* TODO: Color#initialize */
-      "  def initialize(*args)\n"
-      "  end\n"
-      "  def set(color)\n"
-      "  end\n"
-      /* TODO: Color._load */
-      "  def self._load(str)\n"
-      "    Color.new\n"
-      "  end\n"
-      "end\n"
       "class Font\n"
       "  attr_accessor :color, :size\n"
       "  def initialize\n"
-      "    @color = Color.new\n"
+      "    @color = Color.new(0.0, 0.0, 0.0, 0.0)\n"
       "  end\n"
       /* TODO: Font.exist? */
       "  def self.exist?(name)\n"

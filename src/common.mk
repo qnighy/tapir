@@ -18,7 +18,7 @@ else
 EXEC = tapir-x
 endif
 endif
-OBJS = main.o main_rb.o sdl_misc.o misc.o Graphics.o Rect.o
+OBJS = main.o main_rb.o sdl_misc.o misc.o Color.o Graphics.o Rect.o
 CFLAGS += -O2 -Wall -Wextra
 ifeq ($(RGSS),3)
 CPPFLAGS += -I$(RUBY_DIR)/include/ruby-1.9.1/$(RUBY_PLATFORM) \
