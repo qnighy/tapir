@@ -7,7 +7,7 @@
 static VALUE rb_mGraphics;
 static VALUE rb_graphics_update(VALUE self);
 
-void InitGraphics() {
+void Init_Graphics() {
   rb_mGraphics = rb_define_module("Graphics");
   rb_define_singleton_method(rb_mGraphics, "update", rb_graphics_update, 0);
 }

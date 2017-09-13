@@ -1,6 +1,6 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-void InitGraphics(void);
+void Init_Graphics(void);
 
 #endif /* GRAPHICS_H */

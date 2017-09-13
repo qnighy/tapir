@@ -5,6 +5,7 @@
 #include "misc.h"
 #include "sdl_misc.h"
 #include "Graphics.h"
+#include "Rect.h"
 
 void Init_zlib(void);
 static void Init_RGSS(void);
@@ -57,5 +58,6 @@ int main(int argc, char **argv) {
 }
 
 static void Init_RGSS(void) {
-  InitGraphics();
+  Init_Rect();
+  Init_Graphics();
 }
