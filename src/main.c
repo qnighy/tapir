@@ -6,6 +6,8 @@
 #include "sdl_misc.h"
 #include "Color.h"
 #include "Graphics.h"
+#include "RGSSError.h"
+#include "RGSSReset.h"
 #include "Rect.h"
 #include "Table.h"
 #include "Tone.h"
@@ -61,6 +63,8 @@ int main(int argc, char **argv) {
 }
 
 static void Init_RGSS(void) {
+  Init_RGSSError();
+  Init_RGSSReset();
   Init_Rect();
   Init_Color();
   Init_Tone();

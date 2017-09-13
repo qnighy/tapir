@@ -4,15 +4,15 @@
 #if RGSS == 3
 #define RGSS_RESET "RGSSReset"
 #define TERMS "Terms"
-#define SCRIPT_PATH "\"Data\\\\Scripts.rvdata2\""
+#define SCRIPT_PATH "\"Data/Scripts.rvdata2\""
 #elif RGSS == 2
 #define RGSS_RESET "Reset"
 #define TERMS "Terms"
-#define SCRIPT_PATH "\"Data\\\\Scripts.rvdata\""
+#define SCRIPT_PATH "\"Data/Scripts.rvdata\""
 #else
 #define RGSS_RESET "Reset"
 #define TERMS "Words"
-#define SCRIPT_PATH "\"Data\\\\Scripts.rxdata\""
+#define SCRIPT_PATH "\"Data/Scripts.rxdata\""
 #endif
 
 VALUE main_rb(VALUE data) {
@@ -118,8 +118,6 @@ VALUE main_rb(VALUE data) {
       "    @height = 0\n"
       "    @tone = Tone.new(0.0, 0.0, 0.0, 0.0)\n"
       "  end\n"
-      "end\n"
-      "class "RGSS_RESET" < Exception\n"
       "end\n"
       "\n"
       "module RPG\n"
@@ -267,16 +265,32 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "end\n"
       "\n"
+#if RGSS == 3
       "def rgss_main\n"
       "  yield\n"
       "rescue "RGSS_RESET"\n"
       "  GC.start\n"
       "  retry\n"
       "end\n"
+      "def rgss_stop\n"
+      "  loop { Graphics.update }\n"
+      "end\n"
+      "def msgbox(*args)\n"
+      "  print *args\n"
+      "end\n"
+      "def msgbox_p(*args)\n"
+      "  p *args\n"
+      "end\n"
+#endif
       /* TODO: read from archive */
-      "def load_data(path, &proc)\n"
-      "  File.open(path.gsub(/\\\\/, \"/\")) do|file|\n"
-      "    Marshal.load(file, &proc)\n"
+      "def load_data(filename)\n"
+      "  File.open(filename.gsub(/\\\\/, \"/\"), \"rb\") do|f|\n"
+      "    Marshal.load(f)\n"
+      "  end\n"
+      "end\n"
+      "def save_data(obj, filename)\n"
+      "  File.open(filename.gsub(/\\\\/, \"/\"), \"wb\") do|f|\n"
+      "    Marshal.dump(obj, f)\n"
       "  end\n"
       "end\n"
       "begin\n"
