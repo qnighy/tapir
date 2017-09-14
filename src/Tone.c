@@ -140,12 +140,12 @@ void Init_Tone(void) {
   rb_define_method(rb_cTone, "_dump", rb_tone_m_old_dump, 1);
 }
 
-bool isTone(VALUE obj) {
+static bool isTone(VALUE obj) {
   if(TYPE(obj) != T_DATA) return false;
   return RDATA(obj)->dmark == (void(*)(void*))tone_mark;
 }
 
-struct Tone *convertTone(VALUE obj) {
+static struct Tone *convertTone(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))tone_mark) {

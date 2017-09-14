@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <SDL.h>
 #include <SDL_image.h>
 #include "Bitmap.h"
@@ -6,12 +5,6 @@
 #include "openres.h"
 #include "misc.h"
 
-struct Bitmap {
-  SDL_Surface *surface;
-};
-
-static bool isBitmap(VALUE obj);
-static struct Bitmap *convertBitmap(VALUE obj);
 static void rb_bitmap_modify(VALUE obj);
 static void bitmap_mark(struct Bitmap *ptr);
 static void bitmap_free(struct Bitmap *ptr);

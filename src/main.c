@@ -10,6 +10,7 @@
 #include "RGSSError.h"
 #include "RGSSReset.h"
 #include "Rect.h"
+#include "Sprite.h"
 #include "Table.h"
 #include "Tone.h"
 
@@ -71,5 +72,6 @@ static void Init_RGSS(void) {
   Init_Tone();
   Init_Table();
   Init_Bitmap();
+  Init_Sprite();
   Init_Graphics();
 }

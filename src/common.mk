@@ -20,7 +20,7 @@ endif
 endif
 OBJS = main.o main_rb.o openres.o sdl_misc.o misc.o \
        Bitmap.o Color.o Graphics.o RGSSError.o RGSSReset.o \
-       Rect.o Table.o Tone.o
+       Rect.o Sprite.o Table.o Tone.o
 CFLAGS += -O2 -Wall -Wextra
 ifeq ($(RGSS),3)
 CPPFLAGS += -I$(RUBY_DIR)/include/ruby-1.9.1/$(RUBY_PLATFORM) \

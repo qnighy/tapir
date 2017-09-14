@@ -88,7 +88,7 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "end\n"
       "class Sprite\n"
-      "  attr_accessor :bitmap, :ox, :oy, :x, :y, :z\n"
+      "  attr_accessor :ox, :oy, :x, :y, :z\n"
       "end\n"
       "class Viewport\n"
       "  attr_accessor :z\n"
