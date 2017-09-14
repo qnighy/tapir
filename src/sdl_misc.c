@@ -50,8 +50,10 @@ void cleanupSDL() {
 void renderSDL() {
   // TODO: implement rendering
   SDL_RenderClear(renderer);
+  for(size_t i = 0; i < registry_size; ++i) {
+    registry[i]->render(registry[i]);
+  }
   SDL_RenderPresent(renderer);
-  fprintf(stderr, "registry_size = %zu\n", registry_size);
 }
 
 void registerRenderable(struct Renderable *renderable) {

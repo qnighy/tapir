@@ -23,6 +23,8 @@ static VALUE rb_sprite_m_initialize_copy(VALUE self, VALUE orig);
 static VALUE rb_sprite_m_bitmap(VALUE self);
 static VALUE rb_sprite_m_set_bitmap(VALUE self, VALUE bitmap);
 
+static void renderSprite(struct Renderable *renderable);
+
 VALUE rb_cSprite;
 
 /*
@@ -123,6 +125,7 @@ static void sprite_free(struct Sprite *ptr) {
 
 static VALUE sprite_alloc(VALUE klass) {
   struct Sprite *ptr = ALLOC(struct Sprite);
+  ptr->renderable.render = renderSprite;
   ptr->bitmap = Qnil;
   registerRenderable(&ptr->renderable);
   VALUE ret = Data_Wrap_Struct(klass, sprite_mark, sprite_free, ptr);
@@ -168,4 +171,17 @@ static VALUE rb_sprite_m_set_bitmap(VALUE self, VALUE newval) {
   if(newval != Qnil) convertBitmap(newval);
   ptr->bitmap = newval;
   return newval;
+}
+
+static void renderSprite(struct Renderable *renderable) {
+  struct Sprite *ptr = (struct Sprite *)renderable;
+  if(ptr->bitmap == Qnil) return;
+  struct Bitmap *bitmap_ptr = convertBitmap(ptr->bitmap);
+
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(
+      renderer, bitmap_ptr->surface);
+
+  SDL_RenderCopy(renderer, texture, NULL, NULL);
+
+  SDL_DestroyTexture(texture);
 }

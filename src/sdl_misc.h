@@ -4,7 +4,7 @@
 #include <SDL.h>
 
 struct Renderable {
-  int flag;
+  void (*render)(struct Renderable *renderable);
 };
 
 extern int window_width;
