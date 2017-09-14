@@ -42,9 +42,8 @@ static VALUE rb_graphics_update(VALUE self) {
         break;
     }
   }
-  /* TODO: Graphics.update: implement actual rendering */
-  SDL_RenderClear(renderer);
-  SDL_RenderPresent(renderer);
+  renderSDL();
+  // TODO: use frame rate correctly
   SDL_Delay(1000 / 60);
 
   if(quit) {

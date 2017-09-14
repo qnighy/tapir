@@ -3,6 +3,8 @@
 
 #include <ruby.h>
 
+#include "sdl_misc.h"
+
 extern VALUE rb_cSprite;
 extern void Init_Sprite(void);
 

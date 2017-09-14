@@ -6,6 +6,7 @@
 #include "misc.h"
 
 struct Sprite {
+  struct Renderable renderable;
   VALUE bitmap;
 };
 
@@ -116,12 +117,14 @@ static void sprite_mark(struct Sprite *ptr) {
 }
 
 static void sprite_free(struct Sprite *ptr) {
+  unregisterRenderable(&ptr->renderable);
   xfree(ptr);
 }
 
 static VALUE sprite_alloc(VALUE klass) {
   struct Sprite *ptr = ALLOC(struct Sprite);
   ptr->bitmap = Qnil;
+  registerRenderable(&ptr->renderable);
   VALUE ret = Data_Wrap_Struct(klass, sprite_mark, sprite_free, ptr);
   return ret;
 }
