@@ -3,6 +3,7 @@
 #include <SDL_image.h>
 #include "Bitmap.h"
 #include "RGSSError.h"
+#include "openres.h"
 #include "misc.h"
 
 struct Bitmap {
@@ -36,6 +37,23 @@ void Init_Bitmap(void) {
       rb_bitmap_m_initialize_copy, 1);
   rb_define_method(rb_cBitmap, "width", rb_bitmap_m_width, 0);
   rb_define_method(rb_cBitmap, "height", rb_bitmap_m_height, 0);
+  // TODO: implement Bitmap#dispose
+  // TODO: implement Bitmap#disposed?
+  // TODO: implement Bitmap#rect
+  // TODO: implement Bitmap#blt
+  // TODO: implement Bitmap#stretch_blt
+  // TODO: implement Bitmap#gradient_fill_rect
+  // TODO: implement Bitmap#clear
+  // TODO: implement Bitmap#clear_rect
+  // TODO: implement Bitmap#get_pixel
+  // TODO: implement Bitmap#set_pixel
+  // TODO: implement Bitmap#hue_change
+  // TODO: implement Bitmap#blur
+  // TODO: implement Bitmap#radial_blur
+  // TODO: implement Bitmap#draw_text
+  // TODO: implement Bitmap#text_size
+  // TODO: implement Bitmap#font
+  // TODO: implement Bitmap#font=
 }
 
 bool isBitmap(VALUE obj) {
@@ -97,8 +115,7 @@ static VALUE rb_bitmap_m_initialize(int argc, VALUE *argv, VALUE self) {
         const char * const extensions[] = {"", ".png", ".jpg", ".bmp"};
         VALUE filename = rb_obj_dup(argv[0]);
         rb_str_cat2(filename, extensions[i]);
-        /* TODO: case-insensitive path */
-        file = SDL_RWFromFile(RSTRING_PTR(filename), "rb");
+        file = openres(RSTRING_PTR(filename));
         if(file) break;
       }
       if(!file) {
@@ -133,7 +150,7 @@ static VALUE rb_bitmap_m_initialize(int argc, VALUE *argv, VALUE self) {
 
 static VALUE rb_bitmap_m_initialize_copy(VALUE self, VALUE orig) {
   struct Bitmap *ptr = convertBitmap(self);
-  struct Bitmap *orig_ptr = convertBitmap(self);
+  struct Bitmap *orig_ptr = convertBitmap(orig);
   /* TODO: what masks are appropriate? */
   ptr->surface = SDL_CreateRGBSurface(
       0, orig_ptr->surface->w, orig_ptr->surface->h, 32,

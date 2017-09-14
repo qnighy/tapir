@@ -30,4 +30,20 @@ $ make
 
 This will make three binaries: `accordion/tapir-a`, `violin/tapir-v`, and `xylophone/tapir-x`. Accordion, Violin, and Xylophone are for RGSS3 (VX Ace), RGSS2 (VX), and RGSS (XP), respectively.
 
+## Install RTPs
+
+In Windows, RTPs will be installed to these directories by default:
+
+- `C:\Program Files (x86)\Common Files\Enterbrain\RGSS\Standard`
+- `C:\Program Files (x86)\Common Files\Enterbrain\RGSS2\RPGVX`
+- `C:\Program Files (x86)\Common Files\Enterbrain\RGSS3\RPGVXAce`
+
+(In 32bit windows, `Program Files (x86)` becomes `Program Files`.)
+
+Tapir currently looks for them in these directories:
+
+- `/usr/local/share/Enterbrain/RGSS/Standard`
+- `/usr/local/share/Enterbrain/RGSS2/RPGVX`
+- `/usr/local/share/Enterbrain/RGSS3/RPGVXAce`
+
 ## Run tapir
