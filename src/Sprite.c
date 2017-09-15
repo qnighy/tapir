@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_opengl.h>
 #include "Sprite.h"
 #include "Bitmap.h"
 #include "misc.h"
@@ -178,10 +179,6 @@ static void renderSprite(struct Renderable *renderable) {
   if(ptr->bitmap == Qnil) return;
   struct Bitmap *bitmap_ptr = convertBitmap(ptr->bitmap);
 
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(
-      renderer, bitmap_ptr->surface);
-
-  SDL_RenderCopy(renderer, texture, NULL, NULL);
-
-  SDL_DestroyTexture(texture);
+  glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
 }

@@ -1,4 +1,4 @@
-PC_LIBS = sdl2 SDL2_image SDL2_ttf
+PC_LIBS = sdl2 SDL2_image SDL2_ttf gl
 
 ifeq ($(RGSS),3)
 RUBY_SRC_DIR = ../ruby192

@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <SDL_opengl.h>
 #include "sdl_misc.h"
 
 int window_width = 640;
 int window_height = 480;
 SDL_Window *window = NULL;
-SDL_Renderer *renderer = NULL;
+SDL_GLContext glcontext = NULL;
 static size_t registry_size, registry_capacity;
 static struct Renderable **registry;
 
@@ -18,22 +19,23 @@ void initSDL() {
     exit(1);
   }
 
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
   /* TODO: fetch window title from Game.ini */
   window = SDL_CreateWindow("tapir",
       SDL_WINDOWPOS_CENTERED,
       SDL_WINDOWPOS_CENTERED,
-      window_width, window_height, SDL_WINDOW_SHOWN);
+      window_width, window_height,
+      SDL_WINDOW_OPENGL);
   if(!window) {
     fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
     SDL_Quit();
     exit(1);
   }
 
-  renderer = SDL_CreateRenderer(
-      window, -1,
-      SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-  if(!renderer) {
-    fprintf(stderr, "SDL_CreateRenderer Error: %s\n", SDL_GetError());
+  glcontext = SDL_GL_CreateContext(window);
+  if(!glcontext) {
+    fprintf(stderr, "SDL_GL_CreateContext error: %s\n", SDL_GetError());
     SDL_DestroyWindow(window);
     SDL_Quit();
     exit(1);
@@ -41,7 +43,7 @@ void initSDL() {
 }
 
 void cleanupSDL() {
-  SDL_DestroyRenderer(renderer);
+  SDL_GL_DeleteContext(glcontext);
   SDL_DestroyWindow(window);
   SDL_Quit();
   free(registry);
@@ -49,11 +51,13 @@ void cleanupSDL() {
 
 void renderSDL() {
   // TODO: implement rendering
-  SDL_RenderClear(renderer);
+  SDL_GL_MakeCurrent(window, glcontext);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
   for(size_t i = 0; i < registry_size; ++i) {
     registry[i]->render(registry[i]);
   }
-  SDL_RenderPresent(renderer);
+  SDL_GL_SwapWindow(window);
 }
 
 void registerRenderable(struct Renderable *renderable) {

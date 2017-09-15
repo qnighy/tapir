@@ -11,6 +11,7 @@ extern int window_width;
 extern int window_height;
 extern SDL_Window *window;
 extern SDL_Renderer *renderer;
+extern SDL_GLContext glcontext;
 
 void initSDL(void);
 void cleanupSDL(void);
