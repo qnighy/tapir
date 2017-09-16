@@ -20,6 +20,8 @@ void initSDL() {
   }
 
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
   /* TODO: fetch window title from Game.ini */
   window = SDL_CreateWindow("tapir",
@@ -32,6 +34,11 @@ void initSDL() {
     SDL_Quit();
     exit(1);
   }
+
+  // int major, minor;
+  // SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
+  // SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
+  // fprintf(stderr, "GL version: %d.%d\n", major, minor);
 
   glcontext = SDL_GL_CreateContext(window);
   if(!glcontext) {

@@ -1,10 +1,22 @@
 #include <stdbool.h>
 #include <SDL.h>
 #include <SDL_image.h>
+#define GL_GLEXT_PROTOTYPES
 #include <SDL_opengl.h>
+#include <SDL_opengl_glext.h>
 #include "Sprite.h"
 #include "Bitmap.h"
 #include "misc.h"
+
+static const char *vsh_source =
+  "void main(void) {\n"
+  "    gl_Position = ftransform();\n"
+  "}\n";
+static const char *fsh_source =
+  "void main(void) {\n"
+  "    gl_FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+  "}\n";
+static GLuint shader;
 
 struct Sprite {
   struct Renderable renderable;
@@ -90,6 +102,51 @@ void Init_Sprite(void) {
   // TODO: implement Sprite#color=
   // TODO: implement Sprite#tone
   // TODO: implement Sprite#tone=
+
+  GLuint vsh = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(vsh, 1, &vsh_source, NULL);
+  glCompileShader(vsh);
+  {
+    int compilation_status;
+    glGetShaderiv(vsh, GL_COMPILE_STATUS, &compilation_status);
+    if(!compilation_status) {
+      char compilation_log[512] = {0};
+      glGetShaderInfoLog(vsh, sizeof(compilation_log), NULL, compilation_log);
+      fprintf(stderr, "vsh compile error:\n%s\n", compilation_log);
+    }
+  }
+
+  GLuint fsh = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(fsh, 1, &fsh_source, NULL);
+  glCompileShader(fsh);
+  {
+    int compilation_status;
+    glGetShaderiv(fsh, GL_COMPILE_STATUS, &compilation_status);
+    if(!compilation_status) {
+      char compilation_log[512] = {0};
+      glGetShaderInfoLog(fsh, sizeof(compilation_log), NULL, compilation_log);
+      fprintf(stderr, "fsh compile error:\n%s\n", compilation_log);
+    }
+  }
+
+  shader = glCreateProgram();
+  glAttachShader(shader, vsh);
+  glAttachShader(shader, fsh);
+  glLinkProgram(shader);
+  {
+    int link_status;
+    glGetShaderiv(shader, GL_LINK_STATUS, &link_status);
+    if(!link_status) {
+      char link_log[512] = {0};
+      glGetProgramInfoLog(shader, sizeof(link_log), NULL, link_log);
+      fprintf(stderr, "shader link error:\n%s\n", link_log);
+    }
+  }
+
+  glDeleteShader(vsh);
+  glDeleteShader(fsh);
+
+  fflush(stderr);
 }
 
 static bool isSprite(VALUE obj) {
@@ -179,6 +236,17 @@ static void renderSprite(struct Renderable *renderable) {
   if(ptr->bitmap == Qnil) return;
   struct Bitmap *bitmap_ptr = convertBitmap(ptr->bitmap);
 
-  glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
+  GLfloat vertices[][3] = {
+    {-1.0f, -1.0f, 0.0f},
+    { 1.0f, -1.0f, 0.0f},
+    {-1.0f,  1.0f, 0.0f},
+    { 1.0f,  1.0f, 0.0f}
+  };
+
+  glUseProgram(shader);
+  glBegin(GL_TRIANGLE_STRIP);
+  for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
+    glVertex3fv(vertices[i]);
+  }
+  glEnd();
 }
