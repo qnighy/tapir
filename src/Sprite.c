@@ -5,6 +5,10 @@
 #include <SDL_opengl_glext.h>
 #include "Sprite.h"
 #include "Bitmap.h"
+#include "Viewport.h"
+#include "Rect.h"
+#include "Color.h"
+#include "Tone.h"
 #include "misc.h"
 
 static GLuint shader;
@@ -16,8 +20,64 @@ static VALUE sprite_alloc(VALUE klass);
 static VALUE rb_sprite_m_initialize(int argc, VALUE *argv, VALUE self);
 static VALUE rb_sprite_m_initialize_copy(VALUE self, VALUE orig);
 
+static VALUE rb_sprite_m_dispose(VALUE self);
+static VALUE rb_sprite_m_disposed_p(VALUE self);
 static VALUE rb_sprite_m_bitmap(VALUE self);
 static VALUE rb_sprite_m_set_bitmap(VALUE self, VALUE bitmap);
+#if RGSS >= 2
+static VALUE rb_sprite_m_width(VALUE self);
+static VALUE rb_sprite_m_height(VALUE self);
+#endif
+static VALUE rb_sprite_m_src_rect(VALUE self);
+static VALUE rb_sprite_m_set_src_rect(VALUE self, VALUE newval);
+#if RGSS >= 2
+static VALUE rb_sprite_m_viewport(VALUE self);
+static VALUE rb_sprite_m_set_viewport(VALUE self, VALUE newval);
+#endif
+static VALUE rb_sprite_m_visible(VALUE self);
+static VALUE rb_sprite_m_set_visible(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_x(VALUE self);
+static VALUE rb_sprite_m_set_x(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_y(VALUE self);
+static VALUE rb_sprite_m_set_y(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_z(VALUE self);
+static VALUE rb_sprite_m_set_z(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_ox(VALUE self);
+static VALUE rb_sprite_m_set_ox(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_oy(VALUE self);
+static VALUE rb_sprite_m_set_oy(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_zoom_x(VALUE self);
+static VALUE rb_sprite_m_set_zoom_x(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_zoom_y(VALUE self);
+static VALUE rb_sprite_m_set_zoom_y(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_angle(VALUE self);
+static VALUE rb_sprite_m_set_angle(VALUE self, VALUE newval);
+#if RGSS >= 2
+static VALUE rb_sprite_m_wave_amp(VALUE self);
+static VALUE rb_sprite_m_set_wave_amp(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_wave_length(VALUE self);
+static VALUE rb_sprite_m_set_wave_length(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_wave_speed(VALUE self);
+static VALUE rb_sprite_m_set_wave_speed(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_wave_phase(VALUE self);
+static VALUE rb_sprite_m_set_wave_phase(VALUE self, VALUE newval);
+#endif
+static VALUE rb_sprite_m_mirror(VALUE self);
+static VALUE rb_sprite_m_set_mirror(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_bush_depth(VALUE self);
+static VALUE rb_sprite_m_set_bush_depth(VALUE self, VALUE newval);
+#if RGSS >= 2
+static VALUE rb_sprite_m_bush_opacity(VALUE self);
+static VALUE rb_sprite_m_set_bush_opacity(VALUE self, VALUE newval);
+#endif
+static VALUE rb_sprite_m_opacity(VALUE self);
+static VALUE rb_sprite_m_set_opacity(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_blend_type(VALUE self);
+static VALUE rb_sprite_m_set_blend_type(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_color(VALUE self);
+static VALUE rb_sprite_m_set_color(VALUE self, VALUE newval);
+static VALUE rb_sprite_m_tone(VALUE self);
+static VALUE rb_sprite_m_set_tone(VALUE self, VALUE newval);
 
 static void renderSprite(struct Renderable *renderable);
 
@@ -33,58 +93,67 @@ void Init_Sprite(void) {
       rb_sprite_m_initialize, -1);
   rb_define_private_method(rb_cSprite, "initialize_copy",
       rb_sprite_m_initialize_copy, 1);
+  rb_define_method(rb_cSprite, "dispose", rb_sprite_m_dispose, 0);
+  rb_define_method(rb_cSprite, "disposed?", rb_sprite_m_disposed_p, 0);
+#if RGSS >= 2
+  rb_define_method(rb_cSprite, "width", rb_sprite_m_width, 0);
+  rb_define_method(rb_cSprite, "height", rb_sprite_m_height, 0);
+#endif
   rb_define_method(rb_cSprite, "bitmap", rb_sprite_m_bitmap, 0);
   rb_define_method(rb_cSprite, "bitmap=", rb_sprite_m_set_bitmap, 1);
-  // TODO: implement Sprite#dispose
-  // TODO: implement Sprite#disposed?
+  rb_define_method(rb_cSprite, "src_rect", rb_sprite_m_src_rect, 0);
+  rb_define_method(rb_cSprite, "src_rect=", rb_sprite_m_set_src_rect, 1);
+#if RGSS >= 2
+  rb_define_method(rb_cSprite, "viewport", rb_sprite_m_viewport, 0);
+  rb_define_method(rb_cSprite, "viewport=", rb_sprite_m_set_viewport, 1);
+#endif
+  rb_define_method(rb_cSprite, "visible", rb_sprite_m_visible, 0);
+  rb_define_method(rb_cSprite, "visible=", rb_sprite_m_set_visible, 1);
+  rb_define_method(rb_cSprite, "x", rb_sprite_m_x, 0);
+  rb_define_method(rb_cSprite, "x=", rb_sprite_m_set_x, 1);
+  rb_define_method(rb_cSprite, "y", rb_sprite_m_y, 0);
+  rb_define_method(rb_cSprite, "y=", rb_sprite_m_set_y, 1);
+  rb_define_method(rb_cSprite, "z", rb_sprite_m_z, 0);
+  rb_define_method(rb_cSprite, "z=", rb_sprite_m_set_z, 1);
+  rb_define_method(rb_cSprite, "ox", rb_sprite_m_ox, 0);
+  rb_define_method(rb_cSprite, "ox=", rb_sprite_m_set_ox, 1);
+  rb_define_method(rb_cSprite, "oy", rb_sprite_m_oy, 0);
+  rb_define_method(rb_cSprite, "oy=", rb_sprite_m_set_oy, 1);
+  rb_define_method(rb_cSprite, "zoom_x", rb_sprite_m_zoom_x, 0);
+  rb_define_method(rb_cSprite, "zoom_x=", rb_sprite_m_set_zoom_x, 1);
+  rb_define_method(rb_cSprite, "zoom_y", rb_sprite_m_zoom_y, 0);
+  rb_define_method(rb_cSprite, "zoom_y=", rb_sprite_m_set_zoom_y, 1);
+  rb_define_method(rb_cSprite, "angle", rb_sprite_m_angle, 0);
+  rb_define_method(rb_cSprite, "angle=", rb_sprite_m_set_angle, 1);
+#if RGSS >= 2
+  rb_define_method(rb_cSprite, "wave_amp", rb_sprite_m_wave_amp, 0);
+  rb_define_method(rb_cSprite, "wave_amp=", rb_sprite_m_set_wave_amp, 1);
+  rb_define_method(rb_cSprite, "wave_length", rb_sprite_m_wave_length, 0);
+  rb_define_method(rb_cSprite, "wave_length=", rb_sprite_m_set_wave_length, 1);
+  rb_define_method(rb_cSprite, "wave_speed", rb_sprite_m_wave_speed, 0);
+  rb_define_method(rb_cSprite, "wave_speed=", rb_sprite_m_set_wave_speed, 1);
+  rb_define_method(rb_cSprite, "wave_phase", rb_sprite_m_wave_phase, 0);
+  rb_define_method(rb_cSprite, "wave_phase=", rb_sprite_m_set_wave_phase, 1);
+#endif
+  rb_define_method(rb_cSprite, "mirror", rb_sprite_m_mirror, 0);
+  rb_define_method(rb_cSprite, "mirror=", rb_sprite_m_set_mirror, 1);
+  rb_define_method(rb_cSprite, "bush_depth", rb_sprite_m_bush_depth, 0);
+  rb_define_method(rb_cSprite, "bush_depth=", rb_sprite_m_set_bush_depth, 1);
+#if RGSS >= 2
+  rb_define_method(rb_cSprite, "bush_opacity", rb_sprite_m_bush_opacity, 0);
+  rb_define_method(rb_cSprite, "bush_opacity=",
+      rb_sprite_m_set_bush_opacity, 1);
+#endif
+  rb_define_method(rb_cSprite, "opacity", rb_sprite_m_opacity, 0);
+  rb_define_method(rb_cSprite, "opacity=", rb_sprite_m_set_opacity, 1);
+  rb_define_method(rb_cSprite, "blend_type", rb_sprite_m_blend_type, 0);
+  rb_define_method(rb_cSprite, "blend_type=", rb_sprite_m_set_blend_type, 1);
+  rb_define_method(rb_cSprite, "color", rb_sprite_m_color, 0);
+  rb_define_method(rb_cSprite, "color=", rb_sprite_m_set_color, 1);
+  rb_define_method(rb_cSprite, "tone", rb_sprite_m_tone, 0);
+  rb_define_method(rb_cSprite, "tone=", rb_sprite_m_set_tone, 1);
   // TODO: implement Sprite#flash
   // TODO: implement Sprite#update
-  // TODO: implement Sprite#width
-  // TODO: implement Sprite#height
-  // TODO: implement Sprite#src_rect
-  // TODO: implement Sprite#src_rect=
-  // TODO: implement Sprite#viewport
-  // TODO: implement Sprite#viewport=
-  // TODO: implement Sprite#visible
-  // TODO: implement Sprite#visible=
-  // TODO: implement Sprite#x
-  // TODO: implement Sprite#x=
-  // TODO: implement Sprite#y
-  // TODO: implement Sprite#y=
-  // TODO: implement Sprite#z
-  // TODO: implement Sprite#z=
-  // TODO: implement Sprite#ox
-  // TODO: implement Sprite#ox=
-  // TODO: implement Sprite#oy
-  // TODO: implement Sprite#oy=
-  // TODO: implement Sprite#zoom_x
-  // TODO: implement Sprite#zoom_x=
-  // TODO: implement Sprite#zoom_y
-  // TODO: implement Sprite#zoom_y=
-  // TODO: implement Sprite#angle
-  // TODO: implement Sprite#angle=
-  // TODO: implement Sprite#wave_amp
-  // TODO: implement Sprite#wave_amp=
-  // TODO: implement Sprite#wave_length
-  // TODO: implement Sprite#wave_length=
-  // TODO: implement Sprite#wave_speed
-  // TODO: implement Sprite#wave_speed=
-  // TODO: implement Sprite#wave_phase
-  // TODO: implement Sprite#wave_phase=
-  // TODO: implement Sprite#mirror
-  // TODO: implement Sprite#mirror=
-  // TODO: implement Sprite#bush_depth
-  // TODO: implement Sprite#bush_depth=
-  // TODO: implement Sprite#bush_opacity
-  // TODO: implement Sprite#bush_opacity=
-  // TODO: implement Sprite#opacity
-  // TODO: implement Sprite#opacity=
-  // TODO: implement Sprite#blend_type
-  // TODO: implement Sprite#blend_type=
-  // TODO: implement Sprite#color
-  // TODO: implement Sprite#color=
-  // TODO: implement Sprite#tone
-  // TODO: implement Sprite#tone=
 }
 
 bool isSprite(VALUE obj) {
@@ -111,7 +180,11 @@ void rb_sprite_modify(VALUE obj) {
 }
 
 static void sprite_mark(struct Sprite *ptr) {
+  rb_gc_mark(ptr->renderable.viewport);
   rb_gc_mark(ptr->bitmap);
+  rb_gc_mark(ptr->src_rect);
+  rb_gc_mark(ptr->color);
+  rb_gc_mark(ptr->tone);
 }
 
 static void sprite_free(struct Sprite *ptr) {
@@ -122,7 +195,34 @@ static void sprite_free(struct Sprite *ptr) {
 static VALUE sprite_alloc(VALUE klass) {
   struct Sprite *ptr = ALLOC(struct Sprite);
   ptr->renderable.render = renderSprite;
+  ptr->renderable.z = 0;
+  ptr->renderable.viewport = Qnil;
   ptr->bitmap = Qnil;
+  ptr->disposed = true;
+  ptr->src_rect = rb_rect_new2();
+  ptr->visible = true;
+  ptr->x = 0;
+  ptr->y = 0;
+  ptr->ox = 0;
+  ptr->oy = 0;
+  ptr->zoom_x = 1.0;
+  ptr->zoom_y = 1.0;
+  ptr->angle = 0.0;
+#if RGSS >= 2
+  ptr->wave_amp = 0;
+  ptr->wave_length = 0;
+  ptr->wave_speed = 0;
+  ptr->wave_phase = 0.0;
+#endif
+  ptr->mirror = false;
+  ptr->bush_depth = 0;
+#if RGSS >= 2
+  ptr->bush_opacity = 128;
+#endif
+  ptr->opacity = 255;
+  ptr->blend_type = 0;
+  ptr->color = rb_color_new2();
+  ptr->tone = rb_tone_new2();
   registerRenderable(&ptr->renderable);
   VALUE ret = Data_Wrap_Struct(klass, sprite_mark, sprite_free, ptr);
   return ret;
@@ -141,9 +241,8 @@ static VALUE rb_sprite_m_initialize(int argc, VALUE *argv, VALUE self) {
     case 0:
       break;
     case 1:
-      // TODO: use argv[0] (viewport)
-      (void) argv;
-      (void) ptr;
+      if(argv[0] != Qnil) convertViewport(argv[0]);
+      ptr->renderable.viewport = argv[0];
       break;
     default:
       rb_raise(rb_eArgError,
@@ -160,15 +259,310 @@ static VALUE rb_sprite_m_initialize_copy(VALUE self, VALUE orig) {
   return Qnil;
 }
 
+static VALUE rb_sprite_m_dispose(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  ptr->disposed = true;
+  return Qnil;
+}
+
+static VALUE rb_sprite_m_disposed_p(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return ptr->disposed ? Qtrue : Qfalse;
+}
+
 static VALUE rb_sprite_m_bitmap(VALUE self) {
   struct Sprite *ptr = convertSprite(self);
   return ptr->bitmap;
 }
+
 static VALUE rb_sprite_m_set_bitmap(VALUE self, VALUE newval) {
   struct Sprite *ptr = convertSprite(self);
   rb_sprite_modify(self);
   if(newval != Qnil) convertBitmap(newval);
   ptr->bitmap = newval;
+  return newval;
+}
+
+#if RGSS >= 2
+static VALUE rb_sprite_m_width(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return INT2NUM(convertRect(ptr->src_rect)->width);
+}
+
+static VALUE rb_sprite_m_height(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return INT2NUM(convertRect(ptr->src_rect)->height);
+}
+#endif
+
+static VALUE rb_sprite_m_src_rect(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return ptr->src_rect;
+}
+
+static VALUE rb_sprite_m_set_src_rect(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  rb_rect_set2(ptr->src_rect, newval);
+  return newval;
+}
+
+#if RGSS >= 2
+static VALUE rb_sprite_m_viewport(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return ptr->renderable.viewport;
+}
+
+static VALUE rb_sprite_m_set_viewport(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  if(newval != Qnil) convertViewport(newval);
+  ptr->viewport = newval;
+  return newval;
+}
+#endif
+
+static VALUE rb_sprite_m_visible(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return ptr->visible ? Qtrue : Qfalse;
+}
+
+static VALUE rb_sprite_m_set_visible(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->visible = RTEST(newval);
+  return newval;
+}
+
+static VALUE rb_sprite_m_x(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return INT2NUM(ptr->x);
+}
+
+static VALUE rb_sprite_m_set_x(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->x = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_sprite_m_y(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return INT2NUM(ptr->y);
+}
+
+static VALUE rb_sprite_m_set_y(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->y = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_sprite_m_z(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return INT2NUM(ptr->renderable.z);
+}
+
+static VALUE rb_sprite_m_set_z(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->renderable.z = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_sprite_m_ox(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return INT2NUM(ptr->ox);
+}
+
+static VALUE rb_sprite_m_set_ox(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->ox = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_sprite_m_oy(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return INT2NUM(ptr->oy);
+}
+
+static VALUE rb_sprite_m_set_oy(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->oy = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_sprite_m_zoom_x(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return DBL2NUM(ptr->zoom_x);
+}
+
+static VALUE rb_sprite_m_set_zoom_x(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->zoom_x = NUM2DBL(newval);
+  return newval;
+}
+
+static VALUE rb_sprite_m_zoom_y(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return DBL2NUM(ptr->zoom_y);
+}
+
+static VALUE rb_sprite_m_set_zoom_y(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->zoom_y = NUM2DBL(newval);
+  return newval;
+}
+
+static VALUE rb_sprite_m_angle(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return DBL2NUM(ptr->angle);
+}
+
+static VALUE rb_sprite_m_set_angle(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->angle = NUM2DBL(newval);
+  return newval;
+}
+
+#if RGSS >= 2
+static VALUE rb_sprite_m_wave_amp(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return INT2NUM(ptr->wave_amp);
+}
+
+static VALUE rb_sprite_m_set_wave_amp(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->wave_amp = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_sprite_m_wave_length(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return INT2NUM(ptr->wave_length);
+}
+
+static VALUE rb_sprite_m_set_wave_length(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->wave_length = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_sprite_m_wave_speed(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return INT2NUM(ptr->wave_speed);
+}
+
+static VALUE rb_sprite_m_set_wave_speed(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->wave_speed = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_sprite_m_wave_phase(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return DBL2NUM(ptr->wave_phase);
+}
+
+static VALUE rb_sprite_m_set_wave_phase(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->wave_phase = NUM2DBL(newval);
+  return newval;
+}
+#endif
+
+static VALUE rb_sprite_m_mirror(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return ptr->mirror ? Qtrue : Qfalse;
+}
+
+static VALUE rb_sprite_m_set_mirror(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->mirror = RTEST(newval);
+  return newval;
+}
+
+static VALUE rb_sprite_m_bush_depth(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return INT2NUM(ptr->bush_depth);
+}
+
+static VALUE rb_sprite_m_set_bush_depth(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->bush_depth = NUM2INT(newval);
+  return newval;
+}
+
+#if RGSS >= 2
+static VALUE rb_sprite_m_bush_opacity(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return INT2NUM(ptr->bush_opacity);
+}
+
+static VALUE rb_sprite_m_set_bush_opacity(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->bush_opacity = NUM2INT(newval);
+  return newval;
+}
+#endif
+
+static VALUE rb_sprite_m_opacity(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return INT2NUM(ptr->opacity);
+}
+
+static VALUE rb_sprite_m_set_opacity(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  ptr->opacity = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_sprite_m_blend_type(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return INT2NUM(ptr->blend_type);
+}
+
+static VALUE rb_sprite_m_set_blend_type(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  /* TODO: check range */
+  ptr->blend_type = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_sprite_m_color(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return ptr->color;
+}
+
+static VALUE rb_sprite_m_set_color(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  rb_color_set2(ptr->color, newval);
+  return newval;
+}
+static VALUE rb_sprite_m_tone(VALUE self) {
+  struct Sprite *ptr = convertSprite(self);
+  return ptr->tone;
+}
+
+static VALUE rb_sprite_m_set_tone(VALUE self, VALUE newval) {
+  struct Sprite *ptr = convertSprite(self);
+  rb_sprite_modify(self);
+  rb_tone_set2(ptr->tone, newval);
   return newval;
 }
 

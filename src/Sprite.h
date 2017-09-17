@@ -11,7 +11,17 @@ void Init_Sprite(void);
 
 struct Sprite {
   struct Renderable renderable;
-  VALUE bitmap;
+  VALUE bitmap, src_rect, viewport, color, tone;
+  bool disposed, visible, mirror;
+  int x, y, ox, oy;
+#if RGSS >= 2
+  int wave_amp, wave_length, wave_speed, bush_opacity;
+#endif
+  int bush_depth, opacity, blend_type;
+  double zoom_x, zoom_y, angle;
+#if RGSS >= 2
+  double wave_phase;
+#endif
 };
 
 bool isSprite(VALUE obj);

@@ -1,10 +1,13 @@
 #ifndef SDL_MISC_H
 #define SDL_MISC_H
 
+#include <ruby.h>
 #include <SDL.h>
 
 struct Renderable {
   void (*render)(struct Renderable *renderable);
+  int z;
+  VALUE viewport;
 };
 
 extern int window_width;
