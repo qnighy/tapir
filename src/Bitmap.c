@@ -5,6 +5,20 @@
 #include "openres.h"
 #include "misc.h"
 
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+#define RMASK 0xff000000
+#define GMASK 0x00ff0000
+#define BMASK 0x0000ff00
+#define AMASK 0x000000ff
+#define PIXELFORMAT_RGBA32 SDL_PIXELFORMAT_RGBA8888
+#else
+#define RMASK 0x000000ff
+#define GMASK 0x0000ff00
+#define BMASK 0x00ff0000
+#define AMASK 0xff000000
+#define PIXELFORMAT_RGBA32 SDL_PIXELFORMAT_ABGR8888
+#endif
+
 static void rb_bitmap_modify(VALUE obj);
 static void bitmap_mark(struct Bitmap *ptr);
 static void bitmap_free(struct Bitmap *ptr);
@@ -117,17 +131,18 @@ static VALUE rb_bitmap_m_initialize(int argc, VALUE *argv, VALUE self) {
       }
       /* TODO: load from archive */
       /* TODO: limit file type */
-      ptr->surface = IMG_Load_RW(file, true);
-      if(!ptr->surface) {
+      SDL_Surface *img = IMG_Load_RW(file, true);
+      if(!img) {
         /* TODO: check error handling */
         rb_raise(rb_eRGSSError, "%s", IMG_GetError());
       }
+      ptr->surface = SDL_ConvertSurfaceFormat(img, PIXELFORMAT_RGBA32, 0);
+      SDL_FreeSurface(img);
       break;
     case 2:
-      /* TODO: what masks are appropriate? */
       ptr->surface = SDL_CreateRGBSurface(
           0, NUM2INT(argv[0]), NUM2INT(argv[1]), 32,
-          0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+          RMASK, GMASK, BMASK, AMASK);
       if(!ptr->surface) {
         /* TODO: check error handling */
         rb_raise(rb_eRGSSError, "Could not create surface: %s", SDL_GetError());
@@ -144,10 +159,9 @@ static VALUE rb_bitmap_m_initialize(int argc, VALUE *argv, VALUE self) {
 static VALUE rb_bitmap_m_initialize_copy(VALUE self, VALUE orig) {
   struct Bitmap *ptr = convertBitmap(self);
   struct Bitmap *orig_ptr = convertBitmap(orig);
-  /* TODO: what masks are appropriate? */
   ptr->surface = SDL_CreateRGBSurface(
       0, orig_ptr->surface->w, orig_ptr->surface->h, 32,
-      0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+      RMASK, GMASK, BMASK, AMASK);
   SDL_BlitSurface(orig_ptr->surface, NULL, ptr->surface, NULL);
   return Qnil;
 }
