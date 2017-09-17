@@ -116,7 +116,8 @@ static VALUE rb_input_s_repeat_p(VALUE klass, VALUE key) {
   (void) klass;
   int rkey = convertRubyKey(key);
   if(rkey != -1) {
-    return keycount[rkey] >= 24 && keycount[rkey] % 6 == 0 ? Qtrue : Qfalse;
+    return (keycount[rkey] == 0 ||
+      (keycount[rkey] >= 24 && keycount[rkey] % 6 == 0)) ? Qtrue : Qfalse;
   }
   return Qnil;
 }
