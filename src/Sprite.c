@@ -111,7 +111,7 @@ void rb_sprite_modify(VALUE obj) {
 }
 
 static void sprite_mark(struct Sprite *ptr) {
-  (void) ptr;
+  rb_gc_mark(ptr->bitmap);
 }
 
 static void sprite_free(struct Sprite *ptr) {

@@ -13,6 +13,7 @@
 #include "Sprite.h"
 #include "Table.h"
 #include "Tone.h"
+#include "Viewport.h"
 
 void Init_zlib(void);
 static void Init_RGSS(void);
@@ -72,6 +73,7 @@ static void Init_RGSS(void) {
   Init_Tone();
   Init_Table();
   Init_Bitmap();
+  Init_Viewport();
   Init_Sprite();
   Init_Graphics();
 }
