@@ -337,6 +337,10 @@ VALUE main_rb(VALUE data) {
 #endif
       "    eval(s, binding, title)\n"
       "  end\n"
+      "rescue "RGSS_RESET"\n"
+      "  retry\n"
+      // "rescue SystemExit\n"
+      // "  raise\n"
       "rescue Exception => e\n"
       "  $stderr.print(\"#{e.class}: #{e.message}\\n\")\n"
       "  e.backtrace.each do|frame|\n"
