@@ -7,6 +7,7 @@
 #include "Bitmap.h"
 #include "Color.h"
 #include "Graphics.h"
+#include "Input.h"
 #include "RGSSError.h"
 #include "RGSSReset.h"
 #include "Rect.h"
@@ -76,4 +77,5 @@ static void Init_RGSS(void) {
   Init_Viewport();
   Init_Sprite();
   Init_Graphics();
+  Init_Input();
 }

@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <ruby.h>
 #include "Graphics.h"
+#include "Input.h"
+#include "RGSSReset.h"
 #include "sdl_misc.h"
 
 VALUE rb_mGraphics;
 
-static VALUE rb_graphics_s_update(VALUE self);
-static VALUE rb_graphics_s_width(VALUE self);
-static VALUE rb_graphics_s_height(VALUE self);
+static VALUE rb_graphics_s_update(VALUE klass);
+static VALUE rb_graphics_s_width(VALUE klass);
+static VALUE rb_graphics_s_height(VALUE klass);
 
 void Init_Graphics() {
   rb_mGraphics = rb_define_module("Graphics");
@@ -32,14 +33,25 @@ void Init_Graphics() {
   // TODO: implement Graphics.brightness=
 }
 
-static VALUE rb_graphics_s_update(VALUE self) {
+static VALUE rb_graphics_s_update(VALUE klass) {
   SDL_Event e;
   int quit = 0;
 
-  (void) self;
+  (void) klass;
 
   while(SDL_PollEvent(&e)) {
     switch(e.type) {
+      case SDL_KEYDOWN:
+        if(e.key.keysym.sym == SDLK_F12) {
+          rb_raise(rb_eRGSSReset, "RGSS Reset");
+        }
+        if(!e.key.repeat) {
+          keyPressed(e.key.keysym.sym);
+        }
+        break;
+      case SDL_KEYUP:
+        keyReleased(e.key.keysym.sym);
+        break;
       case SDL_QUIT:
         quit = 1;
         break;
@@ -56,14 +68,14 @@ static VALUE rb_graphics_s_update(VALUE self) {
   return Qnil;
 }
 
-static VALUE rb_graphics_s_width(VALUE self) {
-  (void) self;
+static VALUE rb_graphics_s_width(VALUE klass) {
+  (void) klass;
 
   return INT2NUM(window_width);
 }
 
-static VALUE rb_graphics_s_height(VALUE self) {
-  (void) self;
+static VALUE rb_graphics_s_height(VALUE klass) {
+  (void) klass;
 
   return INT2NUM(window_height);
 }
