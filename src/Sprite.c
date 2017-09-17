@@ -8,14 +8,6 @@
 #include "Bitmap.h"
 #include "misc.h"
 
-static const char *vsh_source =
-  "void main(void) {\n"
-  "    gl_Position = ftransform();\n"
-  "}\n";
-static const char *fsh_source =
-  "void main(void) {\n"
-  "    gl_FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-  "}\n";
 static GLuint shader;
 
 struct Sprite {
@@ -102,51 +94,6 @@ void Init_Sprite(void) {
   // TODO: implement Sprite#color=
   // TODO: implement Sprite#tone
   // TODO: implement Sprite#tone=
-
-  GLuint vsh = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vsh, 1, &vsh_source, NULL);
-  glCompileShader(vsh);
-  {
-    int compilation_status;
-    glGetShaderiv(vsh, GL_COMPILE_STATUS, &compilation_status);
-    if(!compilation_status) {
-      char compilation_log[512] = {0};
-      glGetShaderInfoLog(vsh, sizeof(compilation_log), NULL, compilation_log);
-      fprintf(stderr, "vsh compile error:\n%s\n", compilation_log);
-    }
-  }
-
-  GLuint fsh = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fsh, 1, &fsh_source, NULL);
-  glCompileShader(fsh);
-  {
-    int compilation_status;
-    glGetShaderiv(fsh, GL_COMPILE_STATUS, &compilation_status);
-    if(!compilation_status) {
-      char compilation_log[512] = {0};
-      glGetShaderInfoLog(fsh, sizeof(compilation_log), NULL, compilation_log);
-      fprintf(stderr, "fsh compile error:\n%s\n", compilation_log);
-    }
-  }
-
-  shader = glCreateProgram();
-  glAttachShader(shader, vsh);
-  glAttachShader(shader, fsh);
-  glLinkProgram(shader);
-  {
-    int link_status;
-    glGetShaderiv(shader, GL_LINK_STATUS, &link_status);
-    if(!link_status) {
-      char link_log[512] = {0};
-      glGetProgramInfoLog(shader, sizeof(link_log), NULL, link_log);
-      fprintf(stderr, "shader link error:\n%s\n", link_log);
-    }
-  }
-
-  glDeleteShader(vsh);
-  glDeleteShader(fsh);
-
-  fflush(stderr);
 }
 
 static bool isSprite(VALUE obj) {
@@ -235,6 +182,12 @@ static void renderSprite(struct Renderable *renderable) {
   struct Sprite *ptr = (struct Sprite *)renderable;
   if(ptr->bitmap == Qnil) return;
   struct Bitmap *bitmap_ptr = convertBitmap(ptr->bitmap);
+  // SDL_Surface *surface = bitmap_ptr->surface;
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
   GLfloat vertices[][3] = {
     {-1.0f, -1.0f, 0.0f},
@@ -244,9 +197,85 @@ static void renderSprite(struct Renderable *renderable) {
   };
 
   glUseProgram(shader);
+  glUniform1i(glGetUniformLocation(shader, "tex"), 0);
+
+  glActiveTexture(GL_TEXTURE0);
+  bitmapBindTexture(bitmap_ptr);
+
   glBegin(GL_TRIANGLE_STRIP);
   for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
     glVertex3fv(vertices[i]);
   }
   glEnd();
+
+  glUseProgram(0);
+}
+
+void initSpriteSDL() {
+  static const char *vsh_source =
+    "#version 120\n"
+    "\n"
+    "void main(void) {\n"
+    "    gl_Position = gl_Vertex;\n"
+    "}\n";
+
+  static const char *fsh_source =
+    "#version 120\n"
+    "#if __VERSION__ >= 130\n"
+    "#define texture2D texture\n"
+    "#define texture2DProj textureProj\n"
+    "#endif\n"
+    "\n"
+    "uniform sampler2D tex;\n"
+    "void main(void) {\n"
+    "    vec4 color = texture2D(tex, vec2(gl_FragCoord.x / 544.0, 1.0 - gl_FragCoord.y / 416.0));\n"
+    "    gl_FragColor = color;\n"
+    "}\n";
+
+  GLuint vsh = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(vsh, 1, &vsh_source, NULL);
+  glCompileShader(vsh);
+  {
+    int compilation_status;
+    glGetShaderiv(vsh, GL_COMPILE_STATUS, &compilation_status);
+    if(!compilation_status) {
+      char compilation_log[512] = {0};
+      glGetShaderInfoLog(vsh, sizeof(compilation_log), NULL, compilation_log);
+      fprintf(stderr, "vsh compile error:\n%s\n", compilation_log);
+    }
+  }
+
+  GLuint fsh = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(fsh, 1, &fsh_source, NULL);
+  glCompileShader(fsh);
+  {
+    int compilation_status;
+    glGetShaderiv(fsh, GL_COMPILE_STATUS, &compilation_status);
+    if(!compilation_status) {
+      char compilation_log[512] = {0};
+      glGetShaderInfoLog(fsh, sizeof(compilation_log), NULL, compilation_log);
+      fprintf(stderr, "fsh compile error:\n%s\n", compilation_log);
+    }
+  }
+
+  shader = glCreateProgram();
+  glAttachShader(shader, vsh);
+  glAttachShader(shader, fsh);
+  glLinkProgram(shader);
+  {
+    int link_status;
+    glGetProgramiv(shader, GL_LINK_STATUS, &link_status);
+    if(!link_status) {
+      char link_log[512] = {0};
+      glGetProgramInfoLog(shader, sizeof(link_log), NULL, link_log);
+      fprintf(stderr, "shader link error:\n%s\n", link_log);
+    }
+  }
+
+  glDeleteShader(vsh);
+  glDeleteShader(fsh);
+}
+
+void deinitSpriteSDL() {
+  glDeleteProgram(shader);
 }

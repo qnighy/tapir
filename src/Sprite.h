@@ -6,6 +6,9 @@
 #include "sdl_misc.h"
 
 extern VALUE rb_cSprite;
-extern void Init_Sprite(void);
+void Init_Sprite(void);
+
+void initSpriteSDL(void);
+void deinitSpriteSDL(void);
 
 #endif /* SPRITE_H */
