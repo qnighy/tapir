@@ -1,13 +1,6 @@
 #include "Color.h"
 #include "misc.h"
 
-struct Color {
-  double red, green, blue, alpha;
-};
-
-static bool isColor(VALUE obj);
-static struct Color *convertColor(VALUE obj);
-static void rb_color_modify(VALUE obj);
 static void color_mark(struct Color *ptr);
 static VALUE color_alloc(VALUE klass);
 
@@ -145,12 +138,12 @@ void Init_Color(void) {
   rb_define_method(rb_cColor, "_dump", rb_color_m_old_dump, 1);
 }
 
-static bool isColor(VALUE obj) {
+bool isColor(VALUE obj) {
   if(TYPE(obj) != T_DATA) return false;
   return RDATA(obj)->dmark == (void(*)(void*))color_mark;
 }
 
-static struct Color *convertColor(VALUE obj) {
+struct Color *convertColor(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))color_mark) {
@@ -163,7 +156,7 @@ static struct Color *convertColor(VALUE obj) {
   return ret;
 }
 
-static void rb_color_modify(VALUE obj) {
+void rb_color_modify(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Color");
 }

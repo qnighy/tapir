@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <SDL.h>
 #include <SDL_image.h>
 #define GL_GLEXT_PROTOTYPES
@@ -10,14 +9,6 @@
 
 static GLuint shader;
 
-struct Sprite {
-  struct Renderable renderable;
-  VALUE bitmap;
-};
-
-static bool isSprite(VALUE obj);
-static struct Sprite *convertSprite(VALUE obj);
-static void rb_sprite_modify(VALUE obj);
 static void sprite_mark(struct Sprite *ptr);
 static void sprite_free(struct Sprite *ptr);
 static VALUE sprite_alloc(VALUE klass);
@@ -96,12 +87,12 @@ void Init_Sprite(void) {
   // TODO: implement Sprite#tone=
 }
 
-static bool isSprite(VALUE obj) {
+bool isSprite(VALUE obj) {
   if(TYPE(obj) != T_DATA) return false;
   return RDATA(obj)->dmark == (void(*)(void*))sprite_mark;
 }
 
-static struct Sprite *convertSprite(VALUE obj) {
+struct Sprite *convertSprite(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))sprite_mark) {
@@ -114,7 +105,7 @@ static struct Sprite *convertSprite(VALUE obj) {
   return ret;
 }
 
-static void rb_sprite_modify(VALUE obj) {
+void rb_sprite_modify(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Sprite");
 }

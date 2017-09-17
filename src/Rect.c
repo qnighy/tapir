@@ -1,13 +1,6 @@
 #include "Rect.h"
 #include "misc.h"
 
-struct Rect {
-  int32_t x, y, width, height;
-};
-
-static bool isRect(VALUE obj);
-static struct Rect *convertRect(VALUE obj);
-static void rb_rect_modify(VALUE obj);
 static void rect_mark(struct Rect *ptr);
 static VALUE rect_alloc(VALUE klass);
 
@@ -142,12 +135,12 @@ void Init_Rect() {
   rb_define_method(rb_cRect, "_dump", rb_rect_m_old_dump, 1);
 }
 
-static bool isRect(VALUE obj) {
+bool isRect(VALUE obj) {
   if(TYPE(obj) != T_DATA) return false;
   return RDATA(obj)->dmark == (void(*)(void*))rect_mark;
 }
 
-static struct Rect *convertRect(VALUE obj) {
+struct Rect *convertRect(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))rect_mark) {
@@ -160,7 +153,7 @@ static struct Rect *convertRect(VALUE obj) {
   return ret;
 }
 
-static void rb_rect_modify(VALUE obj) {
+void rb_rect_modify(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Rect");
 }

@@ -7,6 +7,14 @@
 extern VALUE rb_cTone;
 extern void Init_Tone(void);
 
+struct Tone {
+  double red, green, blue, gray;
+};
+
+bool isTone(VALUE obj);
+struct Tone *convertTone(VALUE obj);
+void rb_tone_modify(VALUE obj);
+
 VALUE rb_tone_new(double red, double green, double blue, double gray);
 VALUE rb_tone_new2(void);
 bool rb_tone_equal(VALUE self, VALUE other);

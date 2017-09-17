@@ -18,6 +18,7 @@ struct Bitmap {
 
 bool isBitmap(VALUE obj);
 struct Bitmap *convertBitmap(VALUE obj);
+void rb_bitmap_modify(VALUE obj);
 void bitmapBindTexture(struct Bitmap *ptr);
 
 #endif /* BITMAP_H */

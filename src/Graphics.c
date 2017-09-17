@@ -4,12 +4,13 @@
 #include "Graphics.h"
 #include "sdl_misc.h"
 
-static VALUE rb_mGraphics;
-static VALUE rb_graphics_update(VALUE self);
+VALUE rb_mGraphics;
+
+static VALUE rb_graphics_s_update(VALUE self);
 
 void Init_Graphics() {
   rb_mGraphics = rb_define_module("Graphics");
-  rb_define_singleton_method(rb_mGraphics, "update", rb_graphics_update, 0);
+  rb_define_singleton_method(rb_mGraphics, "update", rb_graphics_s_update, 0);
   // TODO: implement Graphics.wait
   // TODO: implement Graphics.fadeout
   // TODO: implement Graphics.fadein
@@ -29,7 +30,7 @@ void Init_Graphics() {
   // TODO: implement Graphics.brightness=
 }
 
-static VALUE rb_graphics_update(VALUE self) {
+static VALUE rb_graphics_s_update(VALUE self) {
   SDL_Event e;
   int quit = 0;
 

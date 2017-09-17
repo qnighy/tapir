@@ -1,13 +1,6 @@
 #include "Table.h"
 #include "misc.h"
 
-struct Table {
-  int32_t dim, xsize, ysize, zsize, size;
-  int16_t *data;
-};
-
-static struct Table *convertTable(VALUE obj);
-static void rb_table_modify(VALUE obj);
 static void table_mark(struct Table *ptr);
 static void table_free(struct Table *ptr);
 static VALUE table_alloc(VALUE klass);
@@ -156,7 +149,12 @@ void Init_Table() {
   rb_define_method(rb_cTable, "_dump", rb_table_m_old_dump, 1);
 }
 
-static struct Table *convertTable(VALUE obj) {
+bool isTable(VALUE obj) {
+  if(TYPE(obj) != T_DATA) return false;
+  return RDATA(obj)->dmark == (void(*)(void*))table_mark;
+}
+
+struct Table *convertTable(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))table_mark) {
@@ -169,7 +167,7 @@ static struct Table *convertTable(VALUE obj) {
   return ret;
 }
 
-static void rb_table_modify(VALUE obj) {
+void rb_table_modify(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Table");
 }

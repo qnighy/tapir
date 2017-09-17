@@ -5,7 +5,15 @@
 #include <ruby.h>
 
 extern VALUE rb_cColor;
-extern void Init_Color(void);
+void Init_Color(void);
+
+struct Color {
+  double red, green, blue, alpha;
+};
+
+bool isColor(VALUE obj);
+struct Color *convertColor(VALUE obj);
+void rb_color_modify(VALUE obj);
 
 VALUE rb_color_new(double red, double green, double blue, double alpha);
 VALUE rb_color_new2(void);

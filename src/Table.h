@@ -1,11 +1,21 @@
 #ifndef TABLE_H
 #define TABLE_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <ruby.h>
 
 extern VALUE rb_cTable;
 extern void Init_Table(void);
+
+struct Table {
+  int32_t dim, xsize, ysize, zsize, size;
+  int16_t *data;
+};
+
+bool isTable(VALUE obj);
+struct Table *convertTable(VALUE obj);
+void rb_table_modify(VALUE obj);
 
 VALUE rb_table_new(
     int32_t dim, int32_t xsize, int32_t ysize, int32_t zsize);

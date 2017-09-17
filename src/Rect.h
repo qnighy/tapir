@@ -8,6 +8,14 @@
 extern VALUE rb_cRect;
 extern void Init_Rect(void);
 
+struct Rect {
+  int32_t x, y, width, height;
+};
+
+bool isRect(VALUE obj);
+struct Rect *convertRect(VALUE obj);
+void rb_rect_modify(VALUE obj);
+
 VALUE rb_rect_new(int32_t x, int32_t y, int32_t width, int32_t height);
 VALUE rb_rect_new2(void);
 bool rb_rect_equal(VALUE self, VALUE other);

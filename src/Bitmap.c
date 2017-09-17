@@ -19,7 +19,6 @@
 #define PIXELFORMAT_RGBA32 SDL_PIXELFORMAT_ABGR8888
 #endif
 
-static void rb_bitmap_modify(VALUE obj);
 static void bitmap_mark(struct Bitmap *ptr);
 static void bitmap_free(struct Bitmap *ptr);
 static VALUE bitmap_alloc(VALUE klass);
@@ -31,6 +30,21 @@ static VALUE rb_bitmap_m_width(VALUE self);
 static VALUE rb_bitmap_m_height(VALUE self);
 
 VALUE rb_cBitmap;
+
+void bitmapBindTexture(struct Bitmap *ptr) {
+  if(!ptr->texture_id) {
+    glGenTextures(1, &ptr->texture_id);
+    ptr->texture_invalidated = true;
+  }
+  glBindTexture(GL_TEXTURE_2D, ptr->texture_id);
+  if(ptr->texture_invalidated) {
+    SDL_LockSurface(ptr->surface);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ptr->surface->w, ptr->surface->h,
+        0, GL_RGBA, GL_UNSIGNED_BYTE, ptr->surface->pixels);
+    SDL_UnlockSurface(ptr->surface);
+    ptr->texture_invalidated = false;
+  }
+}
 
 /*
  * RGBA bitmap buffer.
@@ -81,22 +95,7 @@ struct Bitmap *convertBitmap(VALUE obj) {
   return ret;
 }
 
-void bitmapBindTexture(struct Bitmap *ptr) {
-  if(!ptr->texture_id) {
-    glGenTextures(1, &ptr->texture_id);
-    ptr->texture_invalidated = true;
-  }
-  glBindTexture(GL_TEXTURE_2D, ptr->texture_id);
-  if(ptr->texture_invalidated) {
-    SDL_LockSurface(ptr->surface);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ptr->surface->w, ptr->surface->h,
-        0, GL_RGBA, GL_UNSIGNED_BYTE, ptr->surface->pixels);
-    SDL_UnlockSurface(ptr->surface);
-    ptr->texture_invalidated = false;
-  }
-}
-
-static void rb_bitmap_modify(VALUE obj) {
+void rb_bitmap_modify(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Bitmap");
 }

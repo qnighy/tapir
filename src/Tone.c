@@ -1,13 +1,6 @@
 #include "Tone.h"
 #include "misc.h"
 
-struct Tone {
-  double red, green, blue, gray;
-};
-
-static bool isTone(VALUE obj);
-static struct Tone *convertTone(VALUE obj);
-static void rb_tone_modify(VALUE obj);
 static void tone_mark(struct Tone *ptr);
 static VALUE tone_alloc(VALUE klass);
 
@@ -140,12 +133,12 @@ void Init_Tone(void) {
   rb_define_method(rb_cTone, "_dump", rb_tone_m_old_dump, 1);
 }
 
-static bool isTone(VALUE obj) {
+bool isTone(VALUE obj) {
   if(TYPE(obj) != T_DATA) return false;
   return RDATA(obj)->dmark == (void(*)(void*))tone_mark;
 }
 
-static struct Tone *convertTone(VALUE obj) {
+struct Tone *convertTone(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))tone_mark) {
@@ -158,7 +151,7 @@ static struct Tone *convertTone(VALUE obj) {
   return ret;
 }
 
-static void rb_tone_modify(VALUE obj) {
+void rb_tone_modify(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Tone");
 }
