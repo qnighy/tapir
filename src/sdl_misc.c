@@ -3,8 +3,13 @@
 #include <SDL_opengl.h>
 #include "sdl_misc.h"
 
+#if RGSS >= 2
+int window_width = 544;
+int window_height = 416;
+#else
 int window_width = 640;
 int window_height = 480;
+#endif
 SDL_Window *window = NULL;
 SDL_GLContext glcontext = NULL;
 static size_t registry_size, registry_capacity;

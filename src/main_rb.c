@@ -67,10 +67,18 @@ VALUE main_rb(VALUE data) {
       "  def self.transition(frames = nil)\n"
       "  end\n"
       "  def self.width\n"
+#if RGSS >= 2
+      "    544\n"
+#else
       "    640\n"
+#endif
       "  end\n"
       "  def self.height\n"
+#if RGSS >= 2
+      "    416\n"
+#else
       "    480\n"
+#endif
       "  end\n"
       /* TODO: Graphics.freeze */
       "  def self.freeze\n"
