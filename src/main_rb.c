@@ -24,6 +24,8 @@ VALUE main_rb(VALUE data) {
       "module Audio\n"
       "  def self.bgm_play(path, volume, pitch)\n"
       "  end\n"
+      "  def self.bgm_stop\n"
+      "  end\n"
       "  def self.me_stop\n"
       "  end\n"
       "  def self.bgs_stop\n"
@@ -64,6 +66,8 @@ VALUE main_rb(VALUE data) {
       "module Graphics\n"
       "  def self.frame_reset\n"
       "  end\n"
+      "  def self.frame_count=(count)\n"
+      "  end\n"
       "  def self.transition(frames = nil)\n"
       "  end\n"
       /* TODO: Graphics.freeze */
@@ -81,8 +85,27 @@ VALUE main_rb(VALUE data) {
       "  def self.update\n"
       "  end\n"
       "end\n"
+      "class Plane\n"
+      "  attr_accessor :z\n"
+      "  def initialize(viewport=nil)\n"
+      "  end\n"
+      "end\n"
+      "class Sprite\n"
+      "  def update\n"
+      "  end\n"
+      "end\n"
+      "class Tilemap\n"
+#if RGSS >= 2
+#else
+      "  attr_accessor :autotiles, :map_data, :priorities, :tileset\n"
+      "  def initialize(viewport=nil)\n"
+      "    @autotiles = [nil, nil, nil, nil, nil, nil]\n"
+      "  end\n"
+#endif
+      "end\n"
+
       "class Window\n"
-      "  attr_accessor :active, :back_opacity, :contents, :cursor_rect, :height, :openness, :oy, :padding, :padding_bottom, :tone, :visible, :width, :windowskin, :x, :y, :z\n"
+      "  attr_accessor :active, :back_opacity, :contents, :contents_opacity, :cursor_rect, :height, :opacity, :openness, :oy, :padding, :padding_bottom, :tone, :visible, :width, :windowskin, :x, :y, :z\n"
       "  def open?\n"
       "    true\n"
       "  end\n"
@@ -100,6 +123,9 @@ VALUE main_rb(VALUE data) {
       "\n"
       "module RPG\n"
       "  class Actor\n"
+#if RGSS == 1
+      "    attr_accessor :armor1_id, :armor2_id, :armor3_id, :armor4_id, :battler_hue, :battler_name, :character_hue, :character_name, :class_id, :initial_level, :exp_basis, :exp_inflation, :final_level, :name, :parameters, :weapon_id\n"
+#endif
       "  end\n"
 #if RGSS == 1
       "  class AudioFile\n"
@@ -117,6 +143,9 @@ VALUE main_rb(VALUE data) {
       "  end\n"
 #endif
       "  class Armor\n"
+#if RGSS == 1
+      "    attr_accessor :auto_state_id\n"
+#endif
       "  end\n"
 #if RGSS >= 2
       "  class BGM\n"
@@ -137,17 +166,32 @@ VALUE main_rb(VALUE data) {
 #if RGSS == 1
       "  module Cache\n"
       /* TODO: RPG::Cache.title */
+      "    def self.autotile(autotile_name)\n"
+      "    end\n"
+      "    def self.character(character_name, character_hue)\n"
+      "    end\n"
       "    def self.title(title_name)\n"
+      "    end\n"
+      "    def self.tileset(tileset_name)\n"
       "    end\n"
       "    def self.windowskin(windowskin_name)\n"
       "    end\n"
       "  end\n"
 #endif
       "  class Class\n"
+#if RGSS == 1
+      "    attr_accessor :learnings\n"
+#endif
       "    class Learning\n"
+#if RGSS == 1
+      "      attr_accessor :level, :skill_id\n"
+#endif
       "    end\n"
       "  end\n"
       "  class CommonEvent\n"
+#if RGSS == 1
+      "    attr_accessor :switch_id, :trigger\n"
+#endif
       "  end\n"
       "  class Enemy\n"
       "    class Action\n"
@@ -157,6 +201,20 @@ VALUE main_rb(VALUE data) {
       "    end\n"
 #endif
       "  end\n"
+#if RGSS == 1
+      "  class Event\n"
+      "    attr_accessor :pages, :x, :y\n"
+      "    class Page\n"
+      "      attr_accessor :always_on_top, :condition, :direction_fix, :graphic, :list, :move_frequency, :move_route, :move_speed, :move_type, :step_anime, :through, :trigger, :walk_anime\n"
+      "      class Condition\n"
+      "        attr_accessor :self_switch_valid, :switch1_id, :switch1_valid, :switch2_valid, :variable_valid\n"
+      "      end\n"
+      "      class Graphic\n"
+      "        attr_accessor :blend_type, :character_hue, :character_name, :direction, :opacity, :pattern, :tile_id\n"
+      "      end\n"
+      "    end\n"
+      "  end\n"
+#endif
       "  class EventCommand\n"
       "  end\n"
       "  class Item\n"
@@ -167,22 +225,29 @@ VALUE main_rb(VALUE data) {
       "    end\n"
       "  end\n"
 #endif
-#if RGSS == 3
-      "  class MapInfo\n"
+#if RGSS == 1
+      "  class Map\n"
+      "    attr_accessor :autoplay_bgm, :autoplay_bgs, :data, :encounter_step, :events, :height, :tileset_id, :width\n"
       "  end\n"
 #endif
-#if RGSS >= 2
+      "  class MapInfo\n"
+#if RGSS == 1
+      "    attr_accessor :name\n"
+#endif
+      "  end\n"
       "  class MoveCommand\n"
       "  end\n"
       "  class MoveRoute\n"
       "  end\n"
+#if RGSS >= 2
       "  class SE\n"
       "  end\n"
 #endif
       "  class Skill\n"
       "  end\n"
 #if RGSS == 1
-      "  class Sprite\n"
+      "  class Sprite < ::Sprite\n"
+      "    @@_animations = []\n"
       "  end\n"
 #endif
       "  class State\n"
@@ -197,13 +262,13 @@ VALUE main_rb(VALUE data) {
       "    attr_accessor :game_title, :opt_draw_title, :opt_followers, :opt_transparent, :opt_use_midi, :start_map_id, :title1_name, :title2_name, :window_tone\n"
 #elif RGSS == 2
 #elif RGSS == 1
-      "    attr_accessor :title_name, :windowskin_name\n"
+      "    attr_accessor :party_members, :start_map_id, :start_x, :start_y, :title_name, :windowskin_name\n"
 #endif
       "    class "TERMS"\n"
 #if RGSS == 3
       "      attr_accessor :commands\n"
 #elif RGSS == 2
-      "      attr_accessor :continue, :new_game, :shutdown\n"
+      "      attr_accessor :continue, :gold, :new_game, :shutdown\n"
 #elif RGSS == 1
 #endif
       "    end\n"
@@ -221,6 +286,9 @@ VALUE main_rb(VALUE data) {
       "  end\n"
 #if RGSS == 1 || RGSS == 3
       "  class Tileset\n"
+#if RGSS == 1
+      "    attr_accessor :autotile_names, :battleback_name, :fog_blend_type, :fog_hue, :fog_name, :fog_opacity, :fog_sx, :fog_sy, :fog_zoom, :panorama_hue, :panorama_name, :passages, :priorities, :terrain_tags, :tileset_name\n"
+#endif
       "  end\n"
 #endif
       "  class Troop\n"
