@@ -81,6 +81,21 @@ struct Bitmap *convertBitmap(VALUE obj) {
   return ret;
 }
 
+void bitmapBindTexture(struct Bitmap *ptr) {
+  if(!ptr->texture_id) {
+    glGenTextures(1, &ptr->texture_id);
+    ptr->texture_invalidated = true;
+  }
+  glBindTexture(GL_TEXTURE_2D, ptr->texture_id);
+  if(ptr->texture_invalidated) {
+    SDL_LockSurface(ptr->surface);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ptr->surface->w, ptr->surface->h,
+        0, GL_RGBA, GL_UNSIGNED_BYTE, ptr->surface->pixels);
+    SDL_UnlockSurface(ptr->surface);
+    ptr->texture_invalidated = false;
+  }
+}
+
 static void rb_bitmap_modify(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Bitmap");
@@ -92,12 +107,17 @@ static void bitmap_mark(struct Bitmap *ptr) {
 
 static void bitmap_free(struct Bitmap *ptr) {
   if(ptr->surface) SDL_FreeSurface(ptr->surface);
+  if(ptr->texture_id) {
+    glDeleteTextures(1, &ptr->texture_id);
+  }
   xfree(ptr);
 }
 
 static VALUE bitmap_alloc(VALUE klass) {
   struct Bitmap *ptr = ALLOC(struct Bitmap);
   ptr->surface = NULL;
+  ptr->texture_id = 0;
+  ptr->texture_invalidated = true;
   VALUE ret = Data_Wrap_Struct(klass, bitmap_mark, bitmap_free, ptr);
   return ret;
 }
