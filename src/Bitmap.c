@@ -2,6 +2,7 @@
 #include <SDL_image.h>
 #include "Bitmap.h"
 #include "RGSSError.h"
+#include "Rect.h"
 #include "openres.h"
 #include "misc.h"
 
@@ -30,6 +31,11 @@ static VALUE rb_bitmap_m_width(VALUE self);
 static VALUE rb_bitmap_m_height(VALUE self);
 
 VALUE rb_cBitmap;
+
+VALUE rb_bitmap_rect(VALUE self) {
+  struct Bitmap *ptr = convertBitmap(self);
+  return rb_rect_new(0, 0, ptr->surface->w, ptr->surface->h);
+}
 
 void bitmapBindTexture(struct Bitmap *ptr) {
   if(!ptr->texture_id) {

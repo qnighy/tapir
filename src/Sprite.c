@@ -280,6 +280,7 @@ static VALUE rb_sprite_m_set_bitmap(VALUE self, VALUE newval) {
   rb_sprite_modify(self);
   if(newval != Qnil) convertBitmap(newval);
   ptr->bitmap = newval;
+  if(newval != Qnil) rb_rect_set2(ptr->src_rect, rb_bitmap_rect(newval));
   return newval;
 }
 
