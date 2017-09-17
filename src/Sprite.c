@@ -141,6 +141,9 @@ static VALUE rb_sprite_m_initialize(int argc, VALUE *argv, VALUE self) {
     case 0:
       break;
     case 1:
+      // TODO: use argv[0] (viewport)
+      (void) argv;
+      (void) ptr;
       break;
     default:
       rb_raise(rb_eArgError,
