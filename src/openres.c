@@ -12,13 +12,17 @@
 #define RTP_PATH "/usr/local/share/Enterbrain/RGSS/Standard"
 #endif
 
-SDL_RWops *openres(const char *path) {
+SDL_RWops *openres(VALUE path) {
+  for(ssize_t i = 0; i < RSTRING_LEN(path); ++i) {
+    if(RSTRING_PTR(path)[i] == '\\') {
+      RSTRING_PTR(path)[i] = '/';
+    }
+  }
   // TODO: support case-insensitive paths
-  // TODO: support '\\' delimiter
-  SDL_RWops *file = SDL_RWFromFile(path, "rb");
+  SDL_RWops *file = SDL_RWFromFile(StringValueCStr(path), "rb");
   if(file) return file;
   VALUE path2 = rb_str_new2(RTP_PATH);
   rb_str_cat2(path2, "/");
-  rb_str_cat2(path2, path);
-  return SDL_RWFromFile(RSTRING_PTR(path2), "rb");
+  rb_str_concat(path2, path);
+  return SDL_RWFromFile(StringValueCStr(path2), "rb");
 }

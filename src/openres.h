@@ -4,6 +4,6 @@
 #include <ruby.h>
 #include <SDL.h>
 
-SDL_RWops *openres(const char *path);
+SDL_RWops *openres(VALUE path);
 
 #endif /* OPENRES_H */

@@ -142,7 +142,7 @@ static VALUE rb_bitmap_m_initialize(int argc, VALUE *argv, VALUE self) {
         const char * const extensions[] = {"", ".png", ".jpg", ".bmp"};
         VALUE filename = rb_obj_dup(argv[0]);
         rb_str_cat2(filename, extensions[i]);
-        file = openres(RSTRING_PTR(filename));
+        file = openres(filename);
         if(file) break;
       }
       if(!file) {
