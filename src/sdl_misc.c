@@ -65,8 +65,18 @@ void cleanupSDL() {
   free(registry);
 }
 
+static int compare_renderables(const void *o1, const void *o2) {
+  // TODO: use viewport, y and generated time.
+  struct Renderable *r1 = *((struct Renderable * const *)o1);
+  struct Renderable *r2 = *((struct Renderable * const *)o2);
+  if(r1->z < r2->z) return -1;
+  if(r1->z > r2->z) return 1;
+  return 0;
+}
+
 void renderSDL() {
-  // TODO: implement rendering
+  qsort(registry, registry_size, sizeof(*registry), compare_renderables);
+
   SDL_GL_MakeCurrent(window, glcontext);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
