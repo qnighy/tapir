@@ -156,7 +156,6 @@ static VALUE rb_bitmap_m_initialize(int argc, VALUE *argv, VALUE self) {
             StringValueCStr(argv[0]),
             SDL_GetError());
       }
-      /* TODO: load from archive */
       /* TODO: limit file type */
       SDL_Surface *img = IMG_Load_RW(file, true);
       if(!img) {

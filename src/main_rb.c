@@ -570,12 +570,6 @@ VALUE main_rb(VALUE data) {
       "  p *args\n"
       "end\n"
 #endif
-      /* TODO: read from archive */
-      "def load_data(filename)\n"
-      "  File.open(filename.gsub(/\\\\/, \"/\"), \"rb\") do|f|\n"
-      "    Marshal.load(f)\n"
-      "  end\n"
-      "end\n"
       "def save_data(obj, filename)\n"
       "  File.open(filename.gsub(/\\\\/, \"/\"), \"wb\") do|f|\n"
       "    Marshal.dump(obj, f)\n"

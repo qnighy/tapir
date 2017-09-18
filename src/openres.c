@@ -3,7 +3,9 @@
 #include <dirent.h>
 #include <ruby.h>
 #include "openres.h"
+#include "archive.h"
 #include "misc.h"
+#include "RGSSError.h"
 
 // TODO: Make RTP base path configurable
 // TODO: Make RTP name configurable (Game.ini)
@@ -20,6 +22,8 @@ static SDL_RWops *caseless_open(const char *path, const char *mode);
 static void modify_case(char *path);
 
 SDL_RWops *openres(const char *path) {
+  SDL_RWops *file = openFromArchive(path);
+  if(file) return file;
   VALUE path2 = rb_str_new2(path);
   for(ssize_t i = 0; i < RSTRING_LEN(path2); ++i) {
     if(RSTRING_PTR(path2)[i] == '\\') {
@@ -27,12 +31,37 @@ SDL_RWops *openres(const char *path) {
     }
   }
   // TODO: support case-insensitive paths
-  SDL_RWops *file = caseless_open(RSTRING_PTR(path2), "rb");
+  file = caseless_open(RSTRING_PTR(path2), "rb");
   if(file) return file;
   VALUE path3 = rb_str_new2(RTP_PATH);
   rb_str_cat2(path3, "/");
   rb_str_concat(path3, path2);
   return caseless_open(RSTRING_PTR(path3), "rb");
+}
+
+VALUE rb_load_data(VALUE self, VALUE path) {
+  (void) self;
+
+  SDL_RWops *file = NULL;
+  if(archiveExists()) {
+    file = openFromArchive(StringValueCStr(path));
+  } else {
+    file = caseless_open(StringValueCStr(path), "rb");
+  }
+  if(!file) {
+    rb_raise(rb_eRGSSError, "Couldn't open %s", StringValueCStr(path));
+  }
+  VALUE str = rb_str_new(0, 0);
+  while(true) {
+    char buf[1024];
+    size_t numread = SDL_RWread(file, buf, 1, sizeof(buf));
+    if(numread == 0) break;
+    rb_str_cat(str, buf, numread);
+  }
+  SDL_RWclose(file);
+
+  VALUE rb_mMarshal = rb_const_get_at(rb_cObject, rb_intern("Marshal"));
+  return rb_funcall(rb_mMarshal, rb_intern("load"), 1, str);
 }
 
 static SDL_RWops *caseless_open(const char *path, const char *mode) {

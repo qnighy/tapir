@@ -5,6 +5,8 @@
 #include "main_rb.h"
 #include "misc.h"
 #include "sdl_misc.h"
+#include "archive.h"
+#include "openres.h"
 #include "Bitmap.h"
 #include "Color.h"
 #include "Graphics.h"
@@ -93,6 +95,8 @@ int main(int argc, char **argv) {
 
   initSDL();
 
+  initArchive();
+
 #ifdef RUBY_INIT_STACK
   ruby_sysinit(&ruby_argc, &ruby_argv);
   {
@@ -117,6 +121,7 @@ int main(int argc, char **argv) {
   }
 #endif
 
+  deinitArchive();
   cleanupSDL();
   return state;
 }
@@ -140,4 +145,5 @@ static void Init_RGSS(void) {
   Init_Window();
   Init_Graphics();
   Init_Input();
+  rb_define_global_function("load_data", rb_load_data, 1);
 }
