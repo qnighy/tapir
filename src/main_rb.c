@@ -172,7 +172,7 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "end\n"
       "class Window\n"
-      "  attr_accessor :active, :back_opacity, :contents, :contents_opacity, :cursor_rect, :opacity, :openness, :oy, :padding, :padding_bottom, :tone, :visible, :windowskin\n"
+      "  attr_accessor :active, :back_opacity, :contents, :contents_opacity, :cursor_rect, :opacity, :openness, :oy, :padding, :padding_bottom, :tone, :visible\n"
       "  def dispose\n"
       "  end\n"
       "  def disposed?\n"

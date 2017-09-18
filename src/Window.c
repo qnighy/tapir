@@ -16,6 +16,8 @@ static VALUE window_alloc(VALUE klass);
 
 static VALUE rb_window_m_initialize(int argc, VALUE *argv, VALUE self);
 static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig);
+static VALUE rb_window_m_windowskin(VALUE self);
+static VALUE rb_window_m_set_windowskin(VALUE self, VALUE newval);
 static VALUE rb_window_m_x(VALUE self);
 static VALUE rb_window_m_set_x(VALUE self, VALUE newval);
 static VALUE rb_window_m_y(VALUE self);
@@ -41,6 +43,8 @@ void Init_Window(void) {
       rb_window_m_initialize, -1);
   rb_define_private_method(rb_cWindow, "initialize_copy",
       rb_window_m_initialize_copy, 1);
+  rb_define_method(rb_cWindow, "windowskin", rb_window_m_windowskin, 0);
+  rb_define_method(rb_cWindow, "windowskin=", rb_window_m_set_windowskin, 1);
   rb_define_method(rb_cWindow, "x", rb_window_m_x, 0);
   rb_define_method(rb_cWindow, "x=", rb_window_m_set_x, 1);
   rb_define_method(rb_cWindow, "y", rb_window_m_y, 0);
@@ -57,19 +61,13 @@ void Init_Window(void) {
   // TODO: implement Window#move
   // TODO: implement Window#open?
   // TODO: implement Window#close?
-  // TODO: implement Window#windowskin, Window#windowskin=
-  // TODO: implement Window#contents
+  // TODO: implement Window#contents, Window#contents=
   // TODO: implement Window#cursor_rect
   // TODO: implement Window#viewport
   // TODO: implement Window#active
   // TODO: implement Window#visible
   // TODO: implement Window#arrows_visible
   // TODO: implement Window#pause
-  // TODO: implement Window#x
-  // TODO: implement Window#y
-  // TODO: implement Window#width
-  // TODO: implement Window#height
-  // TODO: implement Window#z
   // TODO: implement Window#ox
   // TODO: implement Window#oy
   // TODO: implement Window#padding
@@ -122,6 +120,7 @@ static VALUE window_alloc(VALUE klass) {
   ptr->renderable.z = 0;
 #endif
   ptr->renderable.viewport = Qnil;
+  ptr->windowskin = Qnil;
   ptr->x = 0;
   ptr->y = 0;
   ptr->width = 0;
@@ -159,11 +158,25 @@ static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
   struct Window *orig_ptr = convertWindow(orig);
   ptr->renderable.z = orig_ptr->renderable.z;
   ptr->renderable.viewport = orig_ptr->renderable.viewport;
+  ptr->windowskin = orig_ptr->windowskin;
   ptr->x = orig_ptr->x;
   ptr->y = orig_ptr->y;
   ptr->width = orig_ptr->width;
   ptr->height = orig_ptr->height;
   return Qnil;
+}
+
+static VALUE rb_window_m_windowskin(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return ptr->windowskin;
+}
+
+static VALUE rb_window_m_set_windowskin(VALUE self, VALUE newval) {
+  struct Window *ptr = convertWindow(self);
+  rb_window_modify(self);
+  if(newval != Qnil) convertBitmap(newval);
+  ptr->windowskin = newval;
+  return newval;
 }
 
 static VALUE rb_window_m_x(VALUE self) {
@@ -228,15 +241,14 @@ static VALUE rb_window_m_set_z(VALUE self, VALUE newval) {
 
 static void renderWindow(struct Renderable *renderable) {
   struct Window *ptr = (struct Window *)renderable;
-  // if(ptr->bitmap == Qnil) return;
-  // struct Bitmap *bitmap_ptr = convertBitmap(ptr->bitmap);
-  // SDL_Surface *surface = bitmap_ptr->surface;
-  // struct Rect *src_rect = convertRect(ptr->src_rect);
+  if(ptr->windowskin == Qnil) return;
+  struct Bitmap *skin_bitmap_ptr = convertBitmap(ptr->windowskin);
+  SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
 
-  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  // // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  // // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
   GLfloat vertices[][3] = {
     {-1.0f, -1.0f, 0.0f},
@@ -249,16 +261,16 @@ static void renderWindow(struct Renderable *renderable) {
   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   glUseProgram(shader1);
-  // glUniform1i(glGetUniformLocation(shader, "tex"), 0);
+  glUniform1i(glGetUniformLocation(shader1, "windowskin"), 0);
   glUniform2f(glGetUniformLocation(shader1, "dst_size"),
       window_width, window_height);
   glUniform2f(glGetUniformLocation(shader1, "topleft"),
-      ptr->x, ptr->y);
+      ptr->x + 2, ptr->y + 2);
   glUniform2f(glGetUniformLocation(shader1, "bottomright"),
-      ptr->x + ptr->width, ptr->y + ptr->height);
+      ptr->x + ptr->width - 2, ptr->y + ptr->height - 2);
 
-  // glActiveTexture(GL_TEXTURE0);
-  // bitmapBindTexture(bitmap_ptr);
+  glActiveTexture(GL_TEXTURE0);
+  bitmapBindTexture(skin_bitmap_ptr);
 
   glBegin(GL_TRIANGLE_STRIP);
   for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
@@ -284,15 +296,22 @@ void initWindowSDL() {
     "#define texture2DProj textureProj\n"
     "#endif\n"
     "\n"
-    "uniform sampler2D tex;\n"
+    "uniform sampler2D windowskin;\n"
     "uniform vec2 dst_size;\n"
     "uniform vec2 topleft;\n"
     "uniform vec2 bottomright;\n"
     "\n"
     "void main(void) {\n"
     "    vec2 coord = vec2(gl_FragCoord.x, dst_size.y - gl_FragCoord.y);\n"
-    "    if(topleft.x+2.0 <= coord.x && topleft.y+2.0 <= coord.y && coord.x <= bottomright.x-2.0 && coord.y <= bottomright.y-2.0) {\n"
-    "      gl_FragColor = vec4(0.0, 0.5, 1.0, 0.5);\n"
+    "    if(topleft.x <= coord.x && topleft.y <= coord.y && coord.x <= bottomright.x && coord.y <= bottomright.y) {\n"
+    "      vec2 dim = bottomright - topleft;\n"
+    "      vec2 relative_coord = coord - topleft;\n"
+#if RGSS >= 2
+    "      vec4 color = texture2D(windowskin, vec2(relative_coord.x / dim.x * 0.5, relative_coord.y / dim.y * 0.5));\n"
+#else
+    "      vec4 color = texture2D(windowskin, vec2(relative_coord.x / dim.x * 0.6666667, relative_coord.y / dim.y));\n"
+#endif
+    "      gl_FragColor = color;\n"
     "    } else {\n"
     "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
     "    }\n"

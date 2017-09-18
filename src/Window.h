@@ -11,6 +11,7 @@ void Init_Window(void);
 
 struct Window {
   struct Renderable renderable;
+  VALUE windowskin;
   int x, y, width, height;
 };
 
