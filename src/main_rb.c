@@ -71,6 +71,11 @@ VALUE main_rb(VALUE data) {
       "end\n"
       "class Bitmap\n"
       "  attr_accessor :font\n"
+      "  def dispose\n"
+      "  end\n"
+      "  def disposed?\n"
+      "    false\n"
+      "  end\n"
       "  def font\n"
       "    if !@font\n"
       "      @font = Font.new\n"
@@ -168,16 +173,6 @@ VALUE main_rb(VALUE data) {
       "end\n"
       "\n"
       "module RPG\n"
-      "  class Actor\n"
-      "    attr_accessor :character_name, :class_id, :initial_level, :name\n"
-#if RGSS == 3
-      "    attr_accessor :character_index, :equips, :face_index, :face_name, :features, :nickname\n"
-#elif RGSS == 2
-      "    attr_accessor :armor1_id, :armor2_id, :armor3_id, :armor4_id, :exp_basis, :exp_inflation, :character_index, :face_index, :face_name, :parameters, :weapon_id\n"
-#elif RGSS == 1
-      "    attr_accessor :armor1_id, :armor2_id, :armor3_id, :armor4_id, :battler_hue, :battler_name, :character_hue, :exp_basis, :exp_inflation, :final_level, :parameters, :weapon_id\n"
-#endif
-      "  end\n"
       "  class AudioFile\n"
 #if RGSS == 1
       "    attr_accessor :name, :pitch, :volume\n"
@@ -211,7 +206,101 @@ VALUE main_rb(VALUE data) {
       "  class Area\n"
       "  end\n"
 #endif
+#if RGSS >= 2
+      "  class BaseItem\n"
+#if RGSS == 3
+      "    class Feature\n"
+      "      attr_accessor :code\n"
+      "    end\n"
+#endif
+      "  end\n"
+#endif
+#if RGSS == 3
+      "  class Actor < BaseItem\n"
+#else
+      "  class Actor\n"
+#endif
+      "    attr_accessor :character_name, :class_id, :initial_level, :name\n"
+#if RGSS == 3
+      "    attr_accessor :character_index, :equips, :face_index, :face_name, :features, :nickname\n"
+#elif RGSS == 2
+      "    attr_accessor :armor1_id, :armor2_id, :armor3_id, :armor4_id, :exp_basis, :exp_inflation, :character_index, :face_index, :face_name, :parameters, :weapon_id\n"
+#elif RGSS == 1
+      "    attr_accessor :armor1_id, :armor2_id, :armor3_id, :armor4_id, :battler_hue, :battler_name, :character_hue, :exp_basis, :exp_inflation, :final_level, :parameters, :weapon_id\n"
+#endif
+      "  end\n"
+#if RGSS == 3
+      "  class Class < BaseItem\n"
+#else
+      "  class Class\n"
+#endif
+      "    attr_accessor :learnings\n"
+#if RGSS == 3
+      "    attr_accessor :features\n"
+      "    def exp_for_level(level)\n"
+      // TODO: correct exp_for_level implementation
+      "      1\n"
+      "    end\n"
+#elif RGSS == 2
+#elif RGSS == 1
+#endif
+      "    class Learning\n"
+      "      attr_accessor :level\n"
+#if RGSS == 3
+      "      attr_accessor :skill_id\n"
+#elif RGSS == 2
+#elif RGSS == 1
+      "      attr_accessor :skill_id\n"
+#endif
+      "    end\n"
+      "  end\n"
+#if RGSS >= 2
+      "  class UsableItem < BaseItem\n"
+#if RGSS == 3
+      "    class Effect\n"
+      "    end\n"
+      "    class Damage\n"
+      "    end\n"
+#endif
+      "  end\n"
+#endif
+#if RGSS >= 2
+      "  class Skill < UsableItem\n"
+#else
+      "  class Skill\n"
+#endif
+#if RGSS == 3
+      "    attr_accessor :id\n"
+#endif
+      "  end\n"
+#if RGSS >= 2
+      "  class Item < UsableItem\n"
+#else
+      "  class Item\n"
+#endif
+      "  end\n"
+#if RGSS == 3
+      "  class EquipItem < BaseItem\n"
+      "  end\n"
+#endif
+#if RGSS == 3
+      "  class Weapon < EquipItem\n"
+#elif RGSS == 2
+      "  class Weapon < BaseItem\n"
+#else
+      "  class Weapon\n"
+#endif
+#if RGSS == 3
+      "    attr_accessor :features\n"
+#endif
+      "  end\n"
+#if RGSS == 3
+      "  class Armor < EquipItem\n"
+#elif RGSS == 2
+      "  class Armor < BaseItem\n"
+#else
       "  class Armor\n"
+#endif
 #if RGSS == 3
       "    attr_accessor :features\n"
 #elif RGSS == 2
@@ -220,12 +309,23 @@ VALUE main_rb(VALUE data) {
 #endif
       "  end\n"
 #if RGSS == 3
-      "  module BaseItem\n"
-      "    class Feature\n"
-      "      attr_accessor :code\n"
-      "    end\n"
-      "  end\n"
+      "  class Enemy < BaseItem\n"
+#else
+      "  class Enemy\n"
 #endif
+      "    class Action\n"
+      "    end\n"
+#if RGSS >= 2
+      "    class DropItem\n"
+      "    end\n"
+#endif
+      "  end\n"
+#if RGSS == 3
+      "  class State < BaseItem\n"
+#else
+      "  class State\n"
+#endif
+      "  end\n"
 #if RGSS == 1
       "  module Cache\n"
       /* TODO: is this implementation correct? */
@@ -280,27 +380,6 @@ VALUE main_rb(VALUE data) {
       "    end\n"
       "  end\n"
 #endif
-      "  class Class\n"
-      "    attr_accessor :learnings\n"
-#if RGSS == 3
-      "    attr_accessor :features\n"
-      "    def exp_for_level(level)\n"
-      // TODO: correct exp_for_level implementation
-      "      1\n"
-      "    end\n"
-#elif RGSS == 2
-#elif RGSS == 1
-#endif
-      "    class Learning\n"
-      "      attr_accessor :level\n"
-#if RGSS == 3
-      "      attr_accessor :skill_id\n"
-#elif RGSS == 2
-#elif RGSS == 1
-      "      attr_accessor :skill_id\n"
-#endif
-      "    end\n"
-      "  end\n"
       "  class CommonEvent\n"
 #if RGSS == 3
       "    def autorun?\n"
@@ -313,14 +392,6 @@ VALUE main_rb(VALUE data) {
       "    attr_accessor :switch_id, :trigger\n"
 #elif RGSS == 1
       "    attr_accessor :switch_id, :trigger\n"
-#endif
-      "  end\n"
-      "  class Enemy\n"
-      "    class Action\n"
-      "    end\n"
-#if RGSS >= 2
-      "    class DropItem\n"
-      "    end\n"
 #endif
       "  end\n"
       "  class Event\n"
@@ -357,8 +428,6 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "  class EventCommand\n"
       "  end\n"
-      "  class Item\n"
-      "  end\n"
       "  class Map\n"
       "    attr_accessor :data, :encounter_step, :height, :width\n"
 #if RGSS == 3
@@ -384,18 +453,11 @@ VALUE main_rb(VALUE data) {
       "    end\n"
       "  end\n"
 #endif
-      "  class Skill\n"
-#if RGSS == 3
-      "    attr_accessor :id\n"
-#endif
-      "  end\n"
 #if RGSS == 1
       "  class Sprite < ::Sprite\n"
       "    @@_animations = []\n"
       "  end\n"
 #endif
-      "  class State\n"
-      "  end\n"
       "  class System\n"
       "    attr_accessor :party_members, :start_map_id, :start_x, :start_y, :title_bgm\n"
 #if RGSS >= 2
@@ -445,19 +507,6 @@ VALUE main_rb(VALUE data) {
       "      class Condition\n"
       "      end\n"
       "    end\n"
-      "  end\n"
-#if RGSS == 3
-      "  module UsableItem\n"
-      "    class Effect\n"
-      "    end\n"
-      "    class Damage\n"
-      "    end\n"
-      "  end\n"
-#endif
-      "  class Weapon\n"
-#if RGSS == 3
-      "    attr_accessor :features\n"
-#endif
       "  end\n"
       "end\n"
       "\n"
