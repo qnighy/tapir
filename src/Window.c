@@ -1,7 +1,5 @@
 #include <SDL.h>
-#define GL_GLEXT_PROTOTYPES
-#include <SDL_opengl.h>
-#include <SDL_opengl_glext.h>
+#include "gl_misc.h"
 #include "Window.h"
 #include "Bitmap.h"
 #include "Viewport.h"
@@ -10,7 +8,7 @@
 #include "Tone.h"
 #include "misc.h"
 
-static GLuint shader;
+static GLuint shader1;
 
 static void window_mark(struct Window *ptr);
 static void window_free(struct Window *ptr);
@@ -240,54 +238,46 @@ static void renderWindow(struct Renderable *renderable) {
   // // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   // // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-  // GLfloat vertices[][3] = {
-  //   {-1.0f, -1.0f, 0.0f},
-  //   { 1.0f, -1.0f, 0.0f},
-  //   {-1.0f,  1.0f, 0.0f},
-  //   { 1.0f,  1.0f, 0.0f}
-  // };
+  GLfloat vertices[][3] = {
+    {-1.0f, -1.0f, 0.0f},
+    { 1.0f, -1.0f, 0.0f},
+    {-1.0f,  1.0f, 0.0f},
+    { 1.0f,  1.0f, 0.0f}
+  };
 
   // glEnable(GL_BLEND);
   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  // glUseProgram(shader);
+  glUseProgram(shader1);
   // glUniform1i(glGetUniformLocation(shader, "tex"), 0);
-  // glUniform2f(glGetUniformLocation(shader, "dst_size"),
-  //     window_width, window_height);
-  // glUniform2f(glGetUniformLocation(shader, "src_size"),
-  //     surface->w, surface->h);
-  // glUniform2f(glGetUniformLocation(shader, "src_topleft"),
-  //     src_rect->x, src_rect->y);
-  // glUniform2f(glGetUniformLocation(shader, "src_bottomright"),
-  //     src_rect->x + src_rect->width, src_rect->y + src_rect->height);
-  // glUniform2f(glGetUniformLocation(shader, "dst_translate"),
-  //     ptr->x, ptr->y);
-  // glUniform2f(glGetUniformLocation(shader, "src_translate"),
-  //     ptr->ox, ptr->oy);
-  // glUniform2f(glGetUniformLocation(shader, "zoom"),
-  //     ptr->zoom_x, ptr->zoom_y);
+  glUniform2f(glGetUniformLocation(shader1, "dst_size"),
+      window_width, window_height);
+  glUniform2f(glGetUniformLocation(shader1, "topleft"),
+      ptr->x, ptr->y);
+  glUniform2f(glGetUniformLocation(shader1, "bottomright"),
+      ptr->x + ptr->width, ptr->y + ptr->height);
 
   // glActiveTexture(GL_TEXTURE0);
   // bitmapBindTexture(bitmap_ptr);
 
-  // glBegin(GL_TRIANGLE_STRIP);
-  // for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
-  //   glVertex3fv(vertices[i]);
-  // }
-  // glEnd();
+  glBegin(GL_TRIANGLE_STRIP);
+  for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
+    glVertex3fv(vertices[i]);
+  }
+  glEnd();
 
-  // glUseProgram(0);
+  glUseProgram(0);
 }
 
 void initWindowSDL() {
-  static const char *vsh_source =
+  static const char *vsh1_source =
     "#version 120\n"
     "\n"
     "void main(void) {\n"
     "    gl_Position = gl_Vertex;\n"
     "}\n";
 
-  static const char *fsh_source =
+  static const char *fsh1_source =
     "#version 120\n"
     "#if __VERSION__ >= 130\n"
     "#define texture2D texture\n"
@@ -296,73 +286,21 @@ void initWindowSDL() {
     "\n"
     "uniform sampler2D tex;\n"
     "uniform vec2 dst_size;\n"
-    "uniform vec2 dst_translate;\n"
-    "uniform vec2 src_translate;\n"
-    "uniform vec2 src_topleft;\n"
-    "uniform vec2 src_bottomright;\n"
-    "uniform vec2 src_size;\n"
-    "uniform vec2 zoom;\n"
-    // "uniform float angle;\n"
-    // "uniform vec4 sprite_color;\n"
-    // "uniform vec4 sprite_tone;\n"
+    "uniform vec2 topleft;\n"
+    "uniform vec2 bottomright;\n"
     "\n"
     "void main(void) {\n"
     "    vec2 coord = vec2(gl_FragCoord.x, dst_size.y - gl_FragCoord.y);\n"
-    "    coord = coord - dst_translate;\n"
-    "    coord = vec2(coord.x / zoom.x, coord.y / zoom.y);\n"
-    "    coord = coord + src_translate;\n"
-    "    if(src_topleft.x <= coord.x && src_topleft.y <= coord.y && coord.x <= src_bottomright.x && coord.y <= src_bottomright.y) {\n"
-    "      vec4 color = texture2D(tex, vec2(coord.x / src_size.x, coord.y / src_size.y));\n"
-    "      gl_FragColor = color;\n"
+    "    if(topleft.x+2.0 <= coord.x && topleft.y+2.0 <= coord.y && coord.x <= bottomright.x-2.0 && coord.y <= bottomright.y-2.0) {\n"
+    "      gl_FragColor = vec4(0.0, 0.5, 1.0, 0.5);\n"
     "    } else {\n"
     "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
     "    }\n"
     "}\n";
 
-  GLuint vsh = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vsh, 1, &vsh_source, NULL);
-  glCompileShader(vsh);
-  {
-    int compilation_status;
-    glGetShaderiv(vsh, GL_COMPILE_STATUS, &compilation_status);
-    if(!compilation_status) {
-      char compilation_log[512] = {0};
-      glGetShaderInfoLog(vsh, sizeof(compilation_log), NULL, compilation_log);
-      fprintf(stderr, "vsh compile error:\n%s\n", compilation_log);
-    }
-  }
-
-  GLuint fsh = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fsh, 1, &fsh_source, NULL);
-  glCompileShader(fsh);
-  {
-    int compilation_status;
-    glGetShaderiv(fsh, GL_COMPILE_STATUS, &compilation_status);
-    if(!compilation_status) {
-      char compilation_log[512] = {0};
-      glGetShaderInfoLog(fsh, sizeof(compilation_log), NULL, compilation_log);
-      fprintf(stderr, "fsh compile error:\n%s\n", compilation_log);
-    }
-  }
-
-  shader = glCreateProgram();
-  glAttachShader(shader, vsh);
-  glAttachShader(shader, fsh);
-  glLinkProgram(shader);
-  {
-    int link_status;
-    glGetProgramiv(shader, GL_LINK_STATUS, &link_status);
-    if(!link_status) {
-      char link_log[512] = {0};
-      glGetProgramInfoLog(shader, sizeof(link_log), NULL, link_log);
-      fprintf(stderr, "shader link error:\n%s\n", link_log);
-    }
-  }
-
-  glDeleteShader(vsh);
-  glDeleteShader(fsh);
+  shader1 = compileShaders(vsh1_source, fsh1_source);
 }
 
 void deinitWindowSDL() {
-  glDeleteProgram(shader);
+  glDeleteProgram(shader1);
 }
