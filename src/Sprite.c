@@ -571,7 +571,8 @@ static void renderSprite(struct Renderable *renderable) {
   struct Sprite *ptr = (struct Sprite *)renderable;
   if(ptr->bitmap == Qnil) return;
   struct Bitmap *bitmap_ptr = convertBitmap(ptr->bitmap);
-  // SDL_Surface *surface = bitmap_ptr->surface;
+  SDL_Surface *surface = bitmap_ptr->surface;
+  struct Rect *src_rect = convertRect(ptr->src_rect);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -590,6 +591,20 @@ static void renderSprite(struct Renderable *renderable) {
 
   glUseProgram(shader);
   glUniform1i(glGetUniformLocation(shader, "tex"), 0);
+  glUniform2f(glGetUniformLocation(shader, "dst_size"),
+      window_width, window_height);
+  glUniform2f(glGetUniformLocation(shader, "src_size"),
+      surface->w, surface->h);
+  glUniform2f(glGetUniformLocation(shader, "src_topleft"),
+      src_rect->x, src_rect->y);
+  glUniform2f(glGetUniformLocation(shader, "src_bottomright"),
+      src_rect->x + src_rect->width, src_rect->y + src_rect->height);
+  glUniform2f(glGetUniformLocation(shader, "dst_translate"),
+      ptr->x, ptr->y);
+  glUniform2f(glGetUniformLocation(shader, "src_translate"),
+      ptr->ox, ptr->oy);
+  glUniform2f(glGetUniformLocation(shader, "zoom"),
+      ptr->zoom_x, ptr->zoom_y);
 
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture(bitmap_ptr);
@@ -619,9 +634,28 @@ void initSpriteSDL() {
     "#endif\n"
     "\n"
     "uniform sampler2D tex;\n"
+    "uniform vec2 dst_size;\n"
+    "uniform vec2 dst_translate;\n"
+    "uniform vec2 src_translate;\n"
+    "uniform vec2 src_topleft;\n"
+    "uniform vec2 src_bottomright;\n"
+    "uniform vec2 src_size;\n"
+    "uniform vec2 zoom;\n"
+    // "uniform float angle;\n"
+    // "uniform vec4 sprite_color;\n"
+    // "uniform vec4 sprite_tone;\n"
+    "\n"
     "void main(void) {\n"
-    "    vec4 color = texture2D(tex, vec2(gl_FragCoord.x / 544.0, 1.0 - gl_FragCoord.y / 416.0));\n"
-    "    gl_FragColor = color;\n"
+    "    vec2 coord = vec2(gl_FragCoord.x, dst_size.y - gl_FragCoord.y);\n"
+    "    coord = coord - dst_translate;\n"
+    "    coord = vec2(coord.x / zoom.x, coord.y / zoom.y);\n"
+    "    coord = coord + src_translate;\n"
+    "    if(src_topleft.x <= coord.x && src_topleft.y <= coord.y && coord.x <= src_bottomright.x && coord.y <= src_bottomright.y) {\n"
+    "      vec4 color = texture2D(tex, vec2(coord.x / src_size.x, coord.y / src_size.y));\n"
+    "      gl_FragColor = color;\n"
+    "    } else {\n"
+    "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
+    "    }\n"
     "}\n";
 
   GLuint vsh = glCreateShader(GL_VERTEX_SHADER);
