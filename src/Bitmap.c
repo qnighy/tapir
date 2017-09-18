@@ -152,14 +152,18 @@ static VALUE rb_bitmap_m_initialize(int argc, VALUE *argv, VALUE self) {
       }
       if(!file) {
         /* TODO: check error handling */
-        rb_raise(rb_eRGSSError, "%s", SDL_GetError());
+        rb_raise(rb_eRGSSError, "Error loading %s: %s",
+            StringValueCStr(argv[0]),
+            SDL_GetError());
       }
       /* TODO: load from archive */
       /* TODO: limit file type */
       SDL_Surface *img = IMG_Load_RW(file, true);
       if(!img) {
         /* TODO: check error handling */
-        rb_raise(rb_eRGSSError, "%s", IMG_GetError());
+        rb_raise(rb_eRGSSError, "Error loading %s: %s",
+            StringValueCStr(argv[0]),
+            IMG_GetError());
       }
       ptr->surface = SDL_ConvertSurfaceFormat(img, PIXELFORMAT_RGBA32, 0);
       SDL_FreeSurface(img);
