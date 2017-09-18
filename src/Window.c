@@ -9,6 +9,10 @@
 #include "misc.h"
 
 static GLuint shader1;
+#if RGSS >= 2
+static GLuint shader2;
+#endif
+static GLuint shader3;
 
 static void window_mark(struct Window *ptr);
 static void window_free(struct Window *ptr);
@@ -257,8 +261,8 @@ static void renderWindow(struct Renderable *renderable) {
     { 1.0f,  1.0f, 0.0f}
   };
 
-  // glEnable(GL_BLEND);
-  // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   glUseProgram(shader1);
   glUniform1i(glGetUniformLocation(shader1, "windowskin"), 0);
@@ -268,6 +272,44 @@ static void renderWindow(struct Renderable *renderable) {
       ptr->x + 2, ptr->y + 2);
   glUniform2f(glGetUniformLocation(shader1, "bottomright"),
       ptr->x + ptr->width - 2, ptr->y + ptr->height - 2);
+
+  glActiveTexture(GL_TEXTURE0);
+  bitmapBindTexture(skin_bitmap_ptr);
+
+  glBegin(GL_TRIANGLE_STRIP);
+  for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
+    glVertex3fv(vertices[i]);
+  }
+  glEnd();
+
+#if RGSS >= 2
+  glUseProgram(shader2);
+  glUniform1i(glGetUniformLocation(shader2, "windowskin"), 0);
+  glUniform2f(glGetUniformLocation(shader2, "dst_size"),
+      window_width, window_height);
+  glUniform2f(glGetUniformLocation(shader2, "topleft"),
+      ptr->x + 2, ptr->y + 2);
+  glUniform2f(glGetUniformLocation(shader2, "bottomright"),
+      ptr->x + ptr->width - 2, ptr->y + ptr->height - 2);
+
+  glActiveTexture(GL_TEXTURE0);
+  bitmapBindTexture(skin_bitmap_ptr);
+
+  glBegin(GL_TRIANGLE_STRIP);
+  for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
+    glVertex3fv(vertices[i]);
+  }
+  glEnd();
+#endif
+
+  glUseProgram(shader3);
+  glUniform1i(glGetUniformLocation(shader3, "windowskin"), 0);
+  glUniform2f(glGetUniformLocation(shader3, "dst_size"),
+      window_width, window_height);
+  glUniform2f(glGetUniformLocation(shader3, "topleft"),
+      ptr->x, ptr->y);
+  glUniform2f(glGetUniformLocation(shader3, "bottomright"),
+      ptr->x + ptr->width, ptr->y + ptr->height);
 
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture(skin_bitmap_ptr);
@@ -318,8 +360,117 @@ void initWindowSDL() {
     "}\n";
 
   shader1 = compileShaders(vsh1_source, fsh1_source);
+
+#if RGSS >= 2
+  static const char *vsh2_source =
+    "#version 120\n"
+    "\n"
+    "void main(void) {\n"
+    "    gl_Position = gl_Vertex;\n"
+    "}\n";
+
+  static const char *fsh2_source =
+    "#version 120\n"
+    "#if __VERSION__ >= 130\n"
+    "#define texture2D texture\n"
+    "#define texture2DProj textureProj\n"
+    "#endif\n"
+    "\n"
+    "uniform sampler2D windowskin;\n"
+    "uniform vec2 dst_size;\n"
+    "uniform vec2 topleft;\n"
+    "uniform vec2 bottomright;\n"
+    "\n"
+    "void main(void) {\n"
+    "    vec2 coord = vec2(gl_FragCoord.x, dst_size.y - gl_FragCoord.y);\n"
+    "    if(topleft.x <= coord.x && topleft.y <= coord.y && coord.x <= bottomright.x && coord.y <= bottomright.y) {\n"
+    "      vec2 dim = bottomright - topleft;\n"
+    "      vec2 relative_coord = coord - topleft;\n"
+    "      relative_coord = vec2(relative_coord.x / dim.x, relative_coord.y / dim.y);\n"
+    "      vec2 src_coord = mod(relative_coord, 1.0);\n"
+    "      vec4 color = texture2D(windowskin, vec2(src_coord.x * 0.5, src_coord.y * 0.5 + 0.5));\n"
+    "      gl_FragColor = color;\n"
+    "    } else {\n"
+    "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
+    "    }\n"
+    "}\n";
+
+  shader2 = compileShaders(vsh2_source, fsh2_source);
+#endif
+
+  static const char *vsh3_source =
+    "#version 120\n"
+    "\n"
+    "void main(void) {\n"
+    "    gl_Position = gl_Vertex;\n"
+    "}\n";
+
+  static const char *fsh3_source =
+    "#version 120\n"
+    "#if __VERSION__ >= 130\n"
+    "#define texture2D texture\n"
+    "#define texture2DProj textureProj\n"
+    "#endif\n"
+    "\n"
+    "uniform sampler2D windowskin;\n"
+    "uniform vec2 dst_size;\n"
+    "uniform vec2 topleft;\n"
+    "uniform vec2 bottomright;\n"
+    "\n"
+    "void main(void) {\n"
+    "    vec2 coord = vec2(gl_FragCoord.x, dst_size.y - gl_FragCoord.y);\n"
+    "    if(topleft.x <= coord.x && topleft.y <= coord.y && coord.x <= bottomright.x && coord.y <= bottomright.y) {\n"
+    "      vec2 relative_coord = coord - topleft;\n"
+    "      vec2 relative_coord2 = bottomright - coord;\n"
+    "      vec2 src_coord;\n"
+    "      bool draw = false;\n"
+#if RGSS >= 2
+    "      if(relative_coord.x < 16.0) {\n"
+    "        src_coord.x = (relative_coord.x + 64.0) / 128.0;\n"
+    "        draw = true;\n"
+    "      } else if(relative_coord2.x < 16.0) {\n"
+    "        src_coord.x = (128.0 - relative_coord2.x) / 128.0;\n"
+    "        draw = true;\n"
+    "      } else {\n"
+    "        src_coord.x = (mod(relative_coord.x - 16.0, 32.0) + 80.0) / 128.0;\n"
+    "      }\n"
+#else
+    "      if(relative_coord.x < 16.0) {\n"
+    "        src_coord.x = (relative_coord.x + 128.0) / 192.0;\n"
+    "        draw = true;\n"
+    "      } else if(relative_coord2.x < 16.0) {\n"
+    "        src_coord.x = (192.0 - relative_coord2.x) / 192.0;\n"
+    "        draw = true;\n"
+    "      } else {\n"
+    "        src_coord.x = (mod(relative_coord.x - 16.0, 32.0) + 144.0) / 192.0;\n"
+    "      }\n"
+#endif
+    "      if(relative_coord.y < 16.0) {\n"
+    "        src_coord.y = relative_coord.y / 128.0;\n"
+    "        draw = true;\n"
+    "      } else if(relative_coord2.y < 16.0) {\n"
+    "        src_coord.y = (64.0 - relative_coord2.y) / 128.0;\n"
+    "        draw = true;\n"
+    "      } else {\n"
+    "        src_coord.y = (mod(relative_coord.y - 16.0, 32.0) + 16.0) / 128.0;\n"
+    "      }\n"
+    "      if(draw) {\n"
+    "        gl_FragColor = texture2D(windowskin, src_coord);\n"
+    "      } else {\n"
+    "        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
+    "      }\n"
+    "    } else {\n"
+    "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
+    "    }\n"
+    "}\n";
+
+  shader3 = compileShaders(vsh3_source, fsh3_source);
 }
 
 void deinitWindowSDL() {
+  glDeleteProgram(shader3);
+#if RGSS >= 2
+  glDeleteProgram(shader2);
+#endif
   glDeleteProgram(shader1);
 }
