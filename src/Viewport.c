@@ -235,7 +235,7 @@ static VALUE rb_viewport_m_color(VALUE self) {
 static VALUE rb_viewport_m_set_color(VALUE self, VALUE newval) {
   struct Viewport *ptr = convertViewport(self);
   rb_viewport_modify(self);
-  rb_rect_set2(ptr->color, newval);
+  rb_color_set2(ptr->color, newval);
   return newval;
 }
 
@@ -247,6 +247,6 @@ static VALUE rb_viewport_m_tone(VALUE self) {
 static VALUE rb_viewport_m_set_tone(VALUE self, VALUE newval) {
   struct Viewport *ptr = convertViewport(self);
   rb_viewport_modify(self);
-  rb_rect_set2(ptr->tone, newval);
+  rb_tone_set2(ptr->tone, newval);
   return newval;
 }

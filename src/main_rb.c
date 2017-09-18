@@ -86,9 +86,9 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "  def clear_rect(rect)\n"
       "  end\n"
-      "  def draw_text(rect, text, foo=0)\n"
+      "  def draw_text(*args)\n"
       "  end\n"
-      "  def fill_rect(rect, color)\n"
+      "  def fill_rect(*args)\n"
       "  end\n"
       "  def get_pixel(x, y)\n"
       "    Color.new(0.0, 0.0, 0.0, 0.0)\n"
@@ -97,9 +97,15 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "  def dispose\n"
       "  end\n"
+      "  def rect\n"
+      "    Rect.new(0, 0, width, height)\n"
+      "  end\n"
+      "  def text_size(str)\n"
+      "    Rect.new(0, 0, 32, 32)\n"
+      "  end\n"
       "end\n"
       "class Font\n"
-      "  attr_accessor :color, :size\n"
+      "  attr_accessor :color, :name, :size\n"
       "  def initialize\n"
       "    @color = Color.new(0.0, 0.0, 0.0, 0.0)\n"
       "  end\n"
@@ -110,6 +116,15 @@ VALUE main_rb(VALUE data) {
       "end\n"
       "module Graphics\n"
       "  def self.frame_reset\n"
+      "  end\n"
+      "  def self.frame_rate\n"
+#if RGSS >= 2
+      "    60\n"
+#else
+      "    40\n"
+#endif
+      "  end\n"
+      "  def self.frame_rate=(rate)\n"
       "  end\n"
       "  def self.frame_count=(count)\n"
       "  end\n"
@@ -127,7 +142,7 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "end\n"
       "class Plane\n"
-      "  attr_accessor :z\n"
+      "  attr_accessor :bitmap, :blend_type, :opacity, :ox, :oy, :z, :zoom_x, :zoom_y\n"
       "  def initialize(viewport=nil)\n"
       "  end\n"
       "end\n"
@@ -137,27 +152,40 @@ VALUE main_rb(VALUE data) {
       "end\n"
       "class Tilemap\n"
 #if RGSS >= 2
-      "  attr_accessor :bitmaps\n"
+      "  attr_accessor :bitmaps, :flags, :map_data, :ox, :oy, :passages\n"
       "  def initialize(viewport=nil)\n"
       "    @bitmaps = [nil] * 9\n"
       "  end\n"
+      "  def update\n"
+      "  end\n"
 #else
-      "  attr_accessor :autotiles, :map_data, :priorities, :tileset\n"
+      "  attr_accessor :autotiles, :map_data, :ox, :oy, :priorities, :tileset\n"
       "  def initialize(viewport=nil)\n"
       "    @autotiles = [nil, nil, nil, nil, nil, nil]\n"
       "  end\n"
+      "  def update\n"
+      "  end\n"
 #endif
       "end\n"
-
+      "class Viewport\n"
+      "  def update\n"
+      "  end\n"
+      "end\n"
       "class Window\n"
       "  attr_accessor :active, :back_opacity, :contents, :contents_opacity, :cursor_rect, :height, :opacity, :openness, :oy, :padding, :padding_bottom, :tone, :visible, :width, :windowskin, :x, :y, :z\n"
       "  def dispose\n"
+      "  end\n"
+      "  def disposed?\n"
+      "    false\n"
       "  end\n"
       "  def openness=(newval)\n"
       "    @openness = [[0, newval].max, 255].min\n"
       "  end\n"
       "  def open?\n"
       "    @openness == 255\n"
+      "  end\n"
+      "  def close?\n"
+      "    @openness == 0\n"
       "  end\n"
       "  def update\n"
       "  end\n"
@@ -190,9 +218,13 @@ VALUE main_rb(VALUE data) {
       "  class BGS < AudioFile\n"
       "    def self.stop\n"
       "    end\n"
+      "    def self.fade(time)\n"
+      "    end\n"
       "  end\n"
       "  class ME < AudioFile\n"
       "    def self.stop\n"
+      "    end\n"
+      "    def self.fade(time)\n"
       "    end\n"
       "  end\n"
 #endif
@@ -209,8 +241,9 @@ VALUE main_rb(VALUE data) {
 #if RGSS >= 2
       "  class BaseItem\n"
 #if RGSS == 3
+      "    attr_accessor :features\n"
       "    class Feature\n"
-      "      attr_accessor :code\n"
+      "      attr_accessor :code, :data_id\n"
       "    end\n"
 #endif
       "  end\n"
@@ -222,7 +255,7 @@ VALUE main_rb(VALUE data) {
 #endif
       "    attr_accessor :character_name, :class_id, :initial_level, :name\n"
 #if RGSS == 3
-      "    attr_accessor :character_index, :equips, :face_index, :face_name, :features, :nickname\n"
+      "    attr_accessor :character_index, :equips, :face_index, :face_name, :nickname\n"
 #elif RGSS == 2
       "    attr_accessor :armor1_id, :armor2_id, :armor3_id, :armor4_id, :exp_basis, :exp_inflation, :character_index, :face_index, :face_name, :parameters, :weapon_id\n"
 #elif RGSS == 1
@@ -236,7 +269,7 @@ VALUE main_rb(VALUE data) {
 #endif
       "    attr_accessor :learnings\n"
 #if RGSS == 3
-      "    attr_accessor :features\n"
+      "    attr_accessor :params\n"
       "    def exp_for_level(level)\n"
       // TODO: correct exp_for_level implementation
       "      1\n"
@@ -281,6 +314,7 @@ VALUE main_rb(VALUE data) {
       "  end\n"
 #if RGSS == 3
       "  class EquipItem < BaseItem\n"
+      "    attr_accessor :etype_id, :params\n"
       "  end\n"
 #endif
 #if RGSS == 3
@@ -291,7 +325,7 @@ VALUE main_rb(VALUE data) {
       "  class Weapon\n"
 #endif
 #if RGSS == 3
-      "    attr_accessor :features\n"
+      "    attr_accessor :wtype_id\n"
 #endif
       "  end\n"
 #if RGSS == 3
@@ -302,7 +336,7 @@ VALUE main_rb(VALUE data) {
       "  class Armor\n"
 #endif
 #if RGSS == 3
-      "    attr_accessor :features\n"
+      "    attr_accessor :atype_id\n"
 #elif RGSS == 2
 #elif RGSS == 1
       "    attr_accessor :auto_state_id\n"
@@ -324,6 +358,9 @@ VALUE main_rb(VALUE data) {
       "  class State < BaseItem\n"
 #else
       "  class State\n"
+#endif
+#if RGSS == 3
+      "    attr_accessor :max_turns, :min_turns, :priority, :steps_to_remove, :remove_by_restriction, :restriction\n"
 #endif
       "  end\n"
 #if RGSS == 1
@@ -429,13 +466,13 @@ VALUE main_rb(VALUE data) {
       "  class EventCommand\n"
       "  end\n"
       "  class Map\n"
-      "    attr_accessor :data, :encounter_step, :height, :width\n"
+      "    attr_accessor :autoplay_bgm, :autoplay_bgs, :bgm, :data, :encounter_step, :height, :width\n"
 #if RGSS == 3
       "    attr_accessor :battleback1_name, :battleback2_name, :events, :parallax_loop_x, :parallax_loop_y, :parallax_name, :parallax_sx, :parallax_sy, :scroll_type, :specify_battleback, :tileset_id\n"
 #elif RGSS == 2
-      "    attr_accessor :autoplay_bgm, :autoplay_bgs, :bgm, :events, :parallax_loop_x, :parallax_loop_y, :parallax_name, :parallax_sx, :parallax_sy, :scroll_type\n"
+      "    attr_accessor :events, :parallax_loop_x, :parallax_loop_y, :parallax_name, :parallax_sx, :parallax_sy, :scroll_type\n"
 #elif RGSS == 1
-      "    attr_accessor :autoplay_bgm, :autoplay_bgs, :bgm, :events, :tileset_id\n"
+      "    attr_accessor :events, :tileset_id\n"
 #endif
       "  end\n"
       "  class MapInfo\n"
@@ -465,7 +502,7 @@ VALUE main_rb(VALUE data) {
       "    attr_accessor :terms\n"
 #endif
 #if RGSS == 3
-      "    attr_accessor :game_title, :opt_draw_title, :opt_followers, :opt_transparent, :opt_use_midi, :sounds, :title1_name, :title2_name, :window_tone\n"
+      "    attr_accessor :currency_unit, :game_title, :opt_draw_title, :opt_followers, :opt_transparent, :opt_use_midi, :sounds, :title1_name, :title2_name, :window_tone\n"
 #elif RGSS == 2
       "    attr_accessor :passages, :sounds\n"
 #elif RGSS == 1
@@ -494,7 +531,7 @@ VALUE main_rb(VALUE data) {
 #if RGSS == 1 || RGSS == 3
       "  class Tileset\n"
 #if RGSS == 3
-      "    attr_accessor :flags\n"
+      "    attr_accessor :flags, :tileset_names\n"
 #elif RGSS == 1
       "    attr_accessor :autotile_names, :battleback_name, :fog_blend_type, :fog_hue, :fog_name, :fog_opacity, :fog_sx, :fog_sy, :fog_zoom, :panorama_hue, :panorama_name, :passages, :priorities, :terrain_tags, :tileset_name\n"
 #endif
@@ -508,6 +545,12 @@ VALUE main_rb(VALUE data) {
       "      end\n"
       "    end\n"
       "  end\n"
+#if RGSS == 1
+      "  class Weather\n"
+      "    def initialize(viewport=nil)\n"
+      "    end\n"
+      "  end\n"
+#endif
       "end\n"
       "\n"
 #if RGSS == 3
