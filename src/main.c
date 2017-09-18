@@ -16,6 +16,7 @@
 #include "Table.h"
 #include "Tone.h"
 #include "Viewport.h"
+#include "Window.h"
 
 static bool is_test_mode = false;
 static bool is_btest_mode = false;
@@ -136,6 +137,7 @@ static void Init_RGSS(void) {
   Init_Bitmap();
   Init_Viewport();
   Init_Sprite();
+  Init_Window();
   Init_Graphics();
   Init_Input();
 }

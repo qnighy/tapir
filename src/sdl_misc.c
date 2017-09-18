@@ -3,6 +3,7 @@
 #include <SDL_opengl.h>
 #include "sdl_misc.h"
 #include "Sprite.h"
+#include "Window.h"
 
 #if RGSS >= 2
 int window_width = 544;
@@ -55,9 +56,11 @@ void initSDL() {
   }
 
   initSpriteSDL();
+  initWindowSDL();
 }
 
 void cleanupSDL() {
+  deinitWindowSDL();
   deinitSpriteSDL();
   SDL_GL_DeleteContext(glcontext);
   SDL_DestroyWindow(window);
