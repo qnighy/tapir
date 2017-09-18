@@ -40,7 +40,7 @@ This will make three binaries: `accordion/tapir-a`, `violin/tapir-v`, and `xylop
 
 これにより `accordion/tapir-a`, `violin/tapir-v`, `xylphone/tapir-x` という3つのバイナリが生成されます。 Accordion, Violin, Xylophoneという名前はそれぞれ、RGSS3 (VX Ace), RGSS2 (VX), RGSS (XP) のためのバージョンを意味しています。
 
-## Install RTPs / RTPのインストール
+# Install RTPs / RTPのインストール
 
 In Windows, RTPs will be installed to these directories by default:
 
@@ -60,4 +60,20 @@ Tapirは今のところ、以下のディレクトリを探索します。
 - `/usr/local/share/Enterbrain/RGSS2/RPGVX`
 - `/usr/local/share/Enterbrain/RGSS3/RPGVXAce`
 
-## Run tapir / tapirの実行
+# Run tapir / tapirの実行
+
+Tapir looks for the current directory by default. You can change this by using `-d` option.
+
+Tapirはデフォルトではカレントディレクトリを参照します。`-d`を用いてディレクトリを変更することができます。
+
+```
+% accordion/tapir-a -h
+Tapir-accordion: RGSS3 (RPG Maker VX Ace) compatible game engine
+
+Usage: ./tapir [-h] [-d DIR] [test] [btest] [console]
+    -h      show this help
+    -d DIR  move to DIR before running the game
+    test    enable test mode
+    btest   enable battle test mode
+    console show console (not yet implemented)
+```
