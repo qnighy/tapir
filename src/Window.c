@@ -18,6 +18,16 @@ static VALUE window_alloc(VALUE klass);
 
 static VALUE rb_window_m_initialize(int argc, VALUE *argv, VALUE self);
 static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig);
+static VALUE rb_window_m_x(VALUE self);
+static VALUE rb_window_m_set_x(VALUE self, VALUE newval);
+static VALUE rb_window_m_y(VALUE self);
+static VALUE rb_window_m_set_y(VALUE self, VALUE newval);
+static VALUE rb_window_m_width(VALUE self);
+static VALUE rb_window_m_set_width(VALUE self, VALUE newval);
+static VALUE rb_window_m_height(VALUE self);
+static VALUE rb_window_m_set_height(VALUE self, VALUE newval);
+static VALUE rb_window_m_z(VALUE self);
+static VALUE rb_window_m_set_z(VALUE self, VALUE newval);
 
 static void renderWindow(struct Renderable *renderable);
 
@@ -33,6 +43,16 @@ void Init_Window(void) {
       rb_window_m_initialize, -1);
   rb_define_private_method(rb_cWindow, "initialize_copy",
       rb_window_m_initialize_copy, 1);
+  rb_define_method(rb_cWindow, "x", rb_window_m_x, 0);
+  rb_define_method(rb_cWindow, "x=", rb_window_m_set_x, 1);
+  rb_define_method(rb_cWindow, "y", rb_window_m_y, 0);
+  rb_define_method(rb_cWindow, "y=", rb_window_m_set_y, 1);
+  rb_define_method(rb_cWindow, "width", rb_window_m_width, 0);
+  rb_define_method(rb_cWindow, "width=", rb_window_m_set_width, 1);
+  rb_define_method(rb_cWindow, "height", rb_window_m_height, 0);
+  rb_define_method(rb_cWindow, "height=", rb_window_m_set_height, 1);
+  rb_define_method(rb_cWindow, "z", rb_window_m_z, 0);
+  rb_define_method(rb_cWindow, "z=", rb_window_m_set_z, 1);
   // TODO: implement Window#dispose
   // TODO: implement Window#disposed?
   // TODO: implement Window#update
@@ -146,6 +166,66 @@ static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
   ptr->width = orig_ptr->width;
   ptr->height = orig_ptr->height;
   return Qnil;
+}
+
+static VALUE rb_window_m_x(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return INT2NUM(ptr->x);
+}
+
+static VALUE rb_window_m_set_x(VALUE self, VALUE newval) {
+  struct Window *ptr = convertWindow(self);
+  rb_window_modify(self);
+  ptr->x = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_window_m_y(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return INT2NUM(ptr->y);
+}
+
+static VALUE rb_window_m_set_y(VALUE self, VALUE newval) {
+  struct Window *ptr = convertWindow(self);
+  rb_window_modify(self);
+  ptr->y = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_window_m_width(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return INT2NUM(ptr->width);
+}
+
+static VALUE rb_window_m_set_width(VALUE self, VALUE newval) {
+  struct Window *ptr = convertWindow(self);
+  rb_window_modify(self);
+  ptr->width = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_window_m_height(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return INT2NUM(ptr->height);
+}
+
+static VALUE rb_window_m_set_height(VALUE self, VALUE newval) {
+  struct Window *ptr = convertWindow(self);
+  rb_window_modify(self);
+  ptr->height = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_window_m_z(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return INT2NUM(ptr->renderable.z);
+}
+
+static VALUE rb_window_m_set_z(VALUE self, VALUE newval) {
+  struct Window *ptr = convertWindow(self);
+  rb_window_modify(self);
+  ptr->renderable.z = NUM2INT(newval);
+  return newval;
 }
 
 static void renderWindow(struct Renderable *renderable) {
