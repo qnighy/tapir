@@ -195,7 +195,7 @@ static VALUE sprite_alloc(VALUE klass) {
   ptr->renderable.z = 0;
   ptr->renderable.viewport = Qnil;
   ptr->bitmap = Qnil;
-  ptr->disposed = true;
+  ptr->disposed = false;
   ptr->src_rect = rb_rect_new2();
   ptr->visible = true;
   ptr->x = 0;
@@ -566,6 +566,7 @@ static VALUE rb_sprite_m_set_tone(VALUE self, VALUE newval) {
 
 static void renderSprite(struct Renderable *renderable) {
   struct Sprite *ptr = (struct Sprite *)renderable;
+  if(ptr->disposed || !ptr->visible) return;
   if(ptr->bitmap == Qnil) return;
   struct Bitmap *bitmap_ptr = convertBitmap(ptr->bitmap);
   SDL_Surface *surface = bitmap_ptr->surface;
