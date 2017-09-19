@@ -19,7 +19,7 @@ EXEC = tapir-x
 endif
 endif
 OBJS = main.o main_rb.o archive.o openres.o gl_misc.o sdl_misc.o misc.o \
-       Bitmap.o Color.o Graphics.o Input.o RGSSError.o RGSSReset.o \
+       Bitmap.o Color.o Font.o Graphics.o Input.o RGSSError.o RGSSReset.o \
        Rect.o Sprite.o Table.o Tone.o Viewport.o Window.o
 CFLAGS += -g -O2 -Wall -Wextra
 ifeq ($(RGSS),3)

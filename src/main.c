@@ -9,6 +9,7 @@
 #include "openres.h"
 #include "Bitmap.h"
 #include "Color.h"
+#include "Font.h"
 #include "Graphics.h"
 #include "Input.h"
 #include "RGSSError.h"
@@ -139,6 +140,7 @@ static void Init_RGSS(void) {
   Init_Color();
   Init_Tone();
   Init_Table();
+  Init_Font();
   Init_Bitmap();
   Init_Viewport();
   Init_Sprite();
