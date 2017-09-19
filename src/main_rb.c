@@ -82,6 +82,8 @@ VALUE main_rb(VALUE data) {
       "    end\n"
       "    @font\n"
       "  end\n"
+      "  def blt(*args)\n"
+      "  end\n"
       "  def blur\n"
       "  end\n"
       "  def clear_rect(rect)\n"
@@ -89,6 +91,8 @@ VALUE main_rb(VALUE data) {
       "  def draw_text(*args)\n"
       "  end\n"
       "  def fill_rect(*args)\n"
+      "  end\n"
+      "  def gradient_fill_rect(*args)\n"
       "  end\n"
       "  def get_pixel(x, y)\n"
       "    Color.new(0.0, 0.0, 0.0, 0.0)\n"
@@ -105,13 +109,17 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "end\n"
       "class Font\n"
-      "  attr_accessor :color, :name, :size\n"
+      "  attr_accessor :bold, :color, :italic, :name, :size\n"
       "  def initialize\n"
       "    @color = Color.new(0.0, 0.0, 0.0, 0.0)\n"
+      "    @size = 24\n"
       "  end\n"
       /* TODO: Font.exist? */
       "  def self.exist?(name)\n"
       "    true\n"
+      "  end\n"
+      "  class << self\n"
+      "    attr_accessor :default_size\n"
       "  end\n"
       "end\n"
       "module Graphics\n"
@@ -128,9 +136,16 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "  def self.frame_count=(count)\n"
       "  end\n"
+      "  def self.brightness\n"
+      "    255\n"
+      "  end\n"
+      "  def self.brightness=(brightness)\n"
+      "  end\n"
       "  def self.transition(frames = nil)\n"
       "  end\n"
       "  def self.wait(duration)\n"
+      "  end\n"
+      "  def self.fadein(duration)\n"
       "  end\n"
       "  def self.fadeout(duration)\n"
       "  end\n"
@@ -142,7 +157,7 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "end\n"
       "class Plane\n"
-      "  attr_accessor :bitmap, :blend_type, :opacity, :ox, :oy, :z, :zoom_x, :zoom_y\n"
+      "  attr_accessor :bitmap, :blend_type, :opacity, :ox, :oy, :tone, :z, :zoom_x, :zoom_y\n"
       "  def initialize(viewport=nil)\n"
       "  end\n"
       "end\n"
@@ -158,6 +173,8 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "  def update\n"
       "  end\n"
+      "  def dispose\n"
+      "  end\n"
 #else
       "  attr_accessor :autotiles, :map_data, :ox, :oy, :priorities, :tileset\n"
       "  def initialize(viewport=nil)\n"
@@ -172,7 +189,7 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "end\n"
       "class Window\n"
-      "  attr_accessor :active, :back_opacity, :contents, :contents_opacity, :cursor_rect, :opacity, :openness, :oy, :padding, :padding_bottom, :tone, :visible\n"
+      "  attr_accessor :active, :arrows_visible, :back_opacity, :contents, :contents_opacity, :cursor_rect, :opacity, :openness, :oy, :padding, :padding_bottom, :pause, :tone, :visible\n"
       "  def dispose\n"
       "  end\n"
       "  def disposed?\n"
@@ -225,6 +242,10 @@ VALUE main_rb(VALUE data) {
       "    def self.stop\n"
       "    end\n"
       "    def self.fade(time)\n"
+      "    end\n"
+      "  end\n"
+      "  class SE < AudioFile\n"
+      "    def play\n"
       "    end\n"
       "  end\n"
 #endif
@@ -464,15 +485,22 @@ VALUE main_rb(VALUE data) {
       "    end\n"
       "  end\n"
       "  class EventCommand\n"
+      "    attr_accessor :code, :parameters\n"
+#if RGSS == 3
+      "    attr_accessor :indent\n"
+#elif RGSS == 2
+      "    attr_accessor :indent\n"
+#elif RGSS == 1
+#endif
       "  end\n"
       "  class Map\n"
-      "    attr_accessor :autoplay_bgm, :autoplay_bgs, :bgm, :data, :encounter_step, :height, :width\n"
+      "    attr_accessor :autoplay_bgm, :autoplay_bgs, :bgm, :data, :events, :encounter_step, :height, :width\n"
 #if RGSS == 3
-      "    attr_accessor :battleback1_name, :battleback2_name, :events, :parallax_loop_x, :parallax_loop_y, :parallax_name, :parallax_sx, :parallax_sy, :scroll_type, :specify_battleback, :tileset_id\n"
+      "    attr_accessor :battleback1_name, :battleback2_name, :disable_dashing, :display_name, :parallax_loop_x, :parallax_loop_y, :parallax_name, :parallax_sx, :parallax_sy, :scroll_type, :specify_battleback, :tileset_id\n"
 #elif RGSS == 2
-      "    attr_accessor :events, :parallax_loop_x, :parallax_loop_y, :parallax_name, :parallax_sx, :parallax_sy, :scroll_type\n"
+      "    attr_accessor :disable_dashing, :parallax_loop_x, :parallax_loop_y, :parallax_name, :parallax_sx, :parallax_sy, :scroll_type\n"
 #elif RGSS == 1
-      "    attr_accessor :events, :tileset_id\n"
+      "    attr_accessor :tileset_id\n"
 #endif
       "  end\n"
       "  class MapInfo\n"
@@ -481,15 +509,15 @@ VALUE main_rb(VALUE data) {
 #endif
       "  end\n"
       "  class MoveCommand\n"
+#if RGSS == 2
+      "    attr_accessor :code, :parameters\n"
+#endif
       "  end\n"
       "  class MoveRoute\n"
-      "  end\n"
-#if RGSS >= 2
-      "  class SE\n"
-      "    def play\n"
-      "    end\n"
-      "  end\n"
+#if RGSS == 2
+      "    attr_accessor :list, :repeat, :skippable, :wait\n"
 #endif
+      "  end\n"
 #if RGSS == 1
       "  class Sprite < ::Sprite\n"
       "    @@_animations = []\n"
@@ -547,7 +575,10 @@ VALUE main_rb(VALUE data) {
       "  end\n"
 #if RGSS == 1
       "  class Weather\n"
+      "    attr_accessor :max, :ox, :oy, :type\n"
       "    def initialize(viewport=nil)\n"
+      "    end\n"
+      "    def update\n"
       "    end\n"
       "  end\n"
 #endif
