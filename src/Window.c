@@ -20,6 +20,10 @@ static VALUE window_alloc(VALUE klass);
 
 static VALUE rb_window_m_initialize(int argc, VALUE *argv, VALUE self);
 static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig);
+static VALUE rb_window_m_dispose(VALUE self);
+static VALUE rb_window_m_disposed_p(VALUE self);
+static VALUE rb_window_m_visible(VALUE self);
+static VALUE rb_window_m_set_visible(VALUE self, VALUE newval);
 static VALUE rb_window_m_windowskin(VALUE self);
 static VALUE rb_window_m_set_windowskin(VALUE self, VALUE newval);
 static VALUE rb_window_m_x(VALUE self);
@@ -47,8 +51,12 @@ void Init_Window(void) {
       rb_window_m_initialize, -1);
   rb_define_private_method(rb_cWindow, "initialize_copy",
       rb_window_m_initialize_copy, 1);
+  rb_define_method(rb_cWindow, "dispose", rb_window_m_dispose, 0);
+  rb_define_method(rb_cWindow, "disposed?", rb_window_m_disposed_p, 0);
   rb_define_method(rb_cWindow, "windowskin", rb_window_m_windowskin, 0);
   rb_define_method(rb_cWindow, "windowskin=", rb_window_m_set_windowskin, 1);
+  rb_define_method(rb_cWindow, "visible", rb_window_m_visible, 0);
+  rb_define_method(rb_cWindow, "visible=", rb_window_m_set_visible, 1);
   rb_define_method(rb_cWindow, "x", rb_window_m_x, 0);
   rb_define_method(rb_cWindow, "x=", rb_window_m_set_x, 1);
   rb_define_method(rb_cWindow, "y", rb_window_m_y, 0);
@@ -59,8 +67,6 @@ void Init_Window(void) {
   rb_define_method(rb_cWindow, "height=", rb_window_m_set_height, 1);
   rb_define_method(rb_cWindow, "z", rb_window_m_z, 0);
   rb_define_method(rb_cWindow, "z=", rb_window_m_set_z, 1);
-  // TODO: implement Window#dispose
-  // TODO: implement Window#disposed?
   // TODO: implement Window#update
   // TODO: implement Window#move
   // TODO: implement Window#open?
@@ -69,7 +75,6 @@ void Init_Window(void) {
   // TODO: implement Window#cursor_rect
   // TODO: implement Window#viewport
   // TODO: implement Window#active
-  // TODO: implement Window#visible
   // TODO: implement Window#arrows_visible
   // TODO: implement Window#pause
   // TODO: implement Window#ox
@@ -125,6 +130,8 @@ static VALUE window_alloc(VALUE klass) {
 #endif
   ptr->renderable.viewport = Qnil;
   ptr->windowskin = Qnil;
+  ptr->disposed = false;
+  ptr->visible = true;
   ptr->x = 0;
   ptr->y = 0;
   ptr->width = 0;
@@ -163,11 +170,24 @@ static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
   ptr->renderable.z = orig_ptr->renderable.z;
   ptr->renderable.viewport = orig_ptr->renderable.viewport;
   ptr->windowskin = orig_ptr->windowskin;
+  ptr->disposed = orig_ptr->disposed;
+  ptr->visible = orig_ptr->visible;
   ptr->x = orig_ptr->x;
   ptr->y = orig_ptr->y;
   ptr->width = orig_ptr->width;
   ptr->height = orig_ptr->height;
   return Qnil;
+}
+
+static VALUE rb_window_m_dispose(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  ptr->disposed = true;
+  return Qnil;
+}
+
+static VALUE rb_window_m_disposed_p(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return ptr->disposed ? Qtrue : Qfalse;
 }
 
 static VALUE rb_window_m_windowskin(VALUE self) {
@@ -180,6 +200,18 @@ static VALUE rb_window_m_set_windowskin(VALUE self, VALUE newval) {
   rb_window_modify(self);
   if(newval != Qnil) convertBitmap(newval);
   ptr->windowskin = newval;
+  return newval;
+}
+
+static VALUE rb_window_m_visible(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return ptr->visible ? Qtrue : Qfalse;
+}
+
+static VALUE rb_window_m_set_visible(VALUE self, VALUE newval) {
+  struct Window *ptr = convertWindow(self);
+  rb_window_modify(self);
+  ptr->visible = RTEST(newval);
   return newval;
 }
 
