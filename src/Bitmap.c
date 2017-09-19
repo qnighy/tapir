@@ -27,6 +27,8 @@ static VALUE bitmap_alloc(VALUE klass);
 static VALUE rb_bitmap_m_initialize(int argc, VALUE *argv, VALUE self);
 static VALUE rb_bitmap_m_initialize_copy(VALUE self, VALUE orig);
 
+static VALUE rb_bitmap_m_dispose(VALUE self);
+static VALUE rb_bitmap_m_disposed_p(VALUE self);
 static VALUE rb_bitmap_m_width(VALUE self);
 static VALUE rb_bitmap_m_height(VALUE self);
 
@@ -34,6 +36,7 @@ VALUE rb_cBitmap;
 
 VALUE rb_bitmap_rect(VALUE self) {
   struct Bitmap *ptr = convertBitmap(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
   return rb_rect_new(0, 0, ptr->surface->w, ptr->surface->h);
 }
 
@@ -62,6 +65,8 @@ void Init_Bitmap(void) {
       rb_bitmap_m_initialize, -1);
   rb_define_private_method(rb_cBitmap, "initialize_copy",
       rb_bitmap_m_initialize_copy, 1);
+  rb_define_method(rb_cBitmap, "dispose", rb_bitmap_m_dispose, 0);
+  rb_define_method(rb_cBitmap, "disposed?", rb_bitmap_m_disposed_p, 0);
   rb_define_method(rb_cBitmap, "width", rb_bitmap_m_width, 0);
   rb_define_method(rb_cBitmap, "height", rb_bitmap_m_height, 0);
   // TODO: implement Bitmap#dispose
@@ -187,18 +192,42 @@ static VALUE rb_bitmap_m_initialize(int argc, VALUE *argv, VALUE self) {
 static VALUE rb_bitmap_m_initialize_copy(VALUE self, VALUE orig) {
   struct Bitmap *ptr = convertBitmap(self);
   struct Bitmap *orig_ptr = convertBitmap(orig);
-  ptr->surface = SDL_CreateRGBSurface(
-      0, orig_ptr->surface->w, orig_ptr->surface->h, 32,
-      RMASK, GMASK, BMASK, AMASK);
-  SDL_BlitSurface(orig_ptr->surface, NULL, ptr->surface, NULL);
+  if(orig_ptr->surface) {
+    ptr->surface = SDL_CreateRGBSurface(
+        0, orig_ptr->surface->w, orig_ptr->surface->h, 32,
+        RMASK, GMASK, BMASK, AMASK);
+    SDL_BlitSurface(orig_ptr->surface, NULL, ptr->surface, NULL);
+  } else {
+    ptr->surface = NULL;
+  }
   return Qnil;
+}
+
+static VALUE rb_bitmap_m_dispose(VALUE self) {
+  struct Bitmap *ptr = convertBitmap(self);
+  if(ptr->texture_id) {
+    glDeleteTextures(1, &ptr->texture_id);
+    ptr->texture_id = 0;
+    ptr->texture_invalidated = true;
+  }
+  SDL_FreeSurface(ptr->surface);
+  ptr->surface = NULL;
+  return Qnil;
+}
+
+static VALUE rb_bitmap_m_disposed_p(VALUE self) {
+  struct Bitmap *ptr = convertBitmap(self);
+  return !ptr->surface ? Qtrue : Qfalse;
 }
 
 static VALUE rb_bitmap_m_width(VALUE self) {
   struct Bitmap *ptr = convertBitmap(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
   return INT2NUM(ptr->surface->w);
 }
+
 static VALUE rb_bitmap_m_height(VALUE self) {
   struct Bitmap *ptr = convertBitmap(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
   return INT2NUM(ptr->surface->h);
 }

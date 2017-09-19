@@ -248,6 +248,7 @@ static void renderWindow(struct Renderable *renderable) {
   if(ptr->windowskin == Qnil) return;
   struct Bitmap *skin_bitmap_ptr = convertBitmap(ptr->windowskin);
   SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
+  if(!skin_surface) return;
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

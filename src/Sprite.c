@@ -569,6 +569,7 @@ static void renderSprite(struct Renderable *renderable) {
   if(ptr->bitmap == Qnil) return;
   struct Bitmap *bitmap_ptr = convertBitmap(ptr->bitmap);
   SDL_Surface *surface = bitmap_ptr->surface;
+  if(!surface) return;
   struct Rect *src_rect = convertRect(ptr->src_rect);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
