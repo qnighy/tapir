@@ -94,8 +94,6 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "  def clear\n"
       "  end\n"
-      "  def dispose\n"
-      "  end\n"
       "  def rect\n"
       "    Rect.new(0, 0, width, height)\n"
       "  end\n"
