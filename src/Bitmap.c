@@ -532,6 +532,7 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
     SDL_Surface *rendered = TTF_RenderUTF8_Blended(sdl_font, cstr, outline_fg);
     SDL_SetSurfaceBlendMode(rendered, SDL_BLENDMODE_BLEND);
     SDL_BlitSurface(rendered, NULL, ptr->surface, &out_rect);
+    SDL_FreeSurface(rendered);
 
     TTF_SetFontOutline(sdl_font, 0);
   }
@@ -559,6 +560,7 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
   // TODO: implement shadow
   // TODO: implement outline
   SDL_BlitSurface(rendered, NULL, ptr->surface, &rect);
+  SDL_FreeSurface(rendered);
   return Qnil;
 }
 
