@@ -3,7 +3,7 @@
 #include <fontconfig/fontconfig.h>
 #include "font_lookup.h"
 
-static FcConfig *config;
+static FcConfig *config = NULL;
 
 void initFontLookup(void) {
   if(!FcInit()) {
@@ -14,8 +14,10 @@ void initFontLookup(void) {
 }
 
 void uninitFontLookup(void) {
-  FcConfigDestroy(config);
-  config = NULL;
+  if(config) {
+    FcConfigDestroy(config);
+    config = NULL;
+  }
   FcFini();
 }
 
