@@ -278,6 +278,7 @@ static VALUE rb_window_m_set_z(VALUE self, VALUE newval) {
 
 static void renderWindow(struct Renderable *renderable) {
   struct Window *ptr = (struct Window *)renderable;
+  if(ptr->renderable.viewport != Qnil) WARN_UNIMPLEMENTED("Window#viewport");
   if(ptr->disposed || !ptr->visible) return;
   if(ptr->windowskin == Qnil) return;
   struct Bitmap *skin_bitmap_ptr = convertBitmap(ptr->windowskin);

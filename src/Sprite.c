@@ -593,6 +593,27 @@ static VALUE rb_sprite_m_set_tone(VALUE self, VALUE newval) {
 
 static void renderSprite(struct Renderable *renderable) {
   struct Sprite *ptr = (struct Sprite *)renderable;
+  if(ptr->renderable.viewport != Qnil) WARN_UNIMPLEMENTED("Sprite#viewport");
+  {
+    struct Color *color = convertColor(ptr->color);
+    if(color->red || color->green || color->blue || color->alpha) {
+      WARN_UNIMPLEMENTED("Sprite#color");
+    }
+  }
+  {
+    struct Tone *tone = convertTone(ptr->tone);
+    if(tone->red || tone->green || tone->blue || tone->gray) {
+      WARN_UNIMPLEMENTED("Sprite#tone");
+    }
+  }
+  if(ptr->mirror) WARN_UNIMPLEMENTED("Sprite#mirror");
+#if RGSS >= 2
+  if(ptr->wave_amp) WARN_UNIMPLEMENTED("Sprite#wave_amp");
+#endif
+  if(ptr->bush_depth) WARN_UNIMPLEMENTED("Sprite#bush_depth");
+  if(ptr->opacity != 255) WARN_UNIMPLEMENTED("Sprite#opacity");
+  if(ptr->blend_type) WARN_UNIMPLEMENTED("Sprite#blend_type");
+  if(ptr->angle != 0.0) WARN_UNIMPLEMENTED("Sprite#angle");
   if(ptr->disposed || !ptr->visible) return;
   if(ptr->bitmap == Qnil) return;
   struct Bitmap *bitmap_ptr = convertBitmap(ptr->bitmap);
