@@ -13,6 +13,7 @@ static GLuint shader1;
 static GLuint shader2;
 #endif
 static GLuint shader3;
+static GLuint shader4;
 
 static void window_mark(struct Window *ptr);
 static void window_free(struct Window *ptr);
@@ -358,32 +359,34 @@ static void renderWindow(struct Renderable *renderable) {
   struct Window *ptr = (struct Window *)renderable;
   if(ptr->renderable.viewport != Qnil) WARN_UNIMPLEMENTED("Window#viewport");
   if(ptr->disposed || !ptr->visible) return;
-  if(ptr->contents != Qnil) WARN_UNIMPLEMENTED("Window#contents");
 #if RGSS >= 2
-  if(ptr->openness == 0) return;
-  if(ptr->openness < 255) WARN_UNIMPLEMENTED("Window#openness");
+  int openness = ptr->openness;
+#else
+  int openness = 255;
 #endif
+  if(openness == 0) return;
+  if(openness < 255) WARN_UNIMPLEMENTED("Window#openness");
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   if(ptr->windowskin != Qnil) {
     struct Bitmap *skin_bitmap_ptr = convertBitmap(ptr->windowskin);
     SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
     if(!skin_surface) return;
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glActiveTexture(GL_TEXTURE0);
+    bitmapBindTexture(skin_bitmap_ptr);
 
     glUseProgram(shader1);
     glUniform1i(glGetUniformLocation(shader1, "windowskin"), 0);
     glUniform2f(glGetUniformLocation(shader1, "resolution"),
         window_width, window_height);
-
-    glActiveTexture(GL_TEXTURE0);
-    bitmapBindTexture(skin_bitmap_ptr);
 
     gl_draw_rect(
         ptr->x + 2, ptr->y + 2,
@@ -395,9 +398,6 @@ static void renderWindow(struct Renderable *renderable) {
     glUniform1i(glGetUniformLocation(shader2, "windowskin"), 0);
     glUniform2f(glGetUniformLocation(shader2, "resolution"),
         window_width, window_height);
-
-    glActiveTexture(GL_TEXTURE0);
-    bitmapBindTexture(skin_bitmap_ptr);
 
     gl_draw_rect(
         ptr->x + 2, ptr->y + 2,
@@ -412,12 +412,28 @@ static void renderWindow(struct Renderable *renderable) {
     glUniform2f(glGetUniformLocation(shader3, "bg_size"),
         ptr->width, ptr->height);
 
-    glActiveTexture(GL_TEXTURE0);
-    bitmapBindTexture(skin_bitmap_ptr);
-
     gl_draw_rect(
         ptr->x, ptr->y, ptr->x + ptr->width, ptr->y + ptr->height,
         0.0, 0.0, ptr->width, ptr->height);
+  }
+
+  if(ptr->contents != Qnil && openness == 255) {
+    struct Bitmap *contents_bitmap_ptr = convertBitmap(ptr->contents);
+    SDL_Surface *contents_surface = contents_bitmap_ptr->surface;
+    if(!contents_surface) return;
+
+    glUseProgram(shader4);
+    glUniform1i(glGetUniformLocation(shader4, "contents"), 0);
+    glUniform2f(glGetUniformLocation(shader4, "resolution"),
+        window_width, window_height);
+
+    glActiveTexture(GL_TEXTURE0);
+    bitmapBindTexture(contents_bitmap_ptr);
+
+    gl_draw_rect(
+        ptr->x, ptr->y,
+        ptr->x + ptr->width, ptr->y + ptr->height,
+        0.0, 0.0, 1.0, 1.0);
   }
 
   glUseProgram(0);
@@ -551,9 +567,39 @@ void initWindowSDL() {
     "}\n";
 
   shader3 = compileShaders(vsh3_source, fsh3_source);
+
+  static const char *vsh4_source =
+    "#version 120\n"
+    "\n"
+    "uniform vec2 resolution;\n"
+    "\n"
+    "void main(void) {\n"
+    "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+    "    gl_Position.x = gl_Vertex.x / resolution.x * 2.0 - 1.0;\n"
+    "    gl_Position.y = 1.0 - gl_Vertex.y / resolution.y * 2.0;\n"
+    "    gl_Position.zw = vec2(0.0, 1.0);\n"
+    "}\n";
+
+  static const char *fsh4_source =
+    "#version 120\n"
+    "#if __VERSION__ >= 130\n"
+    "#define texture2D texture\n"
+    "#define texture2DProj textureProj\n"
+    "#endif\n"
+    "\n"
+    "uniform sampler2D windowskin;\n"
+    "\n"
+    "void main(void) {\n"
+    "    vec4 color = texture2D(windowskin, vec2(gl_TexCoord[0].x, gl_TexCoord[0].y));\n"
+    "    gl_FragColor = color;\n"
+    "}\n";
+
+  shader4 = compileShaders(vsh4_source, fsh4_source);
+
 }
 
 void deinitWindowSDL() {
+  if(shader4) glDeleteProgram(shader4);
   if(shader3) glDeleteProgram(shader3);
 #if RGSS >= 2
   if(shader2) glDeleteProgram(shader2);
