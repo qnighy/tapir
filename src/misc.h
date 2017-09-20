@@ -26,4 +26,12 @@ void writeInt16(char *ptr, int16_t val);
 
 void tryChdir(const char *path);
 
+#define WARN_UNIMPLEMENTED(name) do { \
+    static int warned = 0; \
+    if(!warned) { \
+      warned = 1; \
+      fprintf(stderr, "unimplemented: %s\n", name); \
+    } \
+  } while(0)
+
 #endif /* MISC_H */

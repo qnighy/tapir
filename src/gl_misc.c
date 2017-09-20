@@ -10,7 +10,8 @@ GLuint compileShaders(const char *vsh_source, const char *fsh_source) {
     if(!compilation_status) {
       char compilation_log[512] = {0};
       glGetShaderInfoLog(vsh, sizeof(compilation_log), NULL, compilation_log);
-      fprintf(stderr, "vsh compile error:\n%s\n", compilation_log);
+      fprintf(stderr, "vertex shader compile error:\n%s\n", compilation_log);
+      exit(1);
     }
   }
 
@@ -23,7 +24,8 @@ GLuint compileShaders(const char *vsh_source, const char *fsh_source) {
     if(!compilation_status) {
       char compilation_log[512] = {0};
       glGetShaderInfoLog(fsh, sizeof(compilation_log), NULL, compilation_log);
-      fprintf(stderr, "fsh compile error:\n%s\n", compilation_log);
+      fprintf(stderr, "fragment shader compile error:\n%s\n", compilation_log);
+      exit(1);
     }
   }
 
@@ -38,6 +40,7 @@ GLuint compileShaders(const char *vsh_source, const char *fsh_source) {
       char link_log[512] = {0};
       glGetProgramInfoLog(shader, sizeof(link_log), NULL, link_log);
       fprintf(stderr, "shader link error:\n%s\n", link_log);
+      exit(1);
     }
   }
 
@@ -45,4 +48,19 @@ GLuint compileShaders(const char *vsh_source, const char *fsh_source) {
   glDeleteShader(fsh);
 
   return shader;
+}
+
+void gl_draw_rect(
+    double x0, double y0, double x1, double y1,
+    double tx0, double ty0, double tx1, double ty1) {
+  glBegin(GL_TRIANGLE_STRIP);
+  glTexCoord2f(tx0, ty0);
+  glVertex3f(x0, y0, 0.0f);
+  glTexCoord2f(tx1, ty0);
+  glVertex3f(x1, y0, 0.0f);
+  glTexCoord2f(tx0, ty1);
+  glVertex3f(x0, y1, 0.0f);
+  glTexCoord2f(tx1, ty1);
+  glVertex3f(x1, y1, 0.0f);
+  glEnd();
 }

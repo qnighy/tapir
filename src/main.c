@@ -7,8 +7,10 @@
 #include "sdl_misc.h"
 #include "archive.h"
 #include "openres.h"
+#include "font_lookup.h"
 #include "Bitmap.h"
 #include "Color.h"
+#include "Font.h"
 #include "Graphics.h"
 #include "Input.h"
 #include "RGSSError.h"
@@ -26,12 +28,15 @@ static bool is_console_mode = false;
 
 void Init_zlib(void);
 static void Init_RGSS(void);
+static void tapir_atexit(void);
 
 #ifdef RUBY_GLOBAL_SETUP
 RUBY_GLOBAL_SETUP
 #endif
 
 int main(int argc, char **argv) {
+  atexit(tapir_atexit);
+
   int ruby_argc = 2;
   char *ruby_argv_array[] = {
     (char*)"ruby",
@@ -97,6 +102,8 @@ int main(int argc, char **argv) {
 
   initArchive();
 
+  initFontLookup();
+
 #ifdef RUBY_INIT_STACK
   ruby_sysinit(&ruby_argc, &ruby_argv);
   {
@@ -121,9 +128,13 @@ int main(int argc, char **argv) {
   }
 #endif
 
+  return state;
+}
+
+static void tapir_atexit(void) {
+  uninitFontLookup();
   deinitArchive();
   cleanupSDL();
-  return state;
 }
 
 static void Init_RGSS(void) {
@@ -139,6 +150,7 @@ static void Init_RGSS(void) {
   Init_Color();
   Init_Tone();
   Init_Table();
+  Init_Font();
   Init_Bitmap();
   Init_Viewport();
   Init_Sprite();

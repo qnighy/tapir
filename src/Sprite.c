@@ -195,7 +195,7 @@ static VALUE sprite_alloc(VALUE klass) {
   ptr->renderable.z = 0;
   ptr->renderable.viewport = Qnil;
   ptr->bitmap = Qnil;
-  ptr->disposed = true;
+  ptr->disposed = false;
   ptr->src_rect = rb_rect_new2();
   ptr->visible = true;
   ptr->x = 0;
@@ -252,7 +252,34 @@ static VALUE rb_sprite_m_initialize(int argc, VALUE *argv, VALUE self) {
 static VALUE rb_sprite_m_initialize_copy(VALUE self, VALUE orig) {
   struct Sprite *ptr = convertSprite(self);
   struct Sprite *orig_ptr = convertSprite(orig);
+  ptr->renderable.z = orig_ptr->renderable.z;
+  ptr->renderable.viewport = orig_ptr->renderable.viewport;
   ptr->bitmap = orig_ptr->bitmap;
+  rb_rect_set2(ptr->src_rect, orig_ptr->src_rect);
+  rb_color_set2(ptr->color, orig_ptr->color);
+  rb_tone_set2(ptr->tone, orig_ptr->tone);
+  ptr->disposed = orig_ptr->disposed;
+  ptr->visible = orig_ptr->visible;
+  ptr->mirror = orig_ptr->mirror;
+  ptr->x = orig_ptr->x;
+  ptr->y = orig_ptr->y;
+  ptr->ox = orig_ptr->ox;
+  ptr->oy = orig_ptr->oy;
+#if RGSS >= 2
+  ptr->wave_amp = orig_ptr->wave_amp;
+  ptr->wave_length = orig_ptr->wave_length;
+  ptr->wave_speed = orig_ptr->wave_speed;
+  ptr->bush_opacity = orig_ptr->bush_opacity;
+#endif
+  ptr->bush_depth = orig_ptr->bush_depth;
+  ptr->opacity = orig_ptr->opacity;
+  ptr->blend_type = orig_ptr->blend_type;
+  ptr->zoom_x = orig_ptr->zoom_x;
+  ptr->zoom_y = orig_ptr->zoom_y;
+  ptr->angle = orig_ptr->angle;
+#if RGSS >= 2
+  ptr->wave_phase = orig_ptr->wave_phase;
+#endif
   return Qnil;
 }
 
@@ -315,7 +342,7 @@ static VALUE rb_sprite_m_set_viewport(VALUE self, VALUE newval) {
   struct Sprite *ptr = convertSprite(self);
   rb_sprite_modify(self);
   if(newval != Qnil) convertViewport(newval);
-  ptr->viewport = newval;
+  ptr->renderable.viewport = newval;
   return newval;
 }
 #endif
@@ -566,22 +593,38 @@ static VALUE rb_sprite_m_set_tone(VALUE self, VALUE newval) {
 
 static void renderSprite(struct Renderable *renderable) {
   struct Sprite *ptr = (struct Sprite *)renderable;
+  if(ptr->renderable.viewport != Qnil) WARN_UNIMPLEMENTED("Sprite#viewport");
+  {
+    struct Color *color = convertColor(ptr->color);
+    if(color->red || color->green || color->blue || color->alpha) {
+      WARN_UNIMPLEMENTED("Sprite#color");
+    }
+  }
+  {
+    struct Tone *tone = convertTone(ptr->tone);
+    if(tone->red || tone->green || tone->blue || tone->gray) {
+      WARN_UNIMPLEMENTED("Sprite#tone");
+    }
+  }
+  if(ptr->mirror) WARN_UNIMPLEMENTED("Sprite#mirror");
+#if RGSS >= 2
+  if(ptr->wave_amp) WARN_UNIMPLEMENTED("Sprite#wave_amp");
+#endif
+  if(ptr->bush_depth) WARN_UNIMPLEMENTED("Sprite#bush_depth");
+  if(ptr->opacity != 255) WARN_UNIMPLEMENTED("Sprite#opacity");
+  if(ptr->blend_type) WARN_UNIMPLEMENTED("Sprite#blend_type");
+  if(ptr->angle != 0.0) WARN_UNIMPLEMENTED("Sprite#angle");
+  if(ptr->disposed || !ptr->visible) return;
   if(ptr->bitmap == Qnil) return;
   struct Bitmap *bitmap_ptr = convertBitmap(ptr->bitmap);
   SDL_Surface *surface = bitmap_ptr->surface;
+  if(!surface) return;
   struct Rect *src_rect = convertRect(ptr->src_rect);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-  GLfloat vertices[][3] = {
-    {-1.0f, -1.0f, 0.0f},
-    { 1.0f, -1.0f, 0.0f},
-    {-1.0f,  1.0f, 0.0f},
-    { 1.0f,  1.0f, 0.0f}
-  };
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -606,11 +649,7 @@ static void renderSprite(struct Renderable *renderable) {
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture(bitmap_ptr);
 
-  glBegin(GL_TRIANGLE_STRIP);
-  for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
-    glVertex3fv(vertices[i]);
-  }
-  glEnd();
+  gl_draw_rect(-1.0, -1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 
   glUseProgram(0);
 }
@@ -659,5 +698,5 @@ void initSpriteSDL() {
 }
 
 void deinitSpriteSDL() {
-  glDeleteProgram(shader);
+  if(shader) glDeleteProgram(shader);
 }

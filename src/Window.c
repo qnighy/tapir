@@ -20,6 +20,16 @@ static VALUE window_alloc(VALUE klass);
 
 static VALUE rb_window_m_initialize(int argc, VALUE *argv, VALUE self);
 static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig);
+static VALUE rb_window_m_dispose(VALUE self);
+static VALUE rb_window_m_disposed_p(VALUE self);
+#if RGSS == 3
+static VALUE rb_window_m_move(
+    VALUE self, VALUE x, VALUE y, VALUE width, VALUE height);
+static VALUE rb_window_m_open_p(VALUE self);
+static VALUE rb_window_m_close_p(VALUE self);
+#endif
+static VALUE rb_window_m_visible(VALUE self);
+static VALUE rb_window_m_set_visible(VALUE self, VALUE newval);
 static VALUE rb_window_m_windowskin(VALUE self);
 static VALUE rb_window_m_set_windowskin(VALUE self, VALUE newval);
 static VALUE rb_window_m_x(VALUE self);
@@ -32,6 +42,10 @@ static VALUE rb_window_m_height(VALUE self);
 static VALUE rb_window_m_set_height(VALUE self, VALUE newval);
 static VALUE rb_window_m_z(VALUE self);
 static VALUE rb_window_m_set_z(VALUE self, VALUE newval);
+#if RGSS >= 2
+static VALUE rb_window_m_openness(VALUE self);
+static VALUE rb_window_m_set_openness(VALUE self, VALUE newval);
+#endif
 
 static void renderWindow(struct Renderable *renderable);
 
@@ -47,8 +61,17 @@ void Init_Window(void) {
       rb_window_m_initialize, -1);
   rb_define_private_method(rb_cWindow, "initialize_copy",
       rb_window_m_initialize_copy, 1);
+  rb_define_method(rb_cWindow, "dispose", rb_window_m_dispose, 0);
+  rb_define_method(rb_cWindow, "disposed?", rb_window_m_disposed_p, 0);
+#if RGSS == 3
+  rb_define_method(rb_cWindow, "move", rb_window_m_move, 4);
+  rb_define_method(rb_cWindow, "open?", rb_window_m_open_p, 0);
+  rb_define_method(rb_cWindow, "close?", rb_window_m_close_p, 0);
+#endif
   rb_define_method(rb_cWindow, "windowskin", rb_window_m_windowskin, 0);
   rb_define_method(rb_cWindow, "windowskin=", rb_window_m_set_windowskin, 1);
+  rb_define_method(rb_cWindow, "visible", rb_window_m_visible, 0);
+  rb_define_method(rb_cWindow, "visible=", rb_window_m_set_visible, 1);
   rb_define_method(rb_cWindow, "x", rb_window_m_x, 0);
   rb_define_method(rb_cWindow, "x=", rb_window_m_set_x, 1);
   rb_define_method(rb_cWindow, "y", rb_window_m_y, 0);
@@ -59,17 +82,15 @@ void Init_Window(void) {
   rb_define_method(rb_cWindow, "height=", rb_window_m_set_height, 1);
   rb_define_method(rb_cWindow, "z", rb_window_m_z, 0);
   rb_define_method(rb_cWindow, "z=", rb_window_m_set_z, 1);
-  // TODO: implement Window#dispose
-  // TODO: implement Window#disposed?
+#if RGSS >= 2
+  rb_define_method(rb_cWindow, "openness", rb_window_m_openness, 0);
+  rb_define_method(rb_cWindow, "openness=", rb_window_m_set_openness, 1);
+#endif
   // TODO: implement Window#update
-  // TODO: implement Window#move
-  // TODO: implement Window#open?
-  // TODO: implement Window#close?
   // TODO: implement Window#contents, Window#contents=
   // TODO: implement Window#cursor_rect
   // TODO: implement Window#viewport
   // TODO: implement Window#active
-  // TODO: implement Window#visible
   // TODO: implement Window#arrows_visible
   // TODO: implement Window#pause
   // TODO: implement Window#ox
@@ -79,7 +100,6 @@ void Init_Window(void) {
   // TODO: implement Window#opacity
   // TODO: implement Window#back_opacity
   // TODO: implement Window#contents_opacity
-  // TODO: implement Window#openness
   // TODO: implement Window#tone
 }
 
@@ -108,6 +128,7 @@ void rb_window_modify(VALUE obj) {
 
 static void window_mark(struct Window *ptr) {
   rb_gc_mark(ptr->renderable.viewport);
+  rb_gc_mark(ptr->windowskin);
 }
 
 static void window_free(struct Window *ptr) {
@@ -125,10 +146,15 @@ static VALUE window_alloc(VALUE klass) {
 #endif
   ptr->renderable.viewport = Qnil;
   ptr->windowskin = Qnil;
+  ptr->disposed = false;
+  ptr->visible = true;
   ptr->x = 0;
   ptr->y = 0;
   ptr->width = 0;
   ptr->height = 0;
+#if RGSS >= 2
+  ptr->openness = 255;
+#endif
   registerRenderable(&ptr->renderable);
   VALUE ret = Data_Wrap_Struct(klass, window_mark, window_free, ptr);
   return ret;
@@ -163,12 +189,51 @@ static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
   ptr->renderable.z = orig_ptr->renderable.z;
   ptr->renderable.viewport = orig_ptr->renderable.viewport;
   ptr->windowskin = orig_ptr->windowskin;
+  ptr->disposed = orig_ptr->disposed;
+  ptr->visible = orig_ptr->visible;
   ptr->x = orig_ptr->x;
   ptr->y = orig_ptr->y;
   ptr->width = orig_ptr->width;
   ptr->height = orig_ptr->height;
+#if RGSS >= 2
+  ptr->openness = orig_ptr->openness;
+#endif
   return Qnil;
 }
+
+static VALUE rb_window_m_dispose(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  ptr->disposed = true;
+  return Qnil;
+}
+
+static VALUE rb_window_m_disposed_p(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return ptr->disposed ? Qtrue : Qfalse;
+}
+
+#if RGSS == 3
+static VALUE rb_window_m_move(
+    VALUE self, VALUE x, VALUE y, VALUE width, VALUE height) {
+  struct Window *ptr = convertWindow(self);
+  rb_window_modify(self);
+  ptr->x = NUM2INT(x);
+  ptr->y = NUM2INT(y);
+  ptr->width = NUM2INT(width);
+  ptr->height = NUM2INT(height);
+  return Qnil;
+}
+
+static VALUE rb_window_m_open_p(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return ptr->openness == 255 ? Qtrue : Qfalse;
+}
+
+static VALUE rb_window_m_close_p(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return ptr->openness == 0 ? Qtrue : Qfalse;
+}
+#endif
 
 static VALUE rb_window_m_windowskin(VALUE self) {
   struct Window *ptr = convertWindow(self);
@@ -180,6 +245,18 @@ static VALUE rb_window_m_set_windowskin(VALUE self, VALUE newval) {
   rb_window_modify(self);
   if(newval != Qnil) convertBitmap(newval);
   ptr->windowskin = newval;
+  return newval;
+}
+
+static VALUE rb_window_m_visible(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return ptr->visible ? Qtrue : Qfalse;
+}
+
+static VALUE rb_window_m_set_visible(VALUE self, VALUE newval) {
+  struct Window *ptr = convertWindow(self);
+  rb_window_modify(self);
+  ptr->visible = RTEST(newval);
   return newval;
 }
 
@@ -243,82 +320,82 @@ static VALUE rb_window_m_set_z(VALUE self, VALUE newval) {
   return newval;
 }
 
+#if RGSS >= 2
+static VALUE rb_window_m_openness(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return INT2NUM(ptr->openness);
+}
+
+static VALUE rb_window_m_set_openness(VALUE self, VALUE newval) {
+  struct Window *ptr = convertWindow(self);
+  rb_window_modify(self);
+  ptr->openness = saturateInt32(NUM2INT(newval), 0, 255);
+  return newval;
+}
+#endif
+
 static void renderWindow(struct Renderable *renderable) {
   struct Window *ptr = (struct Window *)renderable;
+  if(ptr->renderable.viewport != Qnil) WARN_UNIMPLEMENTED("Window#viewport");
+  if(ptr->disposed || !ptr->visible) return;
   if(ptr->windowskin == Qnil) return;
+#if RGSS >= 2
+  if(ptr->openness == 0) return;
+  if(ptr->openness < 255) WARN_UNIMPLEMENTED("Window#openness");
+#endif
   struct Bitmap *skin_bitmap_ptr = convertBitmap(ptr->windowskin);
   SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
+  if(!skin_surface) return;
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-  GLfloat vertices[][3] = {
-    {-1.0f, -1.0f, 0.0f},
-    { 1.0f, -1.0f, 0.0f},
-    {-1.0f,  1.0f, 0.0f},
-    { 1.0f,  1.0f, 0.0f}
-  };
-
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   glUseProgram(shader1);
   glUniform1i(glGetUniformLocation(shader1, "windowskin"), 0);
-  glUniform2f(glGetUniformLocation(shader1, "dst_size"),
+  glUniform2f(glGetUniformLocation(shader1, "resolution"),
       window_width, window_height);
-  glUniform2f(glGetUniformLocation(shader1, "topleft"),
-      ptr->x + 2, ptr->y + 2);
-  glUniform2f(glGetUniformLocation(shader1, "bottomright"),
-      ptr->x + ptr->width - 2, ptr->y + ptr->height - 2);
 
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture(skin_bitmap_ptr);
 
-  glBegin(GL_TRIANGLE_STRIP);
-  for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
-    glVertex3fv(vertices[i]);
-  }
-  glEnd();
+  gl_draw_rect(
+      ptr->x + 2, ptr->y + 2,
+      ptr->x + ptr->width - 2, ptr->y + ptr->height - 2,
+      0.0, 0.0, 1.0, 1.0);
 
 #if RGSS >= 2
   glUseProgram(shader2);
   glUniform1i(glGetUniformLocation(shader2, "windowskin"), 0);
-  glUniform2f(glGetUniformLocation(shader2, "dst_size"),
+  glUniform2f(glGetUniformLocation(shader2, "resolution"),
       window_width, window_height);
-  glUniform2f(glGetUniformLocation(shader2, "topleft"),
-      ptr->x + 2, ptr->y + 2);
-  glUniform2f(glGetUniformLocation(shader2, "bottomright"),
-      ptr->x + ptr->width - 2, ptr->y + ptr->height - 2);
 
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture(skin_bitmap_ptr);
 
-  glBegin(GL_TRIANGLE_STRIP);
-  for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
-    glVertex3fv(vertices[i]);
-  }
-  glEnd();
+  gl_draw_rect(
+      ptr->x + 2, ptr->y + 2,
+      ptr->x + ptr->width - 2, ptr->y + ptr->height - 2,
+      0.0, 0.0, (ptr->width - 2) / 64.0, (ptr->height - 2) / 64.0);
 #endif
 
   glUseProgram(shader3);
   glUniform1i(glGetUniformLocation(shader3, "windowskin"), 0);
-  glUniform2f(glGetUniformLocation(shader3, "dst_size"),
+  glUniform2f(glGetUniformLocation(shader3, "resolution"),
       window_width, window_height);
-  glUniform2f(glGetUniformLocation(shader3, "topleft"),
-      ptr->x, ptr->y);
-  glUniform2f(glGetUniformLocation(shader3, "bottomright"),
-      ptr->x + ptr->width, ptr->y + ptr->height);
+  glUniform2f(glGetUniformLocation(shader3, "bg_size"),
+      ptr->width, ptr->height);
 
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture(skin_bitmap_ptr);
 
-  glBegin(GL_TRIANGLE_STRIP);
-  for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
-    glVertex3fv(vertices[i]);
-  }
-  glEnd();
+  gl_draw_rect(
+      ptr->x, ptr->y, ptr->x + ptr->width, ptr->y + ptr->height,
+      0.0, 0.0, ptr->width, ptr->height);
 
   glUseProgram(0);
 }
@@ -327,8 +404,13 @@ void initWindowSDL() {
   static const char *vsh1_source =
     "#version 120\n"
     "\n"
+    "uniform vec2 resolution;\n"
+    "\n"
     "void main(void) {\n"
-    "    gl_Position = gl_Vertex;\n"
+    "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+    "    gl_Position.x = gl_Vertex.x / resolution.x * 2.0 - 1.0;\n"
+    "    gl_Position.y = 1.0 - gl_Vertex.y / resolution.y * 2.0;\n"
+    "    gl_Position.zw = vec2(0.0, 1.0);\n"
     "}\n";
 
   static const char *fsh1_source =
@@ -339,24 +421,14 @@ void initWindowSDL() {
     "#endif\n"
     "\n"
     "uniform sampler2D windowskin;\n"
-    "uniform vec2 dst_size;\n"
-    "uniform vec2 topleft;\n"
-    "uniform vec2 bottomright;\n"
     "\n"
     "void main(void) {\n"
-    "    vec2 coord = vec2(gl_FragCoord.x, dst_size.y - gl_FragCoord.y);\n"
-    "    if(topleft.x <= coord.x && topleft.y <= coord.y && coord.x <= bottomright.x && coord.y <= bottomright.y) {\n"
-    "      vec2 dim = bottomright - topleft;\n"
-    "      vec2 relative_coord = coord - topleft;\n"
 #if RGSS >= 2
-    "      vec4 color = texture2D(windowskin, vec2(relative_coord.x / dim.x * 0.5, relative_coord.y / dim.y * 0.5));\n"
+    "    vec4 color = texture2D(windowskin, vec2(gl_TexCoord[0].x * 0.5, gl_TexCoord[0].y * 0.5));\n"
 #else
-    "      vec4 color = texture2D(windowskin, vec2(relative_coord.x / dim.x * 0.6666667, relative_coord.y / dim.y));\n"
+    "    vec4 color = texture2D(windowskin, vec2(gl_TexCoord[0].x * (2.0 / 3.0), gl_TexCoord[0].y));\n"
 #endif
-    "      gl_FragColor = color;\n"
-    "    } else {\n"
-    "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
-    "    }\n"
+    "    gl_FragColor = color;\n"
     "}\n";
 
   shader1 = compileShaders(vsh1_source, fsh1_source);
@@ -365,8 +437,13 @@ void initWindowSDL() {
   static const char *vsh2_source =
     "#version 120\n"
     "\n"
+    "uniform vec2 resolution;\n"
+    "\n"
     "void main(void) {\n"
-    "    gl_Position = gl_Vertex;\n"
+    "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+    "    gl_Position.x = gl_Vertex.x / resolution.x * 2.0 - 1.0;\n"
+    "    gl_Position.y = 1.0 - gl_Vertex.y / resolution.y * 2.0;\n"
+    "    gl_Position.zw = vec2(0.0, 1.0);\n"
     "}\n";
 
   static const char *fsh2_source =
@@ -377,22 +454,15 @@ void initWindowSDL() {
     "#endif\n"
     "\n"
     "uniform sampler2D windowskin;\n"
-    "uniform vec2 dst_size;\n"
-    "uniform vec2 topleft;\n"
-    "uniform vec2 bottomright;\n"
     "\n"
     "void main(void) {\n"
-    "    vec2 coord = vec2(gl_FragCoord.x, dst_size.y - gl_FragCoord.y);\n"
-    "    if(topleft.x <= coord.x && topleft.y <= coord.y && coord.x <= bottomright.x && coord.y <= bottomright.y) {\n"
-    "      vec2 dim = bottomright - topleft;\n"
-    "      vec2 relative_coord = coord - topleft;\n"
-    "      relative_coord = vec2(relative_coord.x / dim.x, relative_coord.y / dim.y);\n"
-    "      vec2 src_coord = mod(relative_coord, 1.0);\n"
-    "      vec4 color = texture2D(windowskin, vec2(src_coord.x * 0.5, src_coord.y * 0.5 + 0.5));\n"
-    "      gl_FragColor = color;\n"
-    "    } else {\n"
-    "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
-    "    }\n"
+    "    vec2 coord = mod(gl_TexCoord[0].xy, 1.0);\n"
+#if RGSS >= 2
+    "    vec4 color = texture2D(windowskin, vec2(coord.x * 0.5, coord.y * 0.5 + 0.5));\n"
+#else
+    "    vec4 color = texture2D(windowskin, vec2(coord.x * (2.0 / 3.0), coord.y));\n"
+#endif
+    "    gl_FragColor = color;\n"
     "}\n";
 
   shader2 = compileShaders(vsh2_source, fsh2_source);
@@ -401,8 +471,13 @@ void initWindowSDL() {
   static const char *vsh3_source =
     "#version 120\n"
     "\n"
+    "uniform vec2 resolution;\n"
+    "\n"
     "void main(void) {\n"
-    "    gl_Position = gl_Vertex;\n"
+    "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+    "    gl_Position.x = gl_Vertex.x / resolution.x * 2.0 - 1.0;\n"
+    "    gl_Position.y = 1.0 - gl_Vertex.y / resolution.y * 2.0;\n"
+    "    gl_Position.zw = vec2(0.0, 1.0);\n"
     "}\n";
 
   static const char *fsh3_source =
@@ -413,52 +488,40 @@ void initWindowSDL() {
     "#endif\n"
     "\n"
     "uniform sampler2D windowskin;\n"
-    "uniform vec2 dst_size;\n"
-    "uniform vec2 topleft;\n"
-    "uniform vec2 bottomright;\n"
+    "uniform vec2 bg_size;\n"
     "\n"
     "void main(void) {\n"
-    "    vec2 coord = vec2(gl_FragCoord.x, dst_size.y - gl_FragCoord.y);\n"
-    "    if(topleft.x <= coord.x && topleft.y <= coord.y && coord.x <= bottomright.x && coord.y <= bottomright.y) {\n"
-    "      vec2 relative_coord = coord - topleft;\n"
-    "      vec2 relative_coord2 = bottomright - coord;\n"
-    "      vec2 src_coord;\n"
-    "      bool draw = false;\n"
+    "    vec2 coord = gl_TexCoord[0].xy;\n"
+    "    vec2 reverse_coord = bg_size - coord;\n"
+    "    vec2 src_coord;\n"
+    "    bool draw = false;\n"
+    "    if(coord.x < 16.0) {\n"
+    "      src_coord.x = coord.x;\n"
+    "      draw = true;\n"
+    "    } else if(reverse_coord.x < 16.0) {\n"
+    "      src_coord.x = 64.0 - reverse_coord.x;\n"
+    "      draw = true;\n"
+    "    } else {\n"
+    "      src_coord.x = mod(coord.x - 16.0, 32.0) + 16.0;\n"
+    "    }\n"
+    "    if(coord.y < 16.0) {\n"
+    "      src_coord.y = coord.y;\n"
+    "      draw = true;\n"
+    "    } else if(reverse_coord.y < 16.0) {\n"
+    "      src_coord.y = 64.0 - reverse_coord.y;\n"
+    "      draw = true;\n"
+    "    } else {\n"
+    "      src_coord.y = mod(coord.y - 16.0, 32.0) + 16.0;\n"
+    "    }\n"
 #if RGSS >= 2
-    "      if(relative_coord.x < 16.0) {\n"
-    "        src_coord.x = (relative_coord.x + 64.0) / 128.0;\n"
-    "        draw = true;\n"
-    "      } else if(relative_coord2.x < 16.0) {\n"
-    "        src_coord.x = (128.0 - relative_coord2.x) / 128.0;\n"
-    "        draw = true;\n"
-    "      } else {\n"
-    "        src_coord.x = (mod(relative_coord.x - 16.0, 32.0) + 80.0) / 128.0;\n"
-    "      }\n"
+    "    src_coord.x = (src_coord.x + 64.0) / 128.0;\n"
+    "    src_coord.y = src_coord.y / 128.0;\n"
 #else
-    "      if(relative_coord.x < 16.0) {\n"
-    "        src_coord.x = (relative_coord.x + 128.0) / 192.0;\n"
-    "        draw = true;\n"
-    "      } else if(relative_coord2.x < 16.0) {\n"
-    "        src_coord.x = (192.0 - relative_coord2.x) / 192.0;\n"
-    "        draw = true;\n"
-    "      } else {\n"
-    "        src_coord.x = (mod(relative_coord.x - 16.0, 32.0) + 144.0) / 192.0;\n"
-    "      }\n"
+    "    src_coord.x = (src_coord.x + 128.0) / 192.0;\n"
+    "    src_coord.y = src_coord.y / 128.0;\n"
 #endif
-    "      if(relative_coord.y < 16.0) {\n"
-    "        src_coord.y = relative_coord.y / 128.0;\n"
-    "        draw = true;\n"
-    "      } else if(relative_coord2.y < 16.0) {\n"
-    "        src_coord.y = (64.0 - relative_coord2.y) / 128.0;\n"
-    "        draw = true;\n"
-    "      } else {\n"
-    "        src_coord.y = (mod(relative_coord.y - 16.0, 32.0) + 16.0) / 128.0;\n"
-    "      }\n"
-    "      if(draw) {\n"
-    "        gl_FragColor = texture2D(windowskin, src_coord);\n"
-    "      } else {\n"
-    "        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
-    "      }\n"
+    "    if(draw) {\n"
+    "      gl_FragColor = texture2D(windowskin, src_coord);\n"
     "    } else {\n"
     "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
     "    }\n"
@@ -468,9 +531,9 @@ void initWindowSDL() {
 }
 
 void deinitWindowSDL() {
-  glDeleteProgram(shader3);
+  if(shader3) glDeleteProgram(shader3);
 #if RGSS >= 2
-  glDeleteProgram(shader2);
+  if(shader2) glDeleteProgram(shader2);
 #endif
-  glDeleteProgram(shader1);
+  if(shader1) glDeleteProgram(shader1);
 }
