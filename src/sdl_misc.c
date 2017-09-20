@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <SDL_opengl.h>
 #include "sdl_misc.h"
 #include "Sprite.h"
@@ -26,6 +28,17 @@ void initSDL() {
     exit(1);
   }
 
+  int img_flags = IMG_INIT_JPG|IMG_INIT_PNG|IMG_INIT_TIF;
+  if(IMG_Init(img_flags) != img_flags) {
+    fprintf(stderr, "IMG_Init Error: %s\n", IMG_GetError());
+    exit(1);
+  }
+
+  if(TTF_Init()) {
+    fprintf(stderr, "TTF_Init Error: %s\n", TTF_GetError());
+    exit(1);
+  }
+
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
@@ -38,7 +51,6 @@ void initSDL() {
       SDL_WINDOW_OPENGL);
   if(!window) {
     fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
-    SDL_Quit();
     exit(1);
   }
 
@@ -50,8 +62,6 @@ void initSDL() {
   glcontext = SDL_GL_CreateContext(window);
   if(!glcontext) {
     fprintf(stderr, "SDL_GL_CreateContext error: %s\n", SDL_GetError());
-    SDL_DestroyWindow(window);
-    SDL_Quit();
     exit(1);
   }
 
@@ -62,10 +72,12 @@ void initSDL() {
 void cleanupSDL() {
   deinitWindowSDL();
   deinitSpriteSDL();
-  SDL_GL_DeleteContext(glcontext);
-  SDL_DestroyWindow(window);
+  if(glcontext) SDL_GL_DeleteContext(glcontext);
+  if(window) SDL_DestroyWindow(window);
+  TTF_Quit();
+  IMG_Quit();
   SDL_Quit();
-  free(registry);
+  if(registry) free(registry);
 }
 
 static int compare_renderables(const void *o1, const void *o2) {

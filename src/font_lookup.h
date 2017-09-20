@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 void initFontLookup(void);
-void uninitFlotLookup(void);
+void uninitFontLookup(void);
 
 bool fontExistence(const char *name);
 

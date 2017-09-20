@@ -10,7 +10,8 @@ GLuint compileShaders(const char *vsh_source, const char *fsh_source) {
     if(!compilation_status) {
       char compilation_log[512] = {0};
       glGetShaderInfoLog(vsh, sizeof(compilation_log), NULL, compilation_log);
-      fprintf(stderr, "vsh compile error:\n%s\n", compilation_log);
+      fprintf(stderr, "vertex shader compile error:\n%s\n", compilation_log);
+      exit(1);
     }
   }
 
@@ -23,7 +24,8 @@ GLuint compileShaders(const char *vsh_source, const char *fsh_source) {
     if(!compilation_status) {
       char compilation_log[512] = {0};
       glGetShaderInfoLog(fsh, sizeof(compilation_log), NULL, compilation_log);
-      fprintf(stderr, "fsh compile error:\n%s\n", compilation_log);
+      fprintf(stderr, "fragment shader compile error:\n%s\n", compilation_log);
+      exit(1);
     }
   }
 
@@ -38,6 +40,7 @@ GLuint compileShaders(const char *vsh_source, const char *fsh_source) {
       char link_log[512] = {0};
       glGetProgramInfoLog(shader, sizeof(link_log), NULL, link_log);
       fprintf(stderr, "shader link error:\n%s\n", link_log);
+      exit(1);
     }
   }
 

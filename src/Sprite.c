@@ -661,5 +661,5 @@ void initSpriteSDL() {
 }
 
 void deinitSpriteSDL() {
-  glDeleteProgram(shader);
+  if(shader) glDeleteProgram(shader);
 }

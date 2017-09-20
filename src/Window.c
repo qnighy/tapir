@@ -502,9 +502,9 @@ void initWindowSDL() {
 }
 
 void deinitWindowSDL() {
-  glDeleteProgram(shader3);
+  if(shader3) glDeleteProgram(shader3);
 #if RGSS >= 2
-  glDeleteProgram(shader2);
+  if(shader2) glDeleteProgram(shader2);
 #endif
-  glDeleteProgram(shader1);
+  if(shader1) glDeleteProgram(shader1);
 }

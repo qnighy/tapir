@@ -28,12 +28,15 @@ static bool is_console_mode = false;
 
 void Init_zlib(void);
 static void Init_RGSS(void);
+static void tapir_atexit(void);
 
 #ifdef RUBY_GLOBAL_SETUP
 RUBY_GLOBAL_SETUP
 #endif
 
 int main(int argc, char **argv) {
+  atexit(tapir_atexit);
+
   int ruby_argc = 2;
   char *ruby_argv_array[] = {
     (char*)"ruby",
@@ -125,9 +128,13 @@ int main(int argc, char **argv) {
   }
 #endif
 
+  return state;
+}
+
+static void tapir_atexit(void) {
+  uninitFontLookup();
   deinitArchive();
   cleanupSDL();
-  return state;
 }
 
 static void Init_RGSS(void) {
