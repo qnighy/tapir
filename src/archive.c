@@ -186,31 +186,36 @@ static Sint64 entry_size(SDL_RWops *context) {
 }
 static Sint64 entry_seek(SDL_RWops *context, Sint64 offset, int whence) {
   struct EntryRW *entry_rw = (struct EntryRW *)context->hidden.unknown.data1;
+  uint64_t old_pos = entry_rw->pos;
+  uint64_t new_pos;
   if(whence == RW_SEEK_SET) {
-    entry_rw->pos = offset;
+    new_pos = offset;
   } else if(whence == RW_SEEK_CUR) {
-    entry_rw->pos += offset;
+    new_pos = old_pos + offset;
   } else {
-    entry_rw->pos = entry_rw->entry->size - offset;
+    new_pos = entry_rw->entry->size + offset;
   }
-  if((int64_t)entry_rw->pos < 0) entry_rw->pos = 0;
-  if(entry_rw->pos > entry_rw->entry->size) {
-    entry_rw->pos = entry_rw->entry->size;
+  if((int64_t)new_pos < 0) new_pos = 0;
+  if(new_pos > entry_rw->entry->size) {
+    new_pos = entry_rw->entry->size;
   }
-  if(SDL_RWseek(archive, entry_rw->entry->pos + entry_rw->pos, RW_SEEK_SET)
-      < -1) {
+  fprintf(stderr, "entry_seek(%d, %s) pos=%d -> %d\n", (int)offset, whence == RW_SEEK_SET ? "RW_SEEK_SET" : whence == RW_SEEK_CUR ? "RW_SEEK_CUR" : "RW_SEEK_END", (int)old_pos, (int)new_pos);
+  if(old_pos == new_pos) return new_pos;
+  if(SDL_RWseek(archive, entry_rw->entry->pos + new_pos, RW_SEEK_SET)
+      < 0) {
+    fprintf(stderr, "Seeking archive failed\n");
     return -1;
   }
   uint32_t a = 7, b = 3;
   entry_rw->key = entry_rw->entry->key;
-  for(int i = 3; entry_rw->entry->pos >> i; ++i) {
-    if((entry_rw->entry->pos >> i) & 1) {
+  for(int i = 3; new_pos >> i; ++i) {
+    if((new_pos >> i) & 1) {
       entry_rw->key = entry_rw->key * a + b;
     }
     b *= 1 + a;
     a *= a;
   }
-  return entry_rw->pos;
+  return entry_rw->pos = new_pos;
 }
 static size_t entry_read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum) {
   struct EntryRW *entry_rw = (struct EntryRW *)context->hidden.unknown.data1;
