@@ -58,6 +58,8 @@ void initArchive(void) {
   archive = SDL_RWFromFile(RGSS_ARCHIVE_NAME, "rb");
   if(!archive) return;
 
+  int64_t archive_size = SDL_RWsize(archive);
+
   uint32_t archive_key;
   {
     char header[8];
@@ -115,6 +117,8 @@ void initArchive(void) {
     if(SDL_RWseek(archive, size, RW_SEEK_CUR) < 0) goto broken;
     entry_key = archive_key;
 #endif
+
+    if((int64_t)pos + size > archive_size) goto broken;
 
     if(entries_size >= entries_capa) {
       entries_capa += entries_capa / 2;
