@@ -273,6 +273,7 @@ static VALUE rb_bitmap_m_height(VALUE self) {
 static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self) {
   struct Bitmap *ptr = convertBitmap(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  ptr->texture_invalidated = true;
   if(argc != 4 && argc != 5) {
     rb_raise(rb_eArgError,
         "wrong number of arguments (%d for 4..5)", argc);
@@ -364,6 +365,7 @@ static VALUE rb_bitmap_m_fill_rect(int argc, VALUE *argv, VALUE self) {
   struct Bitmap *ptr = convertBitmap(self);
   rb_bitmap_modify(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  ptr->texture_invalidated = true;
 
   SDL_Rect sdl_rect;
   struct Color *color_ptr;
@@ -401,6 +403,7 @@ static VALUE rb_bitmap_m_clear(VALUE self) {
   struct Bitmap *ptr = convertBitmap(self);
   rb_bitmap_modify(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  ptr->texture_invalidated = true;
   SDL_FillRect(ptr->surface, NULL, 0x00000000);
   return Qnil;
 }
@@ -410,6 +413,7 @@ static VALUE rb_bitmap_m_clear_rect(int argc, VALUE *argv, VALUE self) {
   struct Bitmap *ptr = convertBitmap(self);
   rb_bitmap_modify(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  ptr->texture_invalidated = true;
 
   SDL_Rect sdl_rect;
   if(argc == 1) {
@@ -453,6 +457,7 @@ static VALUE rb_bitmap_m_set_pixel(VALUE self, VALUE x, VALUE y, VALUE color) {
   struct Bitmap *ptr = convertBitmap(self);
   rb_bitmap_modify(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  ptr->texture_invalidated = true;
   int xi = NUM2INT(x);
   int yi = NUM2INT(y);
   struct Color *color_ptr = convertColor(color);
@@ -474,6 +479,7 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
   struct Bitmap *ptr = convertBitmap(self);
   rb_bitmap_modify(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  ptr->texture_invalidated = true;
 
   VALUE str;
   SDL_Rect rect;
