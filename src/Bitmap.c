@@ -40,6 +40,8 @@ static VALUE rb_bitmap_m_clear_rect(int argc, VALUE *argv, VALUE self);
 #endif
 static VALUE rb_bitmap_m_get_pixel(VALUE self, VALUE x, VALUE y);
 static VALUE rb_bitmap_m_set_pixel(VALUE self, VALUE x, VALUE y, VALUE color);
+static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self);
+static VALUE rb_bitmap_m_text_size(VALUE self, VALUE str);
 static VALUE rb_bitmap_m_font(VALUE self);
 static VALUE rb_bitmap_m_set_font(VALUE self, VALUE newval);
 
@@ -87,6 +89,8 @@ void Init_Bitmap(void) {
 #endif
   rb_define_method(rb_cBitmap, "get_pixel", rb_bitmap_m_get_pixel, 2);
   rb_define_method(rb_cBitmap, "set_pixel", rb_bitmap_m_set_pixel, 3);
+  rb_define_method(rb_cBitmap, "draw_text", rb_bitmap_m_draw_text, -1);
+  rb_define_method(rb_cBitmap, "text_size", rb_bitmap_m_text_size, 1);
   rb_define_method(rb_cBitmap, "font", rb_bitmap_m_font, 0);
   rb_define_method(rb_cBitmap, "font=", rb_bitmap_m_set_font, 1);
   // TODO: implement Bitmap#dispose
@@ -98,10 +102,6 @@ void Init_Bitmap(void) {
   // TODO: implement Bitmap#hue_change
   // TODO: implement Bitmap#blur
   // TODO: implement Bitmap#radial_blur
-  // TODO: implement Bitmap#draw_text
-  // TODO: implement Bitmap#text_size
-  // TODO: implement Bitmap#font
-  // TODO: implement Bitmap#font=
 }
 
 bool isBitmap(VALUE obj) {
@@ -363,6 +363,21 @@ static VALUE rb_bitmap_m_set_pixel(VALUE self, VALUE x, VALUE y, VALUE color) {
   pixel[3] = color_ptr->alpha;
   SDL_UnlockSurface(ptr->surface);
   return Qnil;
+}
+
+static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
+  struct Bitmap *ptr = convertBitmap(self);
+  rb_bitmap_modify(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  // TODO: Bitmap#draw_text
+  return Qnil;
+}
+
+static VALUE rb_bitmap_m_text_size(VALUE self, VALUE str) {
+  struct Bitmap *ptr = convertBitmap(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  // TODO: Bitmap#text_size
+  return rb_rect_new(0, 0, 32, 32);
 }
 
 static VALUE rb_bitmap_m_font(VALUE self) {
