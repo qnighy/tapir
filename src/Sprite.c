@@ -642,7 +642,7 @@ static void renderSprite(struct Renderable *renderable) {
   glUniform2f(glGetUniformLocation(shader, "dst_translate"),
       ptr->x, ptr->y);
   glUniform2f(glGetUniformLocation(shader, "src_translate"),
-      ptr->ox, ptr->oy);
+      ptr->ox + src_rect->x, ptr->oy + src_rect->y);
   glUniform2f(glGetUniformLocation(shader, "zoom"),
       ptr->zoom_x, ptr->zoom_y);
 
