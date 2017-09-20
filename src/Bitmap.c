@@ -46,6 +46,7 @@ static VALUE rb_bitmap_m_dispose(VALUE self);
 static VALUE rb_bitmap_m_disposed_p(VALUE self);
 static VALUE rb_bitmap_m_width(VALUE self);
 static VALUE rb_bitmap_m_height(VALUE self);
+static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self);
 static VALUE rb_bitmap_m_fill_rect(int argc, VALUE *argv, VALUE self);
 static VALUE rb_bitmap_m_clear(VALUE self);
 #if RGSS >= 2
@@ -95,6 +96,7 @@ void Init_Bitmap(void) {
   rb_define_method(rb_cBitmap, "disposed?", rb_bitmap_m_disposed_p, 0);
   rb_define_method(rb_cBitmap, "width", rb_bitmap_m_width, 0);
   rb_define_method(rb_cBitmap, "height", rb_bitmap_m_height, 0);
+  rb_define_method(rb_cBitmap, "blt", rb_bitmap_m_blt, -1);
   rb_define_method(rb_cBitmap, "fill_rect", rb_bitmap_m_fill_rect, -1);
   rb_define_method(rb_cBitmap, "clear", rb_bitmap_m_clear, 0);
 #if RGSS >= 2
@@ -266,6 +268,96 @@ static VALUE rb_bitmap_m_height(VALUE self) {
   struct Bitmap *ptr = convertBitmap(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
   return INT2NUM(ptr->surface->h);
+}
+
+static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self) {
+  struct Bitmap *ptr = convertBitmap(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  if(argc != 4 && argc != 5) {
+    rb_raise(rb_eArgError,
+        "wrong number of arguments (%d for 4..5)", argc);
+  }
+  int x = NUM2INT(argv[0]);
+  int y = NUM2INT(argv[1]);
+  struct Bitmap *src_ptr = convertBitmap(argv[2]);
+  struct Rect *src_rect_ptr = convertRect(argv[3]);
+  int opacity = argc > 4 ? saturateInt32(NUM2INT(argv[4]), 0, 255) : 255;
+
+  if(!src_ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+
+  if(opacity == 0) return Qnil;
+
+  SDL_LockSurface(ptr->surface);
+  SDL_LockSurface(src_ptr->surface);
+
+  Uint32 *src_pixels = src_ptr->surface->pixels;
+  int src_pitch = src_ptr->surface->pitch / 4;
+  Uint32 *dst_pixels = ptr->surface->pixels;
+  int dst_pitch = ptr->surface->pitch / 4;
+
+  int xdiff = x - src_rect_ptr->x;
+  int ydiff = y - src_rect_ptr->y;
+  int xbegin = src_rect_ptr->x;
+  if(xbegin < 0) xbegin = 0;
+  if(xbegin < -xdiff) xbegin = -xdiff;
+  int ybegin = src_rect_ptr->y;
+  if(ybegin < 0) ybegin = 0;
+  if(ybegin < -ydiff) ybegin = -ydiff;
+  int xend = src_rect_ptr->x + src_rect_ptr->width;
+  if(xend > src_ptr->surface->w) xend = src_ptr->surface->w;
+  if(xend > ptr->surface->w - xdiff) xend = ptr->surface->w - xdiff;
+  int yend = src_rect_ptr->y + src_rect_ptr->width;
+  if(yend > src_ptr->surface->w) yend = src_ptr->surface->w;
+  if(yend > ptr->surface->w - ydiff) yend = ptr->surface->w - ydiff;
+
+  for(int sy = ybegin; sy < yend; ++sy) {
+    for(int sx = xbegin; sx < xend; ++sx) {
+      int dx = sx + xdiff;
+      int dy = sy + ydiff;
+      Uint32 src_rgba = src_pixels[sy * src_pitch + sx];
+      Uint32 dst_rgba = dst_pixels[dy * dst_pitch + dx];
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+      Uint32 src_r = (src_rgba >> 24) & 0xff;
+      Uint32 src_g = (src_rgba >> 16) & 0xff;
+      Uint32 src_b = (src_rgba >> 8) & 0xff;
+      Uint32 src_a = src_rgba & 0xff;
+      Uint32 dst_r = (dst_rgba >> 24) & 0xff;
+      Uint32 dst_g = (dst_rgba >> 16) & 0xff;
+      Uint32 dst_b = (dst_rgba >> 8) & 0xff;
+      Uint32 dst_a = dst_rgba & 0xff;
+#else
+      Uint32 src_r = src_rgba & 0xff;
+      Uint32 src_g = (src_rgba >> 8) & 0xff;
+      Uint32 src_b = (src_rgba >> 16) & 0xff;
+      Uint32 src_a = (src_rgba >> 24) & 0xff;
+      Uint32 dst_r = dst_rgba & 0xff;
+      Uint32 dst_g = (dst_rgba >> 8) & 0xff;
+      Uint32 dst_b = (dst_rgba >> 16) & 0xff;
+      Uint32 dst_a = (dst_rgba >> 24) & 0xff;
+#endif
+      if(src_a == 0) continue;
+
+      Uint32 src_t = 255 - src_a;
+      Uint32 new_a =
+        (dst_a * src_t + src_a * opacity) / (255 * 255);
+      Uint32 new_r =
+        (dst_r * dst_a * src_t + src_r * src_a * opacity) / (255 * new_a);
+      Uint32 new_g =
+        (dst_g * dst_a * src_t + src_g * src_a * opacity) / (255 * new_a);
+      Uint32 new_b =
+        (dst_b * dst_a * src_t + src_b * src_a * opacity) / (255 * new_a);
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+      Uint32 new_rgba = (new_r << 24) | (new_g << 16) | (new_b << 8) | new_a;
+#else
+      Uint32 new_rgba = new_r | (new_g << 8) | (new_b << 16) | (new_a << 24);
+#endif
+      dst_pixels[dy * dst_pitch + dx] = new_rgba;
+    }
+  }
+
+  SDL_UnlockSurface(src_ptr->surface);
+  SDL_UnlockSurface(ptr->surface);
+  return Qnil;
 }
 
 static VALUE rb_bitmap_m_fill_rect(int argc, VALUE *argv, VALUE self) {
