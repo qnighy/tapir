@@ -1,4 +1,4 @@
-PC_LIBS = sdl2 SDL2_image SDL2_ttf gl
+PC_LIBS = sdl2 SDL2_image SDL2_ttf fontconfig gl
 
 ifeq ($(RGSS),3)
 RUBY_SRC_DIR = ../ruby192
@@ -19,6 +19,7 @@ EXEC = tapir-x
 endif
 endif
 OBJS = main.o main_rb.o archive.o openres.o gl_misc.o sdl_misc.o misc.o \
+       font_lookup.o \
        Bitmap.o Color.o Font.o Graphics.o Input.o RGSSError.o RGSSReset.o \
        Rect.o Sprite.o Table.o Tone.o Viewport.o Window.o
 CFLAGS += -g -O2 -Wall -Wextra

@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include "Font.h"
 #include "Color.h"
+#include "font_lookup.h"
 #include "openres.h"
 #include "misc.h"
 
@@ -188,9 +189,7 @@ static VALUE rb_font_m_initialize_copy(VALUE self, VALUE orig) {
 static VALUE rb_font_s_exist_p(VALUE klass, VALUE name) {
   (void) klass;
 
-  // TODO: implement Font.exist?
-  (void) name;
-  return Qtrue;
+  return fontExistence(StringValueCStr(name)) ? Qtrue : Qfalse;
 }
 
 static VALUE rb_font_m_name(VALUE self) {

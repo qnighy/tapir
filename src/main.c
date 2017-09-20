@@ -7,6 +7,7 @@
 #include "sdl_misc.h"
 #include "archive.h"
 #include "openres.h"
+#include "font_lookup.h"
 #include "Bitmap.h"
 #include "Color.h"
 #include "Font.h"
@@ -97,6 +98,8 @@ int main(int argc, char **argv) {
   initSDL();
 
   initArchive();
+
+  initFontLookup();
 
 #ifdef RUBY_INIT_STACK
   ruby_sysinit(&ruby_argc, &ruby_argv);
