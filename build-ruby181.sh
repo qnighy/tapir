@@ -10,7 +10,6 @@ fi
 if [ ! -e Makefile ]; then
   ./configure \
     --prefix="$dir/ruby181-build" \
-    --with-static-linked-ext \
 
 fi
 
