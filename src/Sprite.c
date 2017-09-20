@@ -315,7 +315,7 @@ static VALUE rb_sprite_m_set_viewport(VALUE self, VALUE newval) {
   struct Sprite *ptr = convertSprite(self);
   rb_sprite_modify(self);
   if(newval != Qnil) convertViewport(newval);
-  ptr->viewport = newval;
+  ptr->renderable.viewport = newval;
   return newval;
 }
 #endif

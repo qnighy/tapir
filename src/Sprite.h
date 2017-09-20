@@ -11,7 +11,7 @@ void Init_Sprite(void);
 
 struct Sprite {
   struct Renderable renderable;
-  VALUE bitmap, src_rect, viewport, color, tone;
+  VALUE bitmap, src_rect, color, tone;
   bool disposed, visible, mirror;
   int x, y, ox, oy;
 #if RGSS >= 2
