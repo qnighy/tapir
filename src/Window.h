@@ -14,6 +14,9 @@ struct Window {
   VALUE windowskin;
   bool disposed, visible;
   int x, y, width, height;
+#if RGSS >= 2
+  int openness;
+#endif
 };
 
 bool isWindow(VALUE obj);

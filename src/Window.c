@@ -22,6 +22,12 @@ static VALUE rb_window_m_initialize(int argc, VALUE *argv, VALUE self);
 static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig);
 static VALUE rb_window_m_dispose(VALUE self);
 static VALUE rb_window_m_disposed_p(VALUE self);
+#if RGSS == 3
+static VALUE rb_window_m_move(
+    VALUE self, VALUE x, VALUE y, VALUE width, VALUE height);
+static VALUE rb_window_m_open_p(VALUE self);
+static VALUE rb_window_m_close_p(VALUE self);
+#endif
 static VALUE rb_window_m_visible(VALUE self);
 static VALUE rb_window_m_set_visible(VALUE self, VALUE newval);
 static VALUE rb_window_m_windowskin(VALUE self);
@@ -36,6 +42,10 @@ static VALUE rb_window_m_height(VALUE self);
 static VALUE rb_window_m_set_height(VALUE self, VALUE newval);
 static VALUE rb_window_m_z(VALUE self);
 static VALUE rb_window_m_set_z(VALUE self, VALUE newval);
+#if RGSS >= 2
+static VALUE rb_window_m_openness(VALUE self);
+static VALUE rb_window_m_set_openness(VALUE self, VALUE newval);
+#endif
 
 static void renderWindow(struct Renderable *renderable);
 
@@ -53,6 +63,11 @@ void Init_Window(void) {
       rb_window_m_initialize_copy, 1);
   rb_define_method(rb_cWindow, "dispose", rb_window_m_dispose, 0);
   rb_define_method(rb_cWindow, "disposed?", rb_window_m_disposed_p, 0);
+#if RGSS == 3
+  rb_define_method(rb_cWindow, "move", rb_window_m_move, 4);
+  rb_define_method(rb_cWindow, "open?", rb_window_m_open_p, 0);
+  rb_define_method(rb_cWindow, "close?", rb_window_m_close_p, 0);
+#endif
   rb_define_method(rb_cWindow, "windowskin", rb_window_m_windowskin, 0);
   rb_define_method(rb_cWindow, "windowskin=", rb_window_m_set_windowskin, 1);
   rb_define_method(rb_cWindow, "visible", rb_window_m_visible, 0);
@@ -67,10 +82,11 @@ void Init_Window(void) {
   rb_define_method(rb_cWindow, "height=", rb_window_m_set_height, 1);
   rb_define_method(rb_cWindow, "z", rb_window_m_z, 0);
   rb_define_method(rb_cWindow, "z=", rb_window_m_set_z, 1);
+#if RGSS >= 2
+  rb_define_method(rb_cWindow, "openness", rb_window_m_openness, 0);
+  rb_define_method(rb_cWindow, "openness=", rb_window_m_set_openness, 1);
+#endif
   // TODO: implement Window#update
-  // TODO: implement Window#move
-  // TODO: implement Window#open?
-  // TODO: implement Window#close?
   // TODO: implement Window#contents, Window#contents=
   // TODO: implement Window#cursor_rect
   // TODO: implement Window#viewport
@@ -84,7 +100,6 @@ void Init_Window(void) {
   // TODO: implement Window#opacity
   // TODO: implement Window#back_opacity
   // TODO: implement Window#contents_opacity
-  // TODO: implement Window#openness
   // TODO: implement Window#tone
 }
 
@@ -137,6 +152,9 @@ static VALUE window_alloc(VALUE klass) {
   ptr->y = 0;
   ptr->width = 0;
   ptr->height = 0;
+#if RGSS >= 2
+  ptr->openness = 255;
+#endif
   registerRenderable(&ptr->renderable);
   VALUE ret = Data_Wrap_Struct(klass, window_mark, window_free, ptr);
   return ret;
@@ -177,6 +195,9 @@ static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
   ptr->y = orig_ptr->y;
   ptr->width = orig_ptr->width;
   ptr->height = orig_ptr->height;
+#if RGSS >= 2
+  ptr->openness = orig_ptr->openness;
+#endif
   return Qnil;
 }
 
@@ -190,6 +211,29 @@ static VALUE rb_window_m_disposed_p(VALUE self) {
   struct Window *ptr = convertWindow(self);
   return ptr->disposed ? Qtrue : Qfalse;
 }
+
+#if RGSS == 3
+static VALUE rb_window_m_move(
+    VALUE self, VALUE x, VALUE y, VALUE width, VALUE height) {
+  struct Window *ptr = convertWindow(self);
+  rb_window_modify(self);
+  ptr->x = NUM2INT(x);
+  ptr->y = NUM2INT(y);
+  ptr->width = NUM2INT(width);
+  ptr->height = NUM2INT(height);
+  return Qnil;
+}
+
+static VALUE rb_window_m_open_p(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return ptr->openness == 255 ? Qtrue : Qfalse;
+}
+
+static VALUE rb_window_m_close_p(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return ptr->openness == 0 ? Qtrue : Qfalse;
+}
+#endif
 
 static VALUE rb_window_m_windowskin(VALUE self) {
   struct Window *ptr = convertWindow(self);
@@ -276,11 +320,29 @@ static VALUE rb_window_m_set_z(VALUE self, VALUE newval) {
   return newval;
 }
 
+#if RGSS >= 2
+static VALUE rb_window_m_openness(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return INT2NUM(ptr->openness);
+}
+
+static VALUE rb_window_m_set_openness(VALUE self, VALUE newval) {
+  struct Window *ptr = convertWindow(self);
+  rb_window_modify(self);
+  ptr->openness = saturateInt32(NUM2INT(newval), 0, 255);
+  return newval;
+}
+#endif
+
 static void renderWindow(struct Renderable *renderable) {
   struct Window *ptr = (struct Window *)renderable;
   if(ptr->renderable.viewport != Qnil) WARN_UNIMPLEMENTED("Window#viewport");
   if(ptr->disposed || !ptr->visible) return;
   if(ptr->windowskin == Qnil) return;
+#if RGSS >= 2
+  if(ptr->openness == 0) return;
+  if(ptr->openness < 255) WARN_UNIMPLEMENTED("Window#openness");
+#endif
   struct Bitmap *skin_bitmap_ptr = convertBitmap(ptr->windowskin);
   SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
   if(!skin_surface) return;
