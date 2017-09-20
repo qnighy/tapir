@@ -188,6 +188,8 @@ VALUE main_rb(VALUE data) {
       /* TODO: Graphics.freeze */
       "  def self.freeze\n"
       "  end\n"
+      "  def self.resize_screen(width, height)\n"
+      "  end\n"
       "  def self.snap_to_bitmap\n"
       "    Bitmap.new(width, height)\n"
       "  end\n"
@@ -264,12 +266,16 @@ VALUE main_rb(VALUE data) {
       "    end\n"
       "  end\n"
       "  class BGS < AudioFile\n"
+      "    def play\n"
+      "    end\n"
       "    def self.stop\n"
       "    end\n"
       "    def self.fade(time)\n"
       "    end\n"
       "  end\n"
       "  class ME < AudioFile\n"
+      "    def play\n"
+      "    end\n"
       "    def self.stop\n"
       "    end\n"
       "    def self.fade(time)\n"
@@ -277,6 +283,8 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "  class SE < AudioFile\n"
       "    def play\n"
+      "    end\n"
+      "    def self.stop\n"
       "    end\n"
       "  end\n"
 #endif
@@ -292,6 +300,7 @@ VALUE main_rb(VALUE data) {
 #endif
 #if RGSS >= 2
       "  class BaseItem\n"
+      "    attr_accessor :description, :icon_index, :id, :name, :note\n"
 #if RGSS == 3
       "    attr_accessor :features\n"
       "    class Feature\n"
@@ -342,6 +351,9 @@ VALUE main_rb(VALUE data) {
 #if RGSS >= 2
       "  class UsableItem < BaseItem\n"
 #if RGSS == 3
+      "    def need_selection?\n"
+      "      [1, 7, 9].include?(@scope)\n"
+      "    end\n"
       "    class Effect\n"
       "    end\n"
       "    class Damage\n"
@@ -410,9 +422,15 @@ VALUE main_rb(VALUE data) {
       "  class State < BaseItem\n"
 #else
       "  class State\n"
+      "    attr_accessor :auto_release_prob, :agi_rate, :atk_rate, :battle_only, :hold_turn, :name, :nonresistance, :slip_damage, :id\n"
 #endif
+      "    attr_accessor :restriction\n"
 #if RGSS == 3
-      "    attr_accessor :max_turns, :min_turns, :priority, :steps_to_remove, :remove_by_restriction, :restriction\n"
+      "    attr_accessor :auto_removal_timing, :chance_by_damage, :max_turns, :message1, :message2, :message3, :message4, :min_turns, :priority, :steps_to_remove, :remove_at_battle_end, :remove_by_damage, :remove_by_restriction, :remove_by_walking\n"
+#elif RGSS == 2
+      "    attr_accessor :def_rate, :element_set, :icon_index, :message1, :message2, :message3, :message4, :note, :offset_by_opposite, :priority, :reduce_hit_ratio, :release_by_damage, :spi_rate, :state_set\n"
+#elif RGSS == 1
+      "    attr_accessor :animation_id, :cant_evade, :cant_get_exp, :eva, :guard_element_set, :hit_rate, :int_rate, :maxhp_rate, :maxsp_rate, :mdef_rate, :minus_state_set, :pdef_rate, :plus_state_set, :rating, :shock_release_prob, :str_rate, :zero_hp\n"
 #endif
       "  end\n"
 #if RGSS == 1
@@ -470,6 +488,7 @@ VALUE main_rb(VALUE data) {
       "  end\n"
 #endif
       "  class CommonEvent\n"
+      "    attr_accessor :id, :name, :trigger, :switch_id, :list\n"
 #if RGSS == 3
       "    def autorun?\n"
       "      @trigger == 1\n"
@@ -477,19 +496,10 @@ VALUE main_rb(VALUE data) {
       "    def parallel?\n"
       "      @trigger == 2\n"
       "    end\n"
-#elif RGSS == 2
-      "    attr_accessor :switch_id, :trigger\n"
-#elif RGSS == 1
-      "    attr_accessor :switch_id, :trigger\n"
 #endif
       "  end\n"
       "  class Event\n"
-      "    attr_accessor :pages, :x, :y\n"
-#if RGSS == 3
-      "    attr_accessor :id\n"
-#elif RGSS == 2
-#elif RGSS == 1
-#endif
+      "    attr_accessor :id, :name, :pages, :x, :y\n"
       "    class Page\n"
       "      attr_accessor :condition, :direction_fix, :graphic, :list, :move_frequency, :move_route, :move_speed, :move_type, :step_anime, :through, :trigger, :walk_anime\n"
 #if RGSS >= 2
@@ -499,7 +509,9 @@ VALUE main_rb(VALUE data) {
 #endif
       "      class Condition\n"
       "        attr_accessor :self_switch_valid, :switch1_valid, :switch2_valid, :variable_valid\n"
-#if RGSS >= 2
+#if RGSS == 3
+      "        attr_accessor :actor_valid, :item_valid, :self_switch_ch\n"
+#elif RGSS == 2
       "        attr_accessor :actor_valid, :item_valid\n"
 #elif RGSS == 1
       "        attr_accessor :switch1_id\n"
@@ -525,12 +537,14 @@ VALUE main_rb(VALUE data) {
 #endif
       "  end\n"
       "  class Map\n"
-      "    attr_accessor :autoplay_bgm, :autoplay_bgs, :bgm, :data, :events, :encounter_step, :height, :width\n"
+      "    attr_accessor :autoplay_bgm, :autoplay_bgs, :bgm, :bgs, :data, :encounter_list, :encounter_step, :events, :height, :width\n"
+#if RGSS >= 2
+      "    attr_accessor :disable_dashing, :parallax_loop_x, :parallax_loop_y, :parallax_name, :parallax_show, :parallax_sx, :parallax_sy, :scroll_type\n"
+#endif
 #if RGSS == 3
-      "    attr_accessor :battleback1_name, :battleback2_name, :disable_dashing, :display_name, :parallax_loop_x, :parallax_loop_y, :parallax_name, :parallax_sx, :parallax_sy, :scroll_type, :specify_battleback, :tileset_id\n"
-#elif RGSS == 2
-      "    attr_accessor :disable_dashing, :parallax_loop_x, :parallax_loop_y, :parallax_name, :parallax_sx, :parallax_sy, :scroll_type\n"
-#elif RGSS == 1
+      "    attr_accessor :battleback1_name, :battleback2_name, :display_name, :note, :specify_battleback, :tileset_id\n"
+#endif
+#if RGSS == 1
       "    attr_accessor :tileset_id\n"
 #endif
       "  end\n"
@@ -587,13 +601,13 @@ VALUE main_rb(VALUE data) {
       "    end\n"
 #endif
       "  end\n"
-#if RGSS == 1 || RGSS == 3
-      "  class Tileset\n"
 #if RGSS == 3
-      "    attr_accessor :flags, :tileset_names\n"
+      "  class Tileset\n"
+      "    attr_accessor :flags, :id, :mode, :name, :note, :tileset_names\n"
+      "  end\n"
 #elif RGSS == 1
-      "    attr_accessor :autotile_names, :battleback_name, :fog_blend_type, :fog_hue, :fog_name, :fog_opacity, :fog_sx, :fog_sy, :fog_zoom, :panorama_hue, :panorama_name, :passages, :priorities, :terrain_tags, :tileset_name\n"
-#endif
+      "  class Tileset\n"
+      "    attr_accessor :autotile_names, :battleback_name, :fog_blend_type, :fog_hue, :fog_name, :fog_opacity, :fog_sx, :fog_sy, :fog_zoom, :id, :name, :panorama_hue, :panorama_name, :passages, :priorities, :terrain_tags, :tileset_name\n"
       "  end\n"
 #endif
       "  class Troop\n"
