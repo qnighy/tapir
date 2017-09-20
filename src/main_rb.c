@@ -250,6 +250,11 @@ VALUE main_rb(VALUE data) {
       "end\n"
       "class Plane\n"
       "  attr_unimplemented :bitmap, :blend_type, :opacity, :ox, :oy, :tone, :z, :zoom_x, :zoom_y\n"
+      "  def dispose\n"
+      "  end\n"
+      "  def disposed?\n"
+      "    false\n"
+      "  end\n"
       "  def initialize(viewport=nil)\n"
       "    warn_unimplemented(\"Plane.new\")\n"
       "  end\n"
@@ -300,6 +305,7 @@ VALUE main_rb(VALUE data) {
       "    @oy = 0\n"
       "    @tone = Tone.new(0.0, 0.0, 0.0, 0.0)\n"
       "    @openness = 255\n"
+      "    @active = true\n"
       "  end\n"
       "end\n"
       "\n"
@@ -572,13 +578,9 @@ VALUE main_rb(VALUE data) {
       "      attr_accessor :always_on_top\n"
 #endif
       "      class Condition\n"
-      "        attr_accessor :self_switch_valid, :switch1_valid, :switch2_valid, :variable_valid\n"
-#if RGSS == 3
-      "        attr_accessor :actor_valid, :item_valid, :self_switch_ch\n"
-#elif RGSS == 2
-      "        attr_accessor :actor_valid, :item_valid\n"
-#elif RGSS == 1
-      "        attr_accessor :switch1_id\n"
+      "        attr_accessor :self_switch_ch, :self_switch_valid, :switch1_id, :switch1_valid, :switch2_id, :switch2_valid, :variable_id, :variable_valid, :variable_value\n"
+#if RGSS >= 2
+      "        attr_accessor :actor_id, :actor_valid, :item_id, :item_valid\n"
 #endif
       "      end\n"
       "      class Graphic\n"
@@ -643,7 +645,7 @@ VALUE main_rb(VALUE data) {
 #elif RGSS == 2
       "    attr_accessor :passages, :sounds\n"
 #elif RGSS == 1
-      "    attr_accessor :decision_se, :title_name, :windowskin_name\n"
+      "    attr_accessor :cursor_se, :decision_se, :title_name, :windowskin_name\n"
 #endif
       "    class "TERMS"\n"
 #if RGSS == 3
