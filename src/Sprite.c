@@ -252,7 +252,34 @@ static VALUE rb_sprite_m_initialize(int argc, VALUE *argv, VALUE self) {
 static VALUE rb_sprite_m_initialize_copy(VALUE self, VALUE orig) {
   struct Sprite *ptr = convertSprite(self);
   struct Sprite *orig_ptr = convertSprite(orig);
+  ptr->renderable.z = orig_ptr->renderable.z;
+  ptr->renderable.viewport = orig_ptr->renderable.viewport;
   ptr->bitmap = orig_ptr->bitmap;
+  rb_rect_set2(ptr->src_rect, orig_ptr->src_rect);
+  rb_color_set2(ptr->color, orig_ptr->color);
+  rb_tone_set2(ptr->tone, orig_ptr->tone);
+  ptr->disposed = orig_ptr->disposed;
+  ptr->visible = orig_ptr->visible;
+  ptr->mirror = orig_ptr->mirror;
+  ptr->x = orig_ptr->x;
+  ptr->y = orig_ptr->y;
+  ptr->ox = orig_ptr->ox;
+  ptr->oy = orig_ptr->oy;
+#if RGSS >= 2
+  ptr->wave_amp = orig_ptr->wave_amp;
+  ptr->wave_length = orig_ptr->wave_length;
+  ptr->wave_speed = orig_ptr->wave_speed;
+  ptr->bush_opacity = orig_ptr->bush_opacity;
+#endif
+  ptr->bush_depth = orig_ptr->bush_depth;
+  ptr->opacity = orig_ptr->opacity;
+  ptr->blend_type = orig_ptr->blend_type;
+  ptr->zoom_x = orig_ptr->zoom_x;
+  ptr->zoom_y = orig_ptr->zoom_y;
+  ptr->angle = orig_ptr->angle;
+#if RGSS >= 2
+  ptr->wave_phase = orig_ptr->wave_phase;
+#endif
   return Qnil;
 }
 
