@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Input.h"
+#include "misc.h"
 #include "sdl_misc.h"
 
 VALUE rb_mInput;
@@ -124,13 +125,13 @@ static VALUE rb_input_s_repeat_p(VALUE klass, VALUE key) {
 
 static VALUE rb_input_s_dir4(VALUE klass) {
   (void) klass;
-  fprintf(stderr, "Input.dir4\n");
+  WARN_UNIMPLEMENTED("Input.dir4");
   return Qnil;
 }
 
 static VALUE rb_input_s_dir8(VALUE klass) {
   (void) klass;
-  fprintf(stderr, "Input.dir8\n");
+  WARN_UNIMPLEMENTED("Input.dir8");
   return Qnil;
 }
 

@@ -626,13 +626,6 @@ static void renderSprite(struct Renderable *renderable) {
   // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-  GLfloat vertices[][3] = {
-    {-1.0f, -1.0f, 0.0f},
-    { 1.0f, -1.0f, 0.0f},
-    {-1.0f,  1.0f, 0.0f},
-    { 1.0f,  1.0f, 0.0f}
-  };
-
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -656,11 +649,7 @@ static void renderSprite(struct Renderable *renderable) {
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture(bitmap_ptr);
 
-  glBegin(GL_TRIANGLE_STRIP);
-  for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
-    glVertex3fv(vertices[i]);
-  }
-  glEnd();
+  gl_draw_rect(-1.0, -1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 
   glUseProgram(0);
 }

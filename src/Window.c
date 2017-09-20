@@ -352,13 +352,6 @@ static void renderWindow(struct Renderable *renderable) {
   // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-  GLfloat vertices[][3] = {
-    {-1.0f, -1.0f, 0.0f},
-    { 1.0f, -1.0f, 0.0f},
-    {-1.0f,  1.0f, 0.0f},
-    { 1.0f,  1.0f, 0.0f}
-  };
-
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -374,11 +367,7 @@ static void renderWindow(struct Renderable *renderable) {
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture(skin_bitmap_ptr);
 
-  glBegin(GL_TRIANGLE_STRIP);
-  for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
-    glVertex3fv(vertices[i]);
-  }
-  glEnd();
+  gl_draw_rect(-1.0, -1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 
 #if RGSS >= 2
   glUseProgram(shader2);
@@ -393,11 +382,7 @@ static void renderWindow(struct Renderable *renderable) {
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture(skin_bitmap_ptr);
 
-  glBegin(GL_TRIANGLE_STRIP);
-  for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
-    glVertex3fv(vertices[i]);
-  }
-  glEnd();
+  gl_draw_rect(-1.0, -1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 #endif
 
   glUseProgram(shader3);
@@ -412,11 +397,7 @@ static void renderWindow(struct Renderable *renderable) {
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture(skin_bitmap_ptr);
 
-  glBegin(GL_TRIANGLE_STRIP);
-  for(size_t i = 0; i < sizeof(vertices)/sizeof(*vertices); ++i) {
-    glVertex3fv(vertices[i]);
-  }
-  glEnd();
+  gl_draw_rect(-1.0, -1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 
   glUseProgram(0);
 }
