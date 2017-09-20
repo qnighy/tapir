@@ -357,47 +357,45 @@ static void renderWindow(struct Renderable *renderable) {
 
   glUseProgram(shader1);
   glUniform1i(glGetUniformLocation(shader1, "windowskin"), 0);
-  glUniform2f(glGetUniformLocation(shader1, "dst_size"),
+  glUniform2f(glGetUniformLocation(shader1, "resolution"),
       window_width, window_height);
-  glUniform2f(glGetUniformLocation(shader1, "topleft"),
-      ptr->x + 2, ptr->y + 2);
-  glUniform2f(glGetUniformLocation(shader1, "bottomright"),
-      ptr->x + ptr->width - 2, ptr->y + ptr->height - 2);
 
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture(skin_bitmap_ptr);
 
-  gl_draw_rect(-1.0, -1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+  gl_draw_rect(
+      ptr->x + 2, ptr->y + 2,
+      ptr->x + ptr->width - 2, ptr->y + ptr->height - 2,
+      0.0, 0.0, 1.0, 1.0);
 
 #if RGSS >= 2
   glUseProgram(shader2);
   glUniform1i(glGetUniformLocation(shader2, "windowskin"), 0);
-  glUniform2f(glGetUniformLocation(shader2, "dst_size"),
+  glUniform2f(glGetUniformLocation(shader2, "resolution"),
       window_width, window_height);
-  glUniform2f(glGetUniformLocation(shader2, "topleft"),
-      ptr->x + 2, ptr->y + 2);
-  glUniform2f(glGetUniformLocation(shader2, "bottomright"),
-      ptr->x + ptr->width - 2, ptr->y + ptr->height - 2);
 
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture(skin_bitmap_ptr);
 
-  gl_draw_rect(-1.0, -1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+  gl_draw_rect(
+      ptr->x + 2, ptr->y + 2,
+      ptr->x + ptr->width - 2, ptr->y + ptr->height - 2,
+      0.0, 0.0, (ptr->width - 2) / 64.0, (ptr->height - 2) / 64.0);
 #endif
 
   glUseProgram(shader3);
   glUniform1i(glGetUniformLocation(shader3, "windowskin"), 0);
-  glUniform2f(glGetUniformLocation(shader3, "dst_size"),
+  glUniform2f(glGetUniformLocation(shader3, "resolution"),
       window_width, window_height);
-  glUniform2f(glGetUniformLocation(shader3, "topleft"),
-      ptr->x, ptr->y);
-  glUniform2f(glGetUniformLocation(shader3, "bottomright"),
-      ptr->x + ptr->width, ptr->y + ptr->height);
+  glUniform2f(glGetUniformLocation(shader3, "bg_size"),
+      ptr->width, ptr->height);
 
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture(skin_bitmap_ptr);
 
-  gl_draw_rect(-1.0, -1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+  gl_draw_rect(
+      ptr->x, ptr->y, ptr->x + ptr->width, ptr->y + ptr->height,
+      0.0, 0.0, ptr->width, ptr->height);
 
   glUseProgram(0);
 }
@@ -406,8 +404,13 @@ void initWindowSDL() {
   static const char *vsh1_source =
     "#version 120\n"
     "\n"
+    "uniform vec2 resolution;\n"
+    "\n"
     "void main(void) {\n"
-    "    gl_Position = gl_Vertex;\n"
+    "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+    "    gl_Position.x = gl_Vertex.x / resolution.x * 2.0 - 1.0;\n"
+    "    gl_Position.y = 1.0 - gl_Vertex.y / resolution.y * 2.0;\n"
+    "    gl_Position.zw = vec2(0.0, 1.0);\n"
     "}\n";
 
   static const char *fsh1_source =
@@ -418,24 +421,14 @@ void initWindowSDL() {
     "#endif\n"
     "\n"
     "uniform sampler2D windowskin;\n"
-    "uniform vec2 dst_size;\n"
-    "uniform vec2 topleft;\n"
-    "uniform vec2 bottomright;\n"
     "\n"
     "void main(void) {\n"
-    "    vec2 coord = vec2(gl_FragCoord.x, dst_size.y - gl_FragCoord.y);\n"
-    "    if(topleft.x <= coord.x && topleft.y <= coord.y && coord.x <= bottomright.x && coord.y <= bottomright.y) {\n"
-    "      vec2 dim = bottomright - topleft;\n"
-    "      vec2 relative_coord = coord - topleft;\n"
 #if RGSS >= 2
-    "      vec4 color = texture2D(windowskin, vec2(relative_coord.x / dim.x * 0.5, relative_coord.y / dim.y * 0.5));\n"
+    "    vec4 color = texture2D(windowskin, vec2(gl_TexCoord[0].x * 0.5, gl_TexCoord[0].y * 0.5));\n"
 #else
-    "      vec4 color = texture2D(windowskin, vec2(relative_coord.x / dim.x * 0.6666667, relative_coord.y / dim.y));\n"
+    "    vec4 color = texture2D(windowskin, vec2(gl_TexCoord[0].x * (2.0 / 3.0), gl_TexCoord[0].y));\n"
 #endif
-    "      gl_FragColor = color;\n"
-    "    } else {\n"
-    "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
-    "    }\n"
+    "    gl_FragColor = color;\n"
     "}\n";
 
   shader1 = compileShaders(vsh1_source, fsh1_source);
@@ -444,8 +437,13 @@ void initWindowSDL() {
   static const char *vsh2_source =
     "#version 120\n"
     "\n"
+    "uniform vec2 resolution;\n"
+    "\n"
     "void main(void) {\n"
-    "    gl_Position = gl_Vertex;\n"
+    "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+    "    gl_Position.x = gl_Vertex.x / resolution.x * 2.0 - 1.0;\n"
+    "    gl_Position.y = 1.0 - gl_Vertex.y / resolution.y * 2.0;\n"
+    "    gl_Position.zw = vec2(0.0, 1.0);\n"
     "}\n";
 
   static const char *fsh2_source =
@@ -456,22 +454,15 @@ void initWindowSDL() {
     "#endif\n"
     "\n"
     "uniform sampler2D windowskin;\n"
-    "uniform vec2 dst_size;\n"
-    "uniform vec2 topleft;\n"
-    "uniform vec2 bottomright;\n"
     "\n"
     "void main(void) {\n"
-    "    vec2 coord = vec2(gl_FragCoord.x, dst_size.y - gl_FragCoord.y);\n"
-    "    if(topleft.x <= coord.x && topleft.y <= coord.y && coord.x <= bottomright.x && coord.y <= bottomright.y) {\n"
-    "      vec2 dim = bottomright - topleft;\n"
-    "      vec2 relative_coord = coord - topleft;\n"
-    "      relative_coord = vec2(relative_coord.x / dim.x, relative_coord.y / dim.y);\n"
-    "      vec2 src_coord = mod(relative_coord, 1.0);\n"
-    "      vec4 color = texture2D(windowskin, vec2(src_coord.x * 0.5, src_coord.y * 0.5 + 0.5));\n"
-    "      gl_FragColor = color;\n"
-    "    } else {\n"
-    "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
-    "    }\n"
+    "    vec2 coord = mod(gl_TexCoord[0].xy, 1.0);\n"
+#if RGSS >= 2
+    "    vec4 color = texture2D(windowskin, vec2(coord.x * 0.5, coord.y * 0.5 + 0.5));\n"
+#else
+    "    vec4 color = texture2D(windowskin, vec2(coord.x * (2.0 / 3.0), coord.y));\n"
+#endif
+    "    gl_FragColor = color;\n"
     "}\n";
 
   shader2 = compileShaders(vsh2_source, fsh2_source);
@@ -480,8 +471,13 @@ void initWindowSDL() {
   static const char *vsh3_source =
     "#version 120\n"
     "\n"
+    "uniform vec2 resolution;\n"
+    "\n"
     "void main(void) {\n"
-    "    gl_Position = gl_Vertex;\n"
+    "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+    "    gl_Position.x = gl_Vertex.x / resolution.x * 2.0 - 1.0;\n"
+    "    gl_Position.y = 1.0 - gl_Vertex.y / resolution.y * 2.0;\n"
+    "    gl_Position.zw = vec2(0.0, 1.0);\n"
     "}\n";
 
   static const char *fsh3_source =
@@ -492,52 +488,40 @@ void initWindowSDL() {
     "#endif\n"
     "\n"
     "uniform sampler2D windowskin;\n"
-    "uniform vec2 dst_size;\n"
-    "uniform vec2 topleft;\n"
-    "uniform vec2 bottomright;\n"
+    "uniform vec2 bg_size;\n"
     "\n"
     "void main(void) {\n"
-    "    vec2 coord = vec2(gl_FragCoord.x, dst_size.y - gl_FragCoord.y);\n"
-    "    if(topleft.x <= coord.x && topleft.y <= coord.y && coord.x <= bottomright.x && coord.y <= bottomright.y) {\n"
-    "      vec2 relative_coord = coord - topleft;\n"
-    "      vec2 relative_coord2 = bottomright - coord;\n"
-    "      vec2 src_coord;\n"
-    "      bool draw = false;\n"
+    "    vec2 coord = gl_TexCoord[0].xy;\n"
+    "    vec2 reverse_coord = bg_size - coord;\n"
+    "    vec2 src_coord;\n"
+    "    bool draw = false;\n"
+    "    if(coord.x < 16.0) {\n"
+    "      src_coord.x = coord.x;\n"
+    "      draw = true;\n"
+    "    } else if(reverse_coord.x < 16.0) {\n"
+    "      src_coord.x = 64.0 - reverse_coord.x;\n"
+    "      draw = true;\n"
+    "    } else {\n"
+    "      src_coord.x = mod(coord.x - 16.0, 32.0) + 16.0;\n"
+    "    }\n"
+    "    if(coord.y < 16.0) {\n"
+    "      src_coord.y = coord.y;\n"
+    "      draw = true;\n"
+    "    } else if(reverse_coord.y < 16.0) {\n"
+    "      src_coord.y = 64.0 - reverse_coord.y;\n"
+    "      draw = true;\n"
+    "    } else {\n"
+    "      src_coord.y = mod(coord.y - 16.0, 32.0) + 16.0;\n"
+    "    }\n"
 #if RGSS >= 2
-    "      if(relative_coord.x < 16.0) {\n"
-    "        src_coord.x = (relative_coord.x + 64.0) / 128.0;\n"
-    "        draw = true;\n"
-    "      } else if(relative_coord2.x < 16.0) {\n"
-    "        src_coord.x = (128.0 - relative_coord2.x) / 128.0;\n"
-    "        draw = true;\n"
-    "      } else {\n"
-    "        src_coord.x = (mod(relative_coord.x - 16.0, 32.0) + 80.0) / 128.0;\n"
-    "      }\n"
+    "    src_coord.x = (src_coord.x + 64.0) / 128.0;\n"
+    "    src_coord.y = src_coord.y / 128.0;\n"
 #else
-    "      if(relative_coord.x < 16.0) {\n"
-    "        src_coord.x = (relative_coord.x + 128.0) / 192.0;\n"
-    "        draw = true;\n"
-    "      } else if(relative_coord2.x < 16.0) {\n"
-    "        src_coord.x = (192.0 - relative_coord2.x) / 192.0;\n"
-    "        draw = true;\n"
-    "      } else {\n"
-    "        src_coord.x = (mod(relative_coord.x - 16.0, 32.0) + 144.0) / 192.0;\n"
-    "      }\n"
+    "    src_coord.x = (src_coord.x + 128.0) / 192.0;\n"
+    "    src_coord.y = src_coord.y / 128.0;\n"
 #endif
-    "      if(relative_coord.y < 16.0) {\n"
-    "        src_coord.y = relative_coord.y / 128.0;\n"
-    "        draw = true;\n"
-    "      } else if(relative_coord2.y < 16.0) {\n"
-    "        src_coord.y = (64.0 - relative_coord2.y) / 128.0;\n"
-    "        draw = true;\n"
-    "      } else {\n"
-    "        src_coord.y = (mod(relative_coord.y - 16.0, 32.0) + 16.0) / 128.0;\n"
-    "      }\n"
-    "      if(draw) {\n"
-    "        gl_FragColor = texture2D(windowskin, src_coord);\n"
-    "      } else {\n"
-    "        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
-    "      }\n"
+    "    if(draw) {\n"
+    "      gl_FragColor = texture2D(windowskin, src_coord);\n"
     "    } else {\n"
     "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
     "    }\n"
