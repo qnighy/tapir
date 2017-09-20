@@ -26,6 +26,19 @@ static void bitmap_mark(struct Bitmap *ptr);
 static void bitmap_free(struct Bitmap *ptr);
 static VALUE bitmap_alloc(VALUE klass);
 
+VALUE rb_bitmap_new(int width, int height) {
+  VALUE ret = bitmap_alloc(rb_cBitmap);
+  struct Bitmap *ptr = convertBitmap(ret);
+  ptr->surface = SDL_CreateRGBSurface(
+      0, width, height, 32,
+      RMASK, GMASK, BMASK, AMASK);
+  if(!ptr->surface) {
+    /* TODO: check error handling */
+    rb_raise(rb_eRGSSError, "Could not create surface: %s", SDL_GetError());
+  }
+  return ret;
+}
+
 static VALUE rb_bitmap_m_initialize(int argc, VALUE *argv, VALUE self);
 static VALUE rb_bitmap_m_initialize_copy(VALUE self, VALUE orig);
 

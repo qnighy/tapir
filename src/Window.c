@@ -32,6 +32,8 @@ static VALUE rb_window_m_visible(VALUE self);
 static VALUE rb_window_m_set_visible(VALUE self, VALUE newval);
 static VALUE rb_window_m_windowskin(VALUE self);
 static VALUE rb_window_m_set_windowskin(VALUE self, VALUE newval);
+static VALUE rb_window_m_contents(VALUE self);
+static VALUE rb_window_m_set_contents(VALUE self, VALUE newval);
 static VALUE rb_window_m_x(VALUE self);
 static VALUE rb_window_m_set_x(VALUE self, VALUE newval);
 static VALUE rb_window_m_y(VALUE self);
@@ -70,6 +72,8 @@ void Init_Window(void) {
 #endif
   rb_define_method(rb_cWindow, "windowskin", rb_window_m_windowskin, 0);
   rb_define_method(rb_cWindow, "windowskin=", rb_window_m_set_windowskin, 1);
+  rb_define_method(rb_cWindow, "contents", rb_window_m_contents, 0);
+  rb_define_method(rb_cWindow, "contents=", rb_window_m_set_contents, 1);
   rb_define_method(rb_cWindow, "visible", rb_window_m_visible, 0);
   rb_define_method(rb_cWindow, "visible=", rb_window_m_set_visible, 1);
   rb_define_method(rb_cWindow, "x", rb_window_m_x, 0);
@@ -129,6 +133,7 @@ void rb_window_modify(VALUE obj) {
 static void window_mark(struct Window *ptr) {
   rb_gc_mark(ptr->renderable.viewport);
   rb_gc_mark(ptr->windowskin);
+  rb_gc_mark(ptr->contents);
 }
 
 static void window_free(struct Window *ptr) {
@@ -146,6 +151,7 @@ static VALUE window_alloc(VALUE klass) {
 #endif
   ptr->renderable.viewport = Qnil;
   ptr->windowskin = Qnil;
+  ptr->contents = rb_bitmap_new(1, 1);
   ptr->disposed = false;
   ptr->visible = true;
   ptr->x = 0;
@@ -189,6 +195,7 @@ static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
   ptr->renderable.z = orig_ptr->renderable.z;
   ptr->renderable.viewport = orig_ptr->renderable.viewport;
   ptr->windowskin = orig_ptr->windowskin;
+  ptr->contents = orig_ptr->contents;
   ptr->disposed = orig_ptr->disposed;
   ptr->visible = orig_ptr->visible;
   ptr->x = orig_ptr->x;
@@ -245,6 +252,19 @@ static VALUE rb_window_m_set_windowskin(VALUE self, VALUE newval) {
   rb_window_modify(self);
   if(newval != Qnil) convertBitmap(newval);
   ptr->windowskin = newval;
+  return newval;
+}
+
+static VALUE rb_window_m_contents(VALUE self) {
+  struct Window *ptr = convertWindow(self);
+  return ptr->contents;
+}
+
+static VALUE rb_window_m_set_contents(VALUE self, VALUE newval) {
+  struct Window *ptr = convertWindow(self);
+  rb_window_modify(self);
+  if(newval != Qnil) convertBitmap(newval);
+  ptr->contents = newval;
   return newval;
 }
 
@@ -339,6 +359,7 @@ static void renderWindow(struct Renderable *renderable) {
   if(ptr->renderable.viewport != Qnil) WARN_UNIMPLEMENTED("Window#viewport");
   if(ptr->disposed || !ptr->visible) return;
   if(ptr->windowskin == Qnil) return;
+  if(ptr->contents != Qnil) WARN_UNIMPLEMENTED("Window#contents");
 #if RGSS >= 2
   if(ptr->openness == 0) return;
   if(ptr->openness < 255) WARN_UNIMPLEMENTED("Window#openness");

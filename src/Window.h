@@ -11,7 +11,7 @@ void Init_Window(void);
 
 struct Window {
   struct Renderable renderable;
-  VALUE windowskin;
+  VALUE windowskin, contents;
   bool disposed, visible;
   int x, y, width, height;
 #if RGSS >= 2
