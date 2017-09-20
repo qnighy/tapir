@@ -3,6 +3,7 @@
 #include "Bitmap.h"
 #include "RGSSError.h"
 #include "Rect.h"
+#include "Font.h"
 #include "openres.h"
 #include "misc.h"
 
@@ -31,6 +32,8 @@ static VALUE rb_bitmap_m_dispose(VALUE self);
 static VALUE rb_bitmap_m_disposed_p(VALUE self);
 static VALUE rb_bitmap_m_width(VALUE self);
 static VALUE rb_bitmap_m_height(VALUE self);
+static VALUE rb_bitmap_m_font(VALUE self);
+static VALUE rb_bitmap_m_set_font(VALUE self, VALUE newval);
 
 VALUE rb_cBitmap;
 
@@ -69,6 +72,8 @@ void Init_Bitmap(void) {
   rb_define_method(rb_cBitmap, "disposed?", rb_bitmap_m_disposed_p, 0);
   rb_define_method(rb_cBitmap, "width", rb_bitmap_m_width, 0);
   rb_define_method(rb_cBitmap, "height", rb_bitmap_m_height, 0);
+  rb_define_method(rb_cBitmap, "font", rb_bitmap_m_font, 0);
+  rb_define_method(rb_cBitmap, "font=", rb_bitmap_m_set_font, 1);
   // TODO: implement Bitmap#dispose
   // TODO: implement Bitmap#disposed?
   // TODO: implement Bitmap#rect
@@ -112,7 +117,7 @@ void rb_bitmap_modify(VALUE obj) {
 }
 
 static void bitmap_mark(struct Bitmap *ptr) {
-  (void) ptr;
+  rb_gc_mark(ptr->font);
 }
 
 static void bitmap_free(struct Bitmap *ptr) {
@@ -128,6 +133,7 @@ static VALUE bitmap_alloc(VALUE klass) {
   ptr->surface = NULL;
   ptr->texture_id = 0;
   ptr->texture_invalidated = true;
+  ptr->font = rb_font_new();
   VALUE ret = Data_Wrap_Struct(klass, bitmap_mark, bitmap_free, ptr);
   return ret;
 }
@@ -200,6 +206,12 @@ static VALUE rb_bitmap_m_initialize_copy(VALUE self, VALUE orig) {
   } else {
     ptr->surface = NULL;
   }
+  if(ptr->texture_id) {
+    glDeleteTextures(1, &ptr->texture_id);
+    ptr->texture_id = 0;
+    ptr->texture_invalidated = true;
+  }
+  rb_font_set(ptr->font, orig_ptr->font);
   return Qnil;
 }
 
@@ -230,4 +242,16 @@ static VALUE rb_bitmap_m_height(VALUE self) {
   struct Bitmap *ptr = convertBitmap(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
   return INT2NUM(ptr->surface->h);
+}
+
+static VALUE rb_bitmap_m_font(VALUE self) {
+  struct Bitmap *ptr = convertBitmap(self);
+  return ptr->font;
+}
+
+static VALUE rb_bitmap_m_set_font(VALUE self, VALUE newval) {
+  struct Bitmap *ptr = convertBitmap(self);
+  rb_font_modify(self);
+  rb_font_set(ptr->font, newval);
+  return newval;
 }

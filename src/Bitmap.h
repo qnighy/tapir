@@ -14,6 +14,7 @@ struct Bitmap {
   SDL_Surface *surface;
   GLuint texture_id;
   bool texture_invalidated;
+  VALUE font;
 };
 
 bool isBitmap(VALUE obj);

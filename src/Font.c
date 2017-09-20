@@ -9,6 +9,46 @@ static void font_mark(struct Font *ptr);
 static void font_free(struct Font *ptr);
 static VALUE font_alloc(VALUE klass);
 
+VALUE rb_font_new(void) {
+  VALUE ret = font_alloc(rb_cFont);
+  struct Font *ptr = convertFont(ret);
+  ptr->name = rb_cv_get(rb_cFont, "@@default_name");
+  ptr->size = NUM2INT(rb_cv_get(rb_cFont, "@@default_size"));
+  ptr->bold = RTEST(rb_cv_get(rb_cFont, "@@default_bold"));
+  ptr->italic = RTEST(rb_cv_get(rb_cFont, "@@default_italic"));
+#if RGSS == 3
+  ptr->outline = RTEST(rb_cv_get(rb_cFont, "@@default_outline"));
+#endif
+#if RGSS >= 2
+  ptr->shadow = RTEST(rb_cv_get(rb_cFont, "@@default_shadow"));
+#endif
+  rb_color_set2(ptr->color, rb_cv_get(rb_cFont, "@@default_color"));
+#if RGSS == 3
+  rb_color_set2(ptr->out_color, rb_cv_get(rb_cFont, "@@default_out_color"));
+#endif
+  return ret;
+}
+
+void rb_font_set(VALUE self, VALUE other) {
+  struct Font *ptr = convertFont(self);
+  struct Font *orig_ptr = convertFont(other);
+  rb_font_modify(self);
+  ptr->name = orig_ptr->name;
+  ptr->size = orig_ptr->size;
+  ptr->bold = orig_ptr->bold;
+  ptr->italic = orig_ptr->italic;
+#if RGSS == 3
+  ptr->outline = orig_ptr->outline;
+#endif
+#if RGSS >= 2
+  ptr->shadow = orig_ptr->shadow;
+#endif
+  rb_color_set2(ptr->color, orig_ptr->color);
+#if RGSS == 3
+  rb_color_set2(ptr->out_color, orig_ptr->out_color);
+#endif
+}
+
 static VALUE rb_font_m_initialize(int argc, VALUE *argv, VALUE self);
 static VALUE rb_font_m_initialize_copy(VALUE self, VALUE orig);
 static VALUE rb_font_s_exist_p(VALUE klass, VALUE name);

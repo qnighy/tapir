@@ -27,4 +27,7 @@ bool isFont(VALUE obj);
 struct Font *convertFont(VALUE obj);
 void rb_font_modify(VALUE obj);
 
+VALUE rb_font_new(void);
+void rb_font_set(VALUE self, VALUE other);
+
 #endif /* FONT_H */
