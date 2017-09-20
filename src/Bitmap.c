@@ -2,6 +2,7 @@
 #include <SDL_image.h>
 #include "Bitmap.h"
 #include "RGSSError.h"
+#include "Color.h"
 #include "Rect.h"
 #include "Font.h"
 #include "openres.h"
@@ -32,6 +33,13 @@ static VALUE rb_bitmap_m_dispose(VALUE self);
 static VALUE rb_bitmap_m_disposed_p(VALUE self);
 static VALUE rb_bitmap_m_width(VALUE self);
 static VALUE rb_bitmap_m_height(VALUE self);
+static VALUE rb_bitmap_m_fill_rect(int argc, VALUE *argv, VALUE self);
+static VALUE rb_bitmap_m_clear(VALUE self);
+#if RGSS >= 2
+static VALUE rb_bitmap_m_clear_rect(int argc, VALUE *argv, VALUE self);
+#endif
+static VALUE rb_bitmap_m_get_pixel(VALUE self, VALUE x, VALUE y);
+static VALUE rb_bitmap_m_set_pixel(VALUE self, VALUE x, VALUE y, VALUE color);
 static VALUE rb_bitmap_m_font(VALUE self);
 static VALUE rb_bitmap_m_set_font(VALUE self, VALUE newval);
 
@@ -72,6 +80,13 @@ void Init_Bitmap(void) {
   rb_define_method(rb_cBitmap, "disposed?", rb_bitmap_m_disposed_p, 0);
   rb_define_method(rb_cBitmap, "width", rb_bitmap_m_width, 0);
   rb_define_method(rb_cBitmap, "height", rb_bitmap_m_height, 0);
+  rb_define_method(rb_cBitmap, "fill_rect", rb_bitmap_m_fill_rect, -1);
+  rb_define_method(rb_cBitmap, "clear", rb_bitmap_m_clear, 0);
+#if RGSS >= 2
+  rb_define_method(rb_cBitmap, "clear_rect", rb_bitmap_m_clear_rect, -1);
+#endif
+  rb_define_method(rb_cBitmap, "get_pixel", rb_bitmap_m_get_pixel, 2);
+  rb_define_method(rb_cBitmap, "set_pixel", rb_bitmap_m_set_pixel, 3);
   rb_define_method(rb_cBitmap, "font", rb_bitmap_m_font, 0);
   rb_define_method(rb_cBitmap, "font=", rb_bitmap_m_set_font, 1);
   // TODO: implement Bitmap#dispose
@@ -80,10 +95,6 @@ void Init_Bitmap(void) {
   // TODO: implement Bitmap#blt
   // TODO: implement Bitmap#stretch_blt
   // TODO: implement Bitmap#gradient_fill_rect
-  // TODO: implement Bitmap#clear
-  // TODO: implement Bitmap#clear_rect
-  // TODO: implement Bitmap#get_pixel
-  // TODO: implement Bitmap#set_pixel
   // TODO: implement Bitmap#hue_change
   // TODO: implement Bitmap#blur
   // TODO: implement Bitmap#radial_blur
@@ -242,6 +253,116 @@ static VALUE rb_bitmap_m_height(VALUE self) {
   struct Bitmap *ptr = convertBitmap(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
   return INT2NUM(ptr->surface->h);
+}
+
+static VALUE rb_bitmap_m_fill_rect(int argc, VALUE *argv, VALUE self) {
+  struct Bitmap *ptr = convertBitmap(self);
+  rb_bitmap_modify(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+
+  SDL_Rect sdl_rect;
+  struct Color *color_ptr;
+  if(argc == 2) {
+    struct Rect *rect_ptr = convertRect(argv[0]);
+    sdl_rect.x = rect_ptr->x;
+    sdl_rect.y = rect_ptr->y;
+    sdl_rect.w = rect_ptr->width;
+    sdl_rect.h = rect_ptr->height;
+    color_ptr = convertColor(argv[1]);
+  } else if(argc == 5) {
+    sdl_rect.x = NUM2INT(argv[0]);
+    sdl_rect.y = NUM2INT(argv[1]);
+    sdl_rect.w = NUM2INT(argv[2]);
+    sdl_rect.h = NUM2INT(argv[3]);
+    color_ptr = convertColor(argv[4]);
+  } else {
+    rb_raise(rb_eArgError,
+        "wrong number of arguments (%d for 2 or 5)", argc);
+  }
+  Uint32 red = (Uint8)color_ptr->red;
+  Uint32 green = (Uint8)color_ptr->green;
+  Uint32 blue = (Uint8)color_ptr->blue;
+  Uint32 alpha = (Uint8)color_ptr->alpha;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+  Uint32 color = (red << 24) | (green << 16) | (blue << 8) | alpha;
+#else
+  Uint32 color = red | (green << 8) | (blue << 16) | (alpha << 24);
+#endif
+  SDL_FillRect(ptr->surface, &sdl_rect, color);
+  return Qnil;
+}
+
+static VALUE rb_bitmap_m_clear(VALUE self) {
+  struct Bitmap *ptr = convertBitmap(self);
+  rb_bitmap_modify(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  SDL_FillRect(ptr->surface, NULL, 0x00000000);
+  return Qnil;
+}
+
+#if RGSS >= 2
+static VALUE rb_bitmap_m_clear_rect(int argc, VALUE *argv, VALUE self) {
+  struct Bitmap *ptr = convertBitmap(self);
+  rb_bitmap_modify(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+
+  SDL_Rect sdl_rect;
+  if(argc == 1) {
+    struct Rect *rect_ptr = convertRect(argv[0]);
+    sdl_rect.x = rect_ptr->x;
+    sdl_rect.y = rect_ptr->y;
+    sdl_rect.w = rect_ptr->width;
+    sdl_rect.h = rect_ptr->height;
+  } else if(argc == 4) {
+    sdl_rect.x = NUM2INT(argv[0]);
+    sdl_rect.y = NUM2INT(argv[1]);
+    sdl_rect.w = NUM2INT(argv[2]);
+    sdl_rect.h = NUM2INT(argv[3]);
+  } else {
+    rb_raise(rb_eArgError,
+        "wrong number of arguments (%d for 1 or 4)", argc);
+  }
+  SDL_FillRect(ptr->surface, &sdl_rect, 0x00000000);
+  return Qnil;
+}
+#endif
+
+static VALUE rb_bitmap_m_get_pixel(VALUE self, VALUE x, VALUE y) {
+  struct Bitmap *ptr = convertBitmap(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  int xi = NUM2INT(x);
+  int yi = NUM2INT(y);
+  if(!(0 <= xi && xi < ptr->surface->w && 0 <= yi && yi < ptr->surface->h)) {
+    return rb_color_new2();
+  }
+  SDL_LockSurface(ptr->surface);
+  Uint8 *pixel =
+    (Uint8*)ptr->surface->pixels + yi * ptr->surface->pitch + xi * 4;
+  VALUE color = rb_color_new(
+    pixel[0], pixel[1], pixel[2], pixel[3]);
+  SDL_UnlockSurface(ptr->surface);
+  return color;
+}
+
+static VALUE rb_bitmap_m_set_pixel(VALUE self, VALUE x, VALUE y, VALUE color) {
+  struct Bitmap *ptr = convertBitmap(self);
+  rb_bitmap_modify(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  int xi = NUM2INT(x);
+  int yi = NUM2INT(y);
+  struct Color *color_ptr = convertColor(color);
+  if(!(0 <= xi && xi < ptr->surface->w && 0 <= yi && yi < ptr->surface->h)) {
+    return Qnil;
+  }
+  SDL_LockSurface(ptr->surface);
+  Uint8 *pixel =
+    (Uint8*)ptr->surface->pixels + yi * ptr->surface->pitch + xi * 4;
+  pixel[0] = color_ptr->red;
+  pixel[1] = color_ptr->green;
+  pixel[2] = color_ptr->blue;
+  pixel[3] = color_ptr->alpha;
+  SDL_UnlockSurface(ptr->surface);
+  return Qnil;
 }
 
 static VALUE rb_bitmap_m_font(VALUE self) {
