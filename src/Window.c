@@ -358,65 +358,67 @@ static void renderWindow(struct Renderable *renderable) {
   struct Window *ptr = (struct Window *)renderable;
   if(ptr->renderable.viewport != Qnil) WARN_UNIMPLEMENTED("Window#viewport");
   if(ptr->disposed || !ptr->visible) return;
-  if(ptr->windowskin == Qnil) return;
   if(ptr->contents != Qnil) WARN_UNIMPLEMENTED("Window#contents");
 #if RGSS >= 2
   if(ptr->openness == 0) return;
   if(ptr->openness < 255) WARN_UNIMPLEMENTED("Window#openness");
 #endif
-  struct Bitmap *skin_bitmap_ptr = convertBitmap(ptr->windowskin);
-  SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
-  if(!skin_surface) return;
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  if(ptr->windowskin != Qnil) {
+    struct Bitmap *skin_bitmap_ptr = convertBitmap(ptr->windowskin);
+    SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
+    if(!skin_surface) return;
 
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-  glUseProgram(shader1);
-  glUniform1i(glGetUniformLocation(shader1, "windowskin"), 0);
-  glUniform2f(glGetUniformLocation(shader1, "resolution"),
-      window_width, window_height);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  glActiveTexture(GL_TEXTURE0);
-  bitmapBindTexture(skin_bitmap_ptr);
+    glUseProgram(shader1);
+    glUniform1i(glGetUniformLocation(shader1, "windowskin"), 0);
+    glUniform2f(glGetUniformLocation(shader1, "resolution"),
+        window_width, window_height);
 
-  gl_draw_rect(
-      ptr->x + 2, ptr->y + 2,
-      ptr->x + ptr->width - 2, ptr->y + ptr->height - 2,
-      0.0, 0.0, 1.0, 1.0);
+    glActiveTexture(GL_TEXTURE0);
+    bitmapBindTexture(skin_bitmap_ptr);
+
+    gl_draw_rect(
+        ptr->x + 2, ptr->y + 2,
+        ptr->x + ptr->width - 2, ptr->y + ptr->height - 2,
+        0.0, 0.0, 1.0, 1.0);
 
 #if RGSS >= 2
-  glUseProgram(shader2);
-  glUniform1i(glGetUniformLocation(shader2, "windowskin"), 0);
-  glUniform2f(glGetUniformLocation(shader2, "resolution"),
-      window_width, window_height);
+    glUseProgram(shader2);
+    glUniform1i(glGetUniformLocation(shader2, "windowskin"), 0);
+    glUniform2f(glGetUniformLocation(shader2, "resolution"),
+        window_width, window_height);
 
-  glActiveTexture(GL_TEXTURE0);
-  bitmapBindTexture(skin_bitmap_ptr);
+    glActiveTexture(GL_TEXTURE0);
+    bitmapBindTexture(skin_bitmap_ptr);
 
-  gl_draw_rect(
-      ptr->x + 2, ptr->y + 2,
-      ptr->x + ptr->width - 2, ptr->y + ptr->height - 2,
-      0.0, 0.0, (ptr->width - 2) / 64.0, (ptr->height - 2) / 64.0);
+    gl_draw_rect(
+        ptr->x + 2, ptr->y + 2,
+        ptr->x + ptr->width - 2, ptr->y + ptr->height - 2,
+        0.0, 0.0, (ptr->width - 2) / 64.0, (ptr->height - 2) / 64.0);
 #endif
 
-  glUseProgram(shader3);
-  glUniform1i(glGetUniformLocation(shader3, "windowskin"), 0);
-  glUniform2f(glGetUniformLocation(shader3, "resolution"),
-      window_width, window_height);
-  glUniform2f(glGetUniformLocation(shader3, "bg_size"),
-      ptr->width, ptr->height);
+    glUseProgram(shader3);
+    glUniform1i(glGetUniformLocation(shader3, "windowskin"), 0);
+    glUniform2f(glGetUniformLocation(shader3, "resolution"),
+        window_width, window_height);
+    glUniform2f(glGetUniformLocation(shader3, "bg_size"),
+        ptr->width, ptr->height);
 
-  glActiveTexture(GL_TEXTURE0);
-  bitmapBindTexture(skin_bitmap_ptr);
+    glActiveTexture(GL_TEXTURE0);
+    bitmapBindTexture(skin_bitmap_ptr);
 
-  gl_draw_rect(
-      ptr->x, ptr->y, ptr->x + ptr->width, ptr->y + ptr->height,
-      0.0, 0.0, ptr->width, ptr->height);
+    gl_draw_rect(
+        ptr->x, ptr->y, ptr->x + ptr->width, ptr->y + ptr->height,
+        0.0, 0.0, ptr->width, ptr->height);
+  }
 
   glUseProgram(0);
 }
