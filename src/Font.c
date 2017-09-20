@@ -1,4 +1,3 @@
-#include <SDL.h>
 #include "Font.h"
 #include "Color.h"
 #include "font_lookup.h"
@@ -8,6 +7,13 @@
 static void font_mark(struct Font *ptr);
 static void font_free(struct Font *ptr);
 static VALUE font_alloc(VALUE klass);
+
+static void font_invalidate_cache(struct Font *ptr) {
+  if(ptr->cache) {
+    TTF_CloseFont(ptr->cache);
+    ptr->cache = NULL;
+  }
+}
 
 VALUE rb_font_new(void) {
   VALUE ret = font_alloc(rb_cFont);
@@ -47,6 +53,21 @@ void rb_font_set(VALUE self, VALUE other) {
 #if RGSS == 3
   rb_color_set2(ptr->out_color, orig_ptr->out_color);
 #endif
+}
+
+TTF_Font *rb_font_to_sdl(VALUE self) {
+  struct Font *ptr = convertFont(self);
+  if(ptr->cache) return ptr->cache;
+  VALUE name;
+  if(TYPE(ptr->name) == T_ARRAY) {
+    // TODO: multiple font names
+    name = rb_ary_entry(ptr->name, 0);
+  } else {
+    name = ptr->name;
+  }
+  ptr->cache = loadFont(
+      StringValueCStr(name), ptr->size, ptr->bold, ptr->italic);
+  return ptr->cache;
 }
 
 static VALUE rb_font_m_initialize(int argc, VALUE *argv, VALUE self);
@@ -144,6 +165,7 @@ static void font_mark(struct Font *ptr) {
 }
 
 static void font_free(struct Font *ptr) {
+  font_invalidate_cache(ptr);
   xfree(ptr);
 }
 
@@ -163,6 +185,7 @@ static VALUE font_alloc(VALUE klass) {
 #if RGSS == 3
   ptr->out_color = rb_color_new2();
 #endif
+  ptr->cache = NULL;
   VALUE ret = Data_Wrap_Struct(klass, font_mark, font_free, ptr);
   return ret;
 }
@@ -223,6 +246,7 @@ static VALUE rb_font_m_initialize_copy(VALUE self, VALUE orig) {
 #if RGSS == 3
   rb_color_set2(ptr->out_color, orig_ptr->out_color);
 #endif
+  font_invalidate_cache(ptr);
   return Qnil;
 }
 
@@ -241,6 +265,7 @@ static VALUE rb_font_m_set_name(VALUE self, VALUE newval) {
   struct Font *ptr = convertFont(self);
   rb_font_modify(self);
   ptr->name = newval;
+  font_invalidate_cache(ptr);
   return newval;
 }
 
@@ -253,6 +278,7 @@ static VALUE rb_font_m_set_size(VALUE self, VALUE newval) {
   struct Font *ptr = convertFont(self);
   rb_font_modify(self);
   ptr->size = NUM2INT(newval);
+  font_invalidate_cache(ptr);
   return newval;
 }
 
@@ -265,6 +291,7 @@ static VALUE rb_font_m_set_bold(VALUE self, VALUE newval) {
   struct Font *ptr = convertFont(self);
   rb_font_modify(self);
   ptr->bold = RTEST(newval);
+  font_invalidate_cache(ptr);
   return newval;
 }
 
@@ -277,6 +304,7 @@ static VALUE rb_font_m_set_italic(VALUE self, VALUE newval) {
   struct Font *ptr = convertFont(self);
   rb_font_modify(self);
   ptr->italic = RTEST(newval);
+  font_invalidate_cache(ptr);
   return newval;
 }
 
@@ -290,6 +318,7 @@ static VALUE rb_font_m_set_outline(VALUE self, VALUE newval) {
   struct Font *ptr = convertFont(self);
   rb_font_modify(self);
   ptr->outline = RTEST(newval);
+  font_invalidate_cache(ptr);
   return newval;
 }
 #endif
@@ -304,6 +333,7 @@ static VALUE rb_font_m_set_shadow(VALUE self, VALUE newval) {
   struct Font *ptr = convertFont(self);
   rb_font_modify(self);
   ptr->shadow = RTEST(newval);
+  font_invalidate_cache(ptr);
   return newval;
 }
 #endif
@@ -317,6 +347,7 @@ static VALUE rb_font_m_set_color(VALUE self, VALUE newval) {
   struct Font *ptr = convertFont(self);
   rb_font_modify(self);
   rb_color_set2(ptr->color, newval);
+  font_invalidate_cache(ptr);
   return newval;
 }
 
@@ -330,6 +361,7 @@ static VALUE rb_font_m_set_out_color(VALUE self, VALUE newval) {
   struct Font *ptr = convertFont(self);
   rb_font_modify(self);
   rb_color_set2(ptr->out_color, newval);
+  font_invalidate_cache(ptr);
   return newval;
 }
 #endif

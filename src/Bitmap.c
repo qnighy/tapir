@@ -369,15 +369,108 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
   struct Bitmap *ptr = convertBitmap(self);
   rb_bitmap_modify(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
-  // TODO: Bitmap#draw_text
+
+  VALUE str;
+  SDL_Rect rect;
+  int align = 0;
+  if(argc == 2 || argc == 3) {
+    struct Rect *rect_ptr = convertRect(argv[0]);
+    rect.x = rect_ptr->x;
+    rect.y = rect_ptr->y;
+    rect.w = rect_ptr->width;
+    rect.h = rect_ptr->height;
+    str = argv[1];
+    if(argc == 3) align = NUM2INT(argv[2]);
+  } else if(argc == 5 || argc == 6) {
+    rect.x = NUM2INT(argv[0]);
+    rect.y = NUM2INT(argv[1]);
+    rect.w = NUM2INT(argv[2]);
+    rect.h = NUM2INT(argv[3]);
+    str = argv[4];
+    if(argc == 6) align = NUM2INT(argv[5]);
+  } else {
+    rb_raise(rb_eArgError,
+        "wrong number of arguments (%d for 2..3 or 5..6)", argc);
+  }
+
+#if RGSS >= 2
+  if(TYPE(str) != T_STRING) {
+    str = rb_funcall(str, rb_intern("to_s"), 0);
+  }
+#endif
+  const char *cstr = StringValueCStr(str);
+
+  struct Font *font_ptr = convertFont(ptr->font);
+  TTF_Font *sdl_font = rb_font_to_sdl(ptr->font);
+
+#if RGSS == 3
+  if(font_ptr->outline) {
+    TTF_SetFontOutline(sdl_font, 1);
+
+    struct Color *font_out_color_ptr = convertColor(font_ptr->out_color);
+
+    int out_width, out_height;
+    TTF_SizeUTF8(sdl_font, cstr, &out_width, &out_height);
+
+    SDL_Rect out_rect = rect;
+    out_rect.x += (out_rect.w - out_width) * align / 2;
+    out_rect.y--;
+    out_rect.w = out_width;
+    out_rect.h = out_height;
+
+    SDL_Color outline_fg = {
+      font_out_color_ptr->red,
+      font_out_color_ptr->green,
+      font_out_color_ptr->blue,
+      font_out_color_ptr->alpha
+    };
+    SDL_Surface *rendered = TTF_RenderUTF8_Blended(sdl_font, cstr, outline_fg);
+    SDL_SetSurfaceBlendMode(rendered, SDL_BLENDMODE_BLEND);
+    SDL_BlitSurface(rendered, NULL, ptr->surface, &out_rect);
+
+    TTF_SetFontOutline(sdl_font, 0);
+  }
+#endif
+
+  struct Color *font_color_ptr = convertColor(font_ptr->color);
+
+  int width, height;
+  TTF_SizeUTF8(sdl_font, cstr, &width, &height);
+
+  rect.x += (rect.w - width) * align / 2;
+  rect.w = width;
+  rect.h = height;
+
+  SDL_Color fg = {
+    font_color_ptr->red,
+    font_color_ptr->green,
+    font_color_ptr->blue,
+    font_color_ptr->alpha
+  };
+  SDL_Surface *rendered = TTF_RenderUTF8_Blended(sdl_font, cstr, fg);
+  SDL_SetSurfaceBlendMode(rendered, SDL_BLENDMODE_BLEND);
+
+  // TODO: implement scaling
+  // TODO: implement shadow
+  // TODO: implement outline
+  SDL_BlitSurface(rendered, NULL, ptr->surface, &rect);
   return Qnil;
 }
 
 static VALUE rb_bitmap_m_text_size(VALUE self, VALUE str) {
   struct Bitmap *ptr = convertBitmap(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
-  // TODO: Bitmap#text_size
-  return rb_rect_new(0, 0, 32, 32);
+#if RGSS >= 2
+  if(TYPE(str) != T_STRING) {
+    str = rb_funcall(str, rb_intern("to_s"), 0);
+  }
+#endif
+  const char *cstr = StringValueCStr(str);
+
+  TTF_Font *font = rb_font_to_sdl(ptr->font);
+  int width, height;
+  TTF_SizeUTF8(font, cstr, &width, &height);
+  return rb_rect_new(0, 0, width, height);
 }
 
 static VALUE rb_bitmap_m_font(VALUE self) {

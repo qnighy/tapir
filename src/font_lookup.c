@@ -33,3 +33,51 @@ bool fontExistence(const char *name) {
   FcPatternDestroy(pat);
   return exists;
 }
+
+TTF_Font *loadFont(const char *name, int size, bool bold, bool italic) {
+  // TODO: cache font here to avoid multiple loading
+
+  // fprintf(stderr, "loadFont(%s, %d, %d, %d)\n", name, size, bold, italic);
+
+  FcPattern* pat = FcPatternCreate();
+  FcPatternAddString(pat, FC_FAMILY, (const FcChar8 *)name);
+  FcPatternAddInteger(pat, FC_SIZE, size);
+  FcPatternAddInteger(pat, FC_WEIGHT,
+      bold ? FC_WEIGHT_BOLD : FC_WEIGHT_MEDIUM);
+  FcPatternAddInteger(pat, FC_SLANT,
+      italic ? FC_SLANT_ITALIC : FC_SLANT_ROMAN);
+
+  FcConfigSubstitute(config, pat, FcMatchPattern);
+  FcDefaultSubstitute(pat);
+
+  FcResult result;
+  FcPattern* font = FcFontMatch(config, pat, &result);
+  if(!font) {
+    fprintf(stderr, "No font found!\n");
+    exit(1);
+  }
+
+  const char *path;
+  if(FcPatternGetString(font, FC_FILE, 0, (FcChar8 **)&path) != FcResultMatch) {
+    fprintf(stderr, "Fontconfig failed!\n");
+    exit(1);
+  }
+
+  int index;
+  if(FcPatternGetInteger(font, FC_INDEX, 0, &index) != FcResultMatch) {
+    fprintf(stderr, "Fontconfig failed!\n");
+    exit(1);
+  }
+
+  // fprintf(stderr, "font = %s, index = %d\n", path, index);
+
+  TTF_Font *sdl_font = TTF_OpenFontIndex(path, size, index);
+
+  TTF_SetFontStyle(sdl_font,
+      (bold ? TTF_STYLE_BOLD : 0) | (italic ? TTF_STYLE_ITALIC : 0));
+
+  FcPatternDestroy(font);
+  FcPatternDestroy(pat);
+
+  return sdl_font;
+}
