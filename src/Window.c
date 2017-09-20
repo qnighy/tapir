@@ -113,6 +113,7 @@ void rb_window_modify(VALUE obj) {
 
 static void window_mark(struct Window *ptr) {
   rb_gc_mark(ptr->renderable.viewport);
+  rb_gc_mark(ptr->windowskin);
 }
 
 static void window_free(struct Window *ptr) {
