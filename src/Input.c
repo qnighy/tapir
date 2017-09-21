@@ -126,13 +126,13 @@ static VALUE rb_input_s_repeat_p(VALUE klass, VALUE key) {
 static VALUE rb_input_s_dir4(VALUE klass) {
   (void) klass;
   WARN_UNIMPLEMENTED("Input.dir4");
-  return Qnil;
+  return INT2NUM(5);
 }
 
 static VALUE rb_input_s_dir8(VALUE klass) {
   (void) klass;
   WARN_UNIMPLEMENTED("Input.dir8");
-  return Qnil;
+  return INT2NUM(5);
 }
 
 static int convertSDLKey(SDL_Keycode key) {
