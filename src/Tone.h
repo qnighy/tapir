@@ -11,8 +11,8 @@ struct Tone {
   double red, green, blue, gray;
 };
 
-bool isTone(VALUE obj);
-struct Tone *convertTone(VALUE obj);
+bool rb_tone_data_p(VALUE obj);
+struct Tone *rb_tone_data(VALUE obj);
 void rb_tone_modify(VALUE obj);
 
 VALUE rb_tone_new(double red, double green, double blue, double gray);

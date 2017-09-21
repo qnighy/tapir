@@ -17,8 +17,8 @@ struct Bitmap {
   VALUE font;
 };
 
-bool isBitmap(VALUE obj);
-struct Bitmap *convertBitmap(VALUE obj);
+bool rb_bitmap_data_p(VALUE obj);
+struct Bitmap *rb_bitmap_data(VALUE obj);
 void rb_bitmap_modify(VALUE obj);
 
 VALUE rb_bitmap_new(int width, int height);

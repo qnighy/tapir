@@ -108,12 +108,12 @@ void Init_Window(void) {
   // TODO: implement Window#tone
 }
 
-bool isWindow(VALUE obj) {
+bool rb_window_data_p(VALUE obj) {
   if(TYPE(obj) != T_DATA) return false;
   return RDATA(obj)->dmark == (void(*)(void*))window_mark;
 }
 
-struct Window *convertWindow(VALUE obj) {
+struct Window *rb_window_data(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))window_mark) {
@@ -178,7 +178,7 @@ static VALUE window_alloc(VALUE klass) {
  * Creates a new window.
  */
 static VALUE rb_window_m_initialize(int argc, VALUE *argv, VALUE self) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   if(argc > 4) {
     rb_raise(rb_eArgError,
         "wrong number of arguments (%d for 4)", argc);
@@ -191,8 +191,8 @@ static VALUE rb_window_m_initialize(int argc, VALUE *argv, VALUE self) {
 }
 
 static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
-  struct Window *ptr = convertWindow(self);
-  struct Window *orig_ptr = convertWindow(orig);
+  struct Window *ptr = rb_window_data(self);
+  struct Window *orig_ptr = rb_window_data(orig);
   ptr->renderable.z = orig_ptr->renderable.z;
   ptr->renderable.viewport = orig_ptr->renderable.viewport;
   ptr->windowskin = orig_ptr->windowskin;
@@ -210,20 +210,20 @@ static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
 }
 
 static VALUE rb_window_m_dispose(VALUE self) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   ptr->disposed = true;
   return Qnil;
 }
 
 static VALUE rb_window_m_disposed_p(VALUE self) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   return ptr->disposed ? Qtrue : Qfalse;
 }
 
 #if RGSS == 3
 static VALUE rb_window_m_move(
     VALUE self, VALUE x, VALUE y, VALUE width, VALUE height) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   rb_window_modify(self);
   ptr->x = NUM2INT(x);
   ptr->y = NUM2INT(y);
@@ -233,109 +233,109 @@ static VALUE rb_window_m_move(
 }
 
 static VALUE rb_window_m_open_p(VALUE self) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   return ptr->openness == 255 ? Qtrue : Qfalse;
 }
 
 static VALUE rb_window_m_close_p(VALUE self) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   return ptr->openness == 0 ? Qtrue : Qfalse;
 }
 #endif
 
 static VALUE rb_window_m_windowskin(VALUE self) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   return ptr->windowskin;
 }
 
 static VALUE rb_window_m_set_windowskin(VALUE self, VALUE newval) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   rb_window_modify(self);
-  if(newval != Qnil) convertBitmap(newval);
+  if(newval != Qnil) rb_bitmap_data(newval);
   ptr->windowskin = newval;
   return newval;
 }
 
 static VALUE rb_window_m_contents(VALUE self) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   return ptr->contents;
 }
 
 static VALUE rb_window_m_set_contents(VALUE self, VALUE newval) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   rb_window_modify(self);
-  if(newval != Qnil) convertBitmap(newval);
+  if(newval != Qnil) rb_bitmap_data(newval);
   ptr->contents = newval;
   return newval;
 }
 
 static VALUE rb_window_m_visible(VALUE self) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   return ptr->visible ? Qtrue : Qfalse;
 }
 
 static VALUE rb_window_m_set_visible(VALUE self, VALUE newval) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   rb_window_modify(self);
   ptr->visible = RTEST(newval);
   return newval;
 }
 
 static VALUE rb_window_m_x(VALUE self) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   return INT2NUM(ptr->x);
 }
 
 static VALUE rb_window_m_set_x(VALUE self, VALUE newval) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   rb_window_modify(self);
   ptr->x = NUM2INT(newval);
   return newval;
 }
 
 static VALUE rb_window_m_y(VALUE self) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   return INT2NUM(ptr->y);
 }
 
 static VALUE rb_window_m_set_y(VALUE self, VALUE newval) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   rb_window_modify(self);
   ptr->y = NUM2INT(newval);
   return newval;
 }
 
 static VALUE rb_window_m_width(VALUE self) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   return INT2NUM(ptr->width);
 }
 
 static VALUE rb_window_m_set_width(VALUE self, VALUE newval) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   rb_window_modify(self);
   ptr->width = NUM2INT(newval);
   return newval;
 }
 
 static VALUE rb_window_m_height(VALUE self) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   return INT2NUM(ptr->height);
 }
 
 static VALUE rb_window_m_set_height(VALUE self, VALUE newval) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   rb_window_modify(self);
   ptr->height = NUM2INT(newval);
   return newval;
 }
 
 static VALUE rb_window_m_z(VALUE self) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   return INT2NUM(ptr->renderable.z);
 }
 
 static VALUE rb_window_m_set_z(VALUE self, VALUE newval) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   rb_window_modify(self);
   ptr->renderable.z = NUM2INT(newval);
   return newval;
@@ -343,12 +343,12 @@ static VALUE rb_window_m_set_z(VALUE self, VALUE newval) {
 
 #if RGSS >= 2
 static VALUE rb_window_m_openness(VALUE self) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   return INT2NUM(ptr->openness);
 }
 
 static VALUE rb_window_m_set_openness(VALUE self, VALUE newval) {
-  struct Window *ptr = convertWindow(self);
+  struct Window *ptr = rb_window_data(self);
   rb_window_modify(self);
   ptr->openness = saturateInt32(NUM2INT(newval), 0, 255);
   return newval;
@@ -376,7 +376,7 @@ static void renderWindow(struct Renderable *renderable) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   if(ptr->windowskin != Qnil) {
-    struct Bitmap *skin_bitmap_ptr = convertBitmap(ptr->windowskin);
+    struct Bitmap *skin_bitmap_ptr = rb_bitmap_data(ptr->windowskin);
     SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
     if(!skin_surface) return;
 
@@ -418,7 +418,7 @@ static void renderWindow(struct Renderable *renderable) {
   }
 
   if(ptr->contents != Qnil && openness == 255) {
-    struct Bitmap *contents_bitmap_ptr = convertBitmap(ptr->contents);
+    struct Bitmap *contents_bitmap_ptr = rb_bitmap_data(ptr->contents);
     SDL_Surface *contents_surface = contents_bitmap_ptr->surface;
     if(!contents_surface) return;
 

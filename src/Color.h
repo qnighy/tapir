@@ -11,8 +11,8 @@ struct Color {
   double red, green, blue, alpha;
 };
 
-bool isColor(VALUE obj);
-struct Color *convertColor(VALUE obj);
+bool rb_color_data_p(VALUE obj);
+struct Color *rb_color_data(VALUE obj);
 void rb_color_modify(VALUE obj);
 
 VALUE rb_color_new(double red, double green, double blue, double alpha);

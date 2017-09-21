@@ -6,7 +6,7 @@ static VALUE tone_alloc(VALUE klass);
 
 VALUE rb_tone_new(double red, double green, double blue, double gray) {
   VALUE ret = tone_alloc(rb_cTone);
-  struct Tone *ptr = convertTone(ret);
+  struct Tone *ptr = rb_tone_data(ret);
   ptr->red = saturateDouble(red, -255.0, 255.0);
   ptr->green = saturateDouble(green, -255.0, 255.0);
   ptr->blue = saturateDouble(blue, -255.0, 255.0);
@@ -18,8 +18,8 @@ VALUE rb_tone_new2(void) {
 }
 
 bool rb_tone_equal(VALUE self, VALUE other) {
-  struct Tone *ptr = convertTone(self);
-  struct Tone *other_ptr = convertTone(other);
+  struct Tone *ptr = rb_tone_data(self);
+  struct Tone *other_ptr = rb_tone_data(other);
   return
     ptr->red == other_ptr->red &&
     ptr->green == other_ptr->green &&
@@ -30,7 +30,7 @@ bool rb_tone_equal(VALUE self, VALUE other) {
 void rb_tone_set(
     VALUE self, double newred, double newgreen, double newblue,
     double newgray) {
-  struct Tone *ptr = convertTone(self);
+  struct Tone *ptr = rb_tone_data(self);
   rb_tone_modify(self);
   ptr->red = saturateDouble(newred, -255.0, 255.0);
   ptr->green = saturateDouble(newgreen, -255.0, 255.0);
@@ -39,8 +39,8 @@ void rb_tone_set(
 }
 
 void rb_tone_set2(VALUE self, VALUE other) {
-  struct Tone *ptr = convertTone(self);
-  struct Tone *other_ptr = convertTone(other);
+  struct Tone *ptr = rb_tone_data(self);
+  struct Tone *other_ptr = rb_tone_data(other);
   rb_tone_modify(self);
   // Note: original RGSS doesn't check saturation here.
   ptr->red = saturateDouble(other_ptr->red, -255.0, 255.0);
@@ -50,38 +50,38 @@ void rb_tone_set2(VALUE self, VALUE other) {
 }
 
 double rb_tone_red(VALUE self) {
-  struct Tone *ptr = convertTone(self);
+  struct Tone *ptr = rb_tone_data(self);
   return ptr->red;
 }
 void rb_tone_set_red(VALUE self, double newval) {
-  struct Tone *ptr = convertTone(self);
+  struct Tone *ptr = rb_tone_data(self);
   rb_tone_modify(self);
   ptr->red = saturateDouble(newval, -255.0, 255.0);
 }
 double rb_tone_green(VALUE self) {
-  struct Tone *ptr = convertTone(self);
+  struct Tone *ptr = rb_tone_data(self);
   return ptr->green;
 }
 void rb_tone_set_green(VALUE self, double newval) {
-  struct Tone *ptr = convertTone(self);
+  struct Tone *ptr = rb_tone_data(self);
   rb_tone_modify(self);
   ptr->green = saturateDouble(newval, -255.0, 255.0);
 }
 double rb_tone_blue(VALUE self) {
-  struct Tone *ptr = convertTone(self);
+  struct Tone *ptr = rb_tone_data(self);
   return ptr->blue;
 }
 void rb_tone_set_blue(VALUE self, double newval) {
-  struct Tone *ptr = convertTone(self);
+  struct Tone *ptr = rb_tone_data(self);
   rb_tone_modify(self);
   ptr->blue = saturateDouble(newval, -255.0, 255.0);
 }
 double rb_tone_gray(VALUE self) {
-  struct Tone *ptr = convertTone(self);
+  struct Tone *ptr = rb_tone_data(self);
   return ptr->gray;
 }
 void rb_tone_set_gray(VALUE self, double newval) {
-  struct Tone *ptr = convertTone(self);
+  struct Tone *ptr = rb_tone_data(self);
   rb_tone_modify(self);
   ptr->gray = saturateDouble(newval, 0.0, 255.0);
 }
@@ -133,12 +133,12 @@ void Init_Tone(void) {
   rb_define_method(rb_cTone, "_dump", rb_tone_m_old_dump, 1);
 }
 
-bool isTone(VALUE obj) {
+bool rb_tone_data_p(VALUE obj) {
   if(TYPE(obj) != T_DATA) return false;
   return RDATA(obj)->dmark == (void(*)(void*))tone_mark;
 }
 
-struct Tone *convertTone(VALUE obj) {
+struct Tone *rb_tone_data(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))tone_mark) {
@@ -226,7 +226,7 @@ static VALUE rb_tone_m_initialize_copy(VALUE self, VALUE orig) {
  * Compares it to another tone.
  */
 static VALUE rb_tone_m_equal(VALUE self, VALUE other) {
-  if(!isTone(other)) return Qfalse;
+  if(!rb_tone_data_p(other)) return Qfalse;
   return rb_tone_equal(self, other) ? Qtrue : Qfalse;
 }
 
@@ -371,7 +371,7 @@ static VALUE rb_tone_m_set_gray(VALUE self, VALUE newval) {
  * Returns the string representation of the tone.
  */
 static VALUE rb_tone_m_to_s(VALUE self) {
-  struct Tone *ptr = convertTone(self);
+  struct Tone *ptr = rb_tone_data(self);
   char s[100];
   snprintf(s, sizeof(s), "(%f, %f, %f, %f)",
       ptr->red, ptr->green, ptr->blue, ptr->gray);
@@ -388,7 +388,7 @@ static VALUE rb_tone_s_old_load(VALUE klass, VALUE str) {
   (void) klass;
 
   VALUE ret = tone_alloc(rb_cTone);
-  struct Tone *ptr = convertTone(ret);
+  struct Tone *ptr = rb_tone_data(ret);
   StringValue(str);
   // Note: original RGSS doesn't check types.
   Check_Type(str, T_STRING);
@@ -416,7 +416,7 @@ static VALUE rb_tone_s_old_load(VALUE klass, VALUE str) {
 static VALUE rb_tone_m_old_dump(VALUE self, VALUE limit) {
   (void) limit;
 
-  struct Tone *ptr = convertTone(self);
+  struct Tone *ptr = rb_tone_data(self);
   char s[sizeof(double)*4];
   writeDouble(s+sizeof(double)*0, ptr->red);
   writeDouble(s+sizeof(double)*1, ptr->green);

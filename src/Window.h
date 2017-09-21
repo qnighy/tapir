@@ -19,8 +19,8 @@ struct Window {
 #endif
 };
 
-bool isWindow(VALUE obj);
-struct Window *convertWindow(VALUE obj);
+bool rb_window_data_p(VALUE obj);
+struct Window *rb_window_data(VALUE obj);
 void rb_window_modify(VALUE obj);
 
 void initWindowSDL(void);

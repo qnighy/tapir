@@ -59,12 +59,12 @@ void Init_Viewport(void) {
   // TODO: implement Viewport#update
 }
 
-bool isViewport(VALUE obj) {
+bool rb_viewport_data_p(VALUE obj) {
   if(TYPE(obj) != T_DATA) return false;
   return RDATA(obj)->dmark == (void(*)(void*))viewport_mark;
 }
 
-struct Viewport *convertViewport(VALUE obj) {
+struct Viewport *rb_viewport_data(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))viewport_mark) {
@@ -115,7 +115,7 @@ static VALUE viewport_alloc(VALUE klass) {
  * Creates a new viewport.
  */
 static VALUE rb_viewport_m_initialize(int argc, VALUE *argv, VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   switch(argc) {
     case 1:
       rb_rect_set2(ptr->rect, argv[0]);
@@ -143,8 +143,8 @@ static VALUE rb_viewport_m_initialize(int argc, VALUE *argv, VALUE self) {
 }
 
 static VALUE rb_viewport_m_initialize_copy(VALUE self, VALUE orig) {
-  struct Viewport *ptr = convertViewport(self);
-  struct Viewport *orig_ptr = convertViewport(orig);
+  struct Viewport *ptr = rb_viewport_data(self);
+  struct Viewport *orig_ptr = rb_viewport_data(orig);
   rb_rect_set2(ptr->rect, orig_ptr->rect);
   rb_color_set2(ptr->color, orig_ptr->color);
   rb_tone_set2(ptr->tone, orig_ptr->tone);
@@ -157,95 +157,95 @@ static VALUE rb_viewport_m_initialize_copy(VALUE self, VALUE orig) {
 }
 
 static VALUE rb_viewport_m_dispose(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   ptr->disposed = true;
   return Qnil;
 }
 
 static VALUE rb_viewport_m_disposed_p(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   return ptr->disposed ? Qtrue : Qfalse;
 }
 
 static VALUE rb_viewport_m_rect(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   return ptr->rect;
 }
 
 static VALUE rb_viewport_m_set_rect(VALUE self, VALUE newval) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   rb_viewport_modify(self);
   rb_rect_set2(ptr->rect, newval);
   return newval;
 }
 
 static VALUE rb_viewport_m_visible(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   return ptr->visible ? Qtrue : Qfalse;
 }
 
 static VALUE rb_viewport_m_set_visible(VALUE self, VALUE newval) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   rb_viewport_modify(self);
   ptr->visible = RTEST(newval);
   return newval;
 }
 
 static VALUE rb_viewport_m_z(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   return INT2NUM(ptr->z);
 }
 
 static VALUE rb_viewport_m_set_z(VALUE self, VALUE newval) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   rb_viewport_modify(self);
   ptr->z = NUM2INT(newval);
   return newval;
 }
 
 static VALUE rb_viewport_m_ox(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   return INT2NUM(ptr->ox);
 }
 
 static VALUE rb_viewport_m_set_ox(VALUE self, VALUE newval) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   rb_viewport_modify(self);
   ptr->ox = NUM2INT(newval);
   return newval;
 }
 
 static VALUE rb_viewport_m_oy(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   return INT2NUM(ptr->oy);
 }
 
 static VALUE rb_viewport_m_set_oy(VALUE self, VALUE newval) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   rb_viewport_modify(self);
   ptr->oy = NUM2INT(newval);
   return newval;
 }
 
 static VALUE rb_viewport_m_color(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   return ptr->color;
 }
 
 static VALUE rb_viewport_m_set_color(VALUE self, VALUE newval) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   rb_viewport_modify(self);
   rb_color_set2(ptr->color, newval);
   return newval;
 }
 
 static VALUE rb_viewport_m_tone(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   return ptr->tone;
 }
 
 static VALUE rb_viewport_m_set_tone(VALUE self, VALUE newval) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data(self);
   rb_viewport_modify(self);
   rb_tone_set2(ptr->tone, newval);
   return newval;

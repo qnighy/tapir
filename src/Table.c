@@ -35,7 +35,7 @@ VALUE rb_table_new(
   if(zsize < 0) zsize = 0;
   int32_t size = multiply_size(xsize, ysize, zsize);
   VALUE ret = table_alloc(rb_cTable);
-  struct Table *ptr = convertTable(ret);
+  struct Table *ptr = rb_table_data(ret);
   ptr->dim = dim;
   ptr->xsize = xsize;
   ptr->ysize = ysize;
@@ -51,7 +51,7 @@ VALUE rb_table_new(
 void rb_table_resize(
     VALUE self, int32_t new_dim, int32_t new_xsize,
     int32_t new_ysize, int32_t new_zsize) {
-  struct Table *ptr = convertTable(self);
+  struct Table *ptr = rb_table_data(self);
   if(new_xsize < 0) new_xsize = 0;
   if(new_ysize < 0) new_ysize = 0;
   if(new_zsize < 0) new_zsize = 0;
@@ -84,38 +84,38 @@ void rb_table_resize(
 }
 
 int32_t rb_table_dim(VALUE self) {
-  struct Table *ptr = convertTable(self);
+  struct Table *ptr = rb_table_data(self);
   return ptr->dim;
 }
 
 int32_t rb_table_xsize(VALUE self) {
-  struct Table *ptr = convertTable(self);
+  struct Table *ptr = rb_table_data(self);
   return ptr->xsize;
 }
 
 int32_t rb_table_ysize(VALUE self) {
-  struct Table *ptr = convertTable(self);
+  struct Table *ptr = rb_table_data(self);
   return ptr->ysize;
 }
 
 int32_t rb_table_zsize(VALUE self) {
-  struct Table *ptr = convertTable(self);
+  struct Table *ptr = rb_table_data(self);
   return ptr->zsize;
 }
 
 int16_t rb_table_aref(VALUE self, int32_t x, int32_t y, int32_t z) {
-  struct Table *ptr = convertTable(self);
+  struct Table *ptr = rb_table_data(self);
   return ptr->data[((z * ptr->ysize) + y) * ptr->xsize + x];
 }
 
 void rb_table_aset(
     VALUE self, int32_t x, int32_t y, int32_t z, int16_t val) {
-  struct Table *ptr = convertTable(self);
+  struct Table *ptr = rb_table_data(self);
   ptr->data[((z * ptr->ysize) + y) * ptr->xsize + x] = val;
 }
 
-int16_t *rb_table_data(VALUE self) {
-  struct Table *ptr = convertTable(self);
+int16_t *rb_table_data2(VALUE self) {
+  struct Table *ptr = rb_table_data(self);
   return ptr->data;
 }
 
@@ -149,12 +149,12 @@ void Init_Table() {
   rb_define_method(rb_cTable, "_dump", rb_table_m_old_dump, 1);
 }
 
-bool isTable(VALUE obj) {
+bool rb_table_data_p(VALUE obj) {
   if(TYPE(obj) != T_DATA) return false;
   return RDATA(obj)->dmark == (void(*)(void*))table_mark;
 }
 
-struct Table *convertTable(VALUE obj) {
+struct Table *rb_table_data(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))table_mark) {
@@ -193,7 +193,7 @@ static VALUE table_alloc(VALUE klass) {
 }
 
 static VALUE rb_table_m_initialize(int argc, VALUE *argv, VALUE self) {
-  struct Table *ptr = convertTable(self);
+  struct Table *ptr = rb_table_data(self);
   if(ptr->data) {
     xfree(ptr->data);
     ptr->data = NULL;
@@ -212,8 +212,8 @@ static VALUE rb_table_m_initialize(int argc, VALUE *argv, VALUE self) {
   return Qnil;
 }
 static VALUE rb_table_m_initialize_copy(VALUE self, VALUE orig) {
-  struct Table *ptr = convertTable(self);
-  struct Table *orig_ptr = convertTable(orig);
+  struct Table *ptr = rb_table_data(self);
+  struct Table *orig_ptr = rb_table_data(orig);
   rb_table_modify(self);
   ptr->dim = orig_ptr->dim;
   ptr->xsize = orig_ptr->xsize;
@@ -252,7 +252,7 @@ static VALUE rb_table_m_zsize(VALUE self) {
 }
 
 static VALUE rb_table_m_get(int argc, VALUE *argv, VALUE self) {
-  struct Table *ptr = convertTable(self);
+  struct Table *ptr = rb_table_data(self);
   if(argc == ptr->dim) {
     int32_t x = 0 < argc ? NUM2INT(argv[0]) : 0;
     int32_t y = 1 < argc ? NUM2INT(argv[1]) : 0;
@@ -272,7 +272,7 @@ static VALUE rb_table_m_get(int argc, VALUE *argv, VALUE self) {
 }
 
 static VALUE rb_table_m_set(int argc, VALUE *argv, VALUE self) {
-  struct Table *ptr = convertTable(self);
+  struct Table *ptr = rb_table_data(self);
   // Note: original RGSS wrongly accepts one less arguments.
   if(argc == ptr->dim+1) {
     int32_t x = 0 < argc-1 ? NUM2INT(argv[0]) : 0;
@@ -298,7 +298,7 @@ static VALUE rb_table_m_set(int argc, VALUE *argv, VALUE self) {
 static VALUE rb_table_s_old_load(VALUE klass, VALUE str) {
   (void) klass;
   VALUE ret = table_alloc(rb_cTable);
-  struct Table *ptr = convertTable(ret);
+  struct Table *ptr = rb_table_data(ret);
   StringValue(str);
   // Note: original RGSS doesn't check types.
   Check_Type(str, T_STRING);
@@ -338,7 +338,7 @@ static VALUE rb_table_s_old_load(VALUE klass, VALUE str) {
 
 static VALUE rb_table_m_old_dump(VALUE self, VALUE limit) {
   (void) limit;
-  struct Table *ptr = convertTable(self);
+  struct Table *ptr = rb_table_data(self);
   size_t dumpsize = sizeof(int32_t)*5+sizeof(int16_t)*(ptr->size);
   char *s = (char *)xmalloc(dumpsize);
   writeInt32(s, ptr->dim);
