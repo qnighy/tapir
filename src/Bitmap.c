@@ -340,13 +340,13 @@ static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self) {
 
       Uint32 src_t = 255 - src_a;
       Uint32 new_ag = dst_a * src_t + src_a * opacity;
-      Uint32 new_a = new_ag / (255 * 255);
+      Uint32 new_a = new_ag / 255;
       Uint32 new_r =
-        (dst_r * dst_a * src_t + src_r * src_a * opacity) * 255 / new_ag;
+        (dst_r * dst_a * src_t + src_r * src_a * opacity) / new_ag;
       Uint32 new_g =
-        (dst_g * dst_a * src_t + src_g * src_a * opacity) * 255 / new_ag;
+        (dst_g * dst_a * src_t + src_g * src_a * opacity) / new_ag;
       Uint32 new_b =
-        (dst_b * dst_a * src_t + src_b * src_a * opacity) * 255 / new_ag;
+        (dst_b * dst_a * src_t + src_b * src_a * opacity) / new_ag;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
       Uint32 new_rgba = (new_r << 24) | (new_g << 16) | (new_b << 8) | new_a;
 #else
