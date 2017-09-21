@@ -125,14 +125,26 @@ static VALUE rb_input_s_repeat_p(VALUE klass, VALUE key) {
 
 static VALUE rb_input_s_dir4(VALUE klass) {
   (void) klass;
-  WARN_UNIMPLEMENTED("Input.dir4");
-  return INT2NUM(5);
+  int x = (keycount[RGSS_KEY_RIGHT] >= 0) - (keycount[RGSS_KEY_LEFT] >= 0);
+  int y = (keycount[RGSS_KEY_DOWN] >= 0) - (keycount[RGSS_KEY_UP] >= 0);
+  if(x && y) {
+    int xcount = x < 0 ? keycount[RGSS_KEY_LEFT] : keycount[RGSS_KEY_RIGHT];
+    int ycount = y < 0 ? keycount[RGSS_KEY_UP] : keycount[RGSS_KEY_DOWN];
+    if(xcount >= ycount) y = 0;
+    else x = 0;
+  }
+  int dir = 5 + x - y * 3;
+  if(dir == 5) dir = 0;
+  return INT2NUM(dir);
 }
 
 static VALUE rb_input_s_dir8(VALUE klass) {
   (void) klass;
-  WARN_UNIMPLEMENTED("Input.dir8");
-  return INT2NUM(5);
+  int x = (keycount[RGSS_KEY_RIGHT] >= 0) - (keycount[RGSS_KEY_LEFT] >= 0);
+  int y = (keycount[RGSS_KEY_DOWN] >= 0) - (keycount[RGSS_KEY_UP] >= 0);
+  int dir = 5 + x - y * 3;
+  if(dir == 5) dir = 0;
+  return INT2NUM(dir);
 }
 
 static int convertSDLKey(SDL_Keycode key) {
