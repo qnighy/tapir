@@ -15,7 +15,7 @@ struct Table {
 
 bool rb_table_data_p(VALUE obj);
 struct Table *rb_table_data(VALUE obj);
-void rb_table_modify(VALUE obj);
+struct Table *rb_table_data_mut(VALUE obj);
 
 VALUE rb_table_new(
     int32_t dim, int32_t xsize, int32_t ysize, int32_t zsize);

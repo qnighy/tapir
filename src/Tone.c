@@ -30,8 +30,7 @@ bool rb_tone_equal(VALUE self, VALUE other) {
 void rb_tone_set(
     VALUE self, double newred, double newgreen, double newblue,
     double newgray) {
-  struct Tone *ptr = rb_tone_data(self);
-  rb_tone_modify(self);
+  struct Tone *ptr = rb_tone_data_mut(self);
   ptr->red = saturateDouble(newred, -255.0, 255.0);
   ptr->green = saturateDouble(newgreen, -255.0, 255.0);
   ptr->blue = saturateDouble(newblue, -255.0, 255.0);
@@ -39,9 +38,8 @@ void rb_tone_set(
 }
 
 void rb_tone_set2(VALUE self, VALUE other) {
-  struct Tone *ptr = rb_tone_data(self);
+  struct Tone *ptr = rb_tone_data_mut(self);
   struct Tone *other_ptr = rb_tone_data(other);
-  rb_tone_modify(self);
   // Note: original RGSS doesn't check saturation here.
   ptr->red = saturateDouble(other_ptr->red, -255.0, 255.0);
   ptr->green = saturateDouble(other_ptr->green, -255.0, 255.0);
@@ -54,8 +52,7 @@ double rb_tone_red(VALUE self) {
   return ptr->red;
 }
 void rb_tone_set_red(VALUE self, double newval) {
-  struct Tone *ptr = rb_tone_data(self);
-  rb_tone_modify(self);
+  struct Tone *ptr = rb_tone_data_mut(self);
   ptr->red = saturateDouble(newval, -255.0, 255.0);
 }
 double rb_tone_green(VALUE self) {
@@ -63,8 +60,7 @@ double rb_tone_green(VALUE self) {
   return ptr->green;
 }
 void rb_tone_set_green(VALUE self, double newval) {
-  struct Tone *ptr = rb_tone_data(self);
-  rb_tone_modify(self);
+  struct Tone *ptr = rb_tone_data_mut(self);
   ptr->green = saturateDouble(newval, -255.0, 255.0);
 }
 double rb_tone_blue(VALUE self) {
@@ -72,8 +68,7 @@ double rb_tone_blue(VALUE self) {
   return ptr->blue;
 }
 void rb_tone_set_blue(VALUE self, double newval) {
-  struct Tone *ptr = rb_tone_data(self);
-  rb_tone_modify(self);
+  struct Tone *ptr = rb_tone_data_mut(self);
   ptr->blue = saturateDouble(newval, -255.0, 255.0);
 }
 double rb_tone_gray(VALUE self) {
@@ -81,8 +76,7 @@ double rb_tone_gray(VALUE self) {
   return ptr->gray;
 }
 void rb_tone_set_gray(VALUE self, double newval) {
-  struct Tone *ptr = rb_tone_data(self);
-  rb_tone_modify(self);
+  struct Tone *ptr = rb_tone_data_mut(self);
   ptr->gray = saturateDouble(newval, 0.0, 255.0);
 }
 
@@ -151,9 +145,10 @@ struct Tone *rb_tone_data(VALUE obj) {
   return ret;
 }
 
-void rb_tone_modify(VALUE obj) {
+struct Tone *rb_tone_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Tone");
+  return rb_tone_data(obj);
 }
 
 static void tone_mark(struct Tone *ptr) {
@@ -388,12 +383,11 @@ static VALUE rb_tone_s_old_load(VALUE klass, VALUE str) {
   (void) klass;
 
   VALUE ret = tone_alloc(rb_cTone);
-  struct Tone *ptr = rb_tone_data(ret);
+  struct Tone *ptr = rb_tone_data_mut(ret);
   StringValue(str);
   // Note: original RGSS doesn't check types.
   Check_Type(str, T_STRING);
   const char *s = RSTRING_PTR(str);
-  rb_tone_modify(ret);
   // Note: original RGSS doesn't check length.
   if(RSTRING_LEN(str) != sizeof(double)*4) {
     rb_raise(rb_eArgError, "Corrupted marshal data for Tone.");

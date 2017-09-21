@@ -31,8 +31,7 @@ bool rb_rect_equal(VALUE self, VALUE other) {
 void rb_rect_set(
     VALUE self, int32_t newx, int32_t newy,
     int32_t newwidth, int32_t newheight) {
-  struct Rect *ptr = rb_rect_data(self);
-  rb_rect_modify(self);
+  struct Rect *ptr = rb_rect_data_mut(self);
   ptr->x = newx;
   ptr->y = newy;
   ptr->width = newwidth;
@@ -40,9 +39,8 @@ void rb_rect_set(
 }
 
 void rb_rect_set2(VALUE self, VALUE other) {
-  struct Rect *ptr = rb_rect_data(self);
+  struct Rect *ptr = rb_rect_data_mut(self);
   struct Rect *other_ptr = rb_rect_data(other);
-  rb_rect_modify(self);
   ptr->x = other_ptr->x;
   ptr->y = other_ptr->y;
   ptr->width = other_ptr->width;
@@ -54,8 +52,7 @@ int32_t rb_rect_x(VALUE self) {
   return ptr->x;
 }
 void rb_rect_set_x(VALUE self, int32_t newval) {
-  struct Rect *ptr = rb_rect_data(self);
-  rb_rect_modify(self);
+  struct Rect *ptr = rb_rect_data_mut(self);
   ptr->x = newval;
 }
 int32_t rb_rect_y(VALUE self) {
@@ -63,8 +60,7 @@ int32_t rb_rect_y(VALUE self) {
   return ptr->y;
 }
 void rb_rect_set_y(VALUE self, int32_t newval) {
-  struct Rect *ptr = rb_rect_data(self);
-  rb_rect_modify(self);
+  struct Rect *ptr = rb_rect_data_mut(self);
   ptr->y = newval;
 }
 int32_t rb_rect_width(VALUE self) {
@@ -72,8 +68,7 @@ int32_t rb_rect_width(VALUE self) {
   return ptr->width;
 }
 void rb_rect_set_width(VALUE self, int32_t newval) {
-  struct Rect *ptr = rb_rect_data(self);
-  rb_rect_modify(self);
+  struct Rect *ptr = rb_rect_data_mut(self);
   ptr->width = newval;
 }
 int32_t rb_rect_height(VALUE self) {
@@ -81,8 +76,7 @@ int32_t rb_rect_height(VALUE self) {
   return ptr->height;
 }
 void rb_rect_set_height(VALUE self, int32_t newval) {
-  struct Rect *ptr = rb_rect_data(self);
-  rb_rect_modify(self);
+  struct Rect *ptr = rb_rect_data_mut(self);
   ptr->height = newval;
 }
 
@@ -153,9 +147,10 @@ struct Rect *rb_rect_data(VALUE obj) {
   return ret;
 }
 
-void rb_rect_modify(VALUE obj) {
+struct Rect *rb_rect_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Rect");
+  return rb_rect_data(obj);
 }
 
 static void rect_mark(struct Rect *ptr) {
@@ -367,12 +362,11 @@ static VALUE rb_rect_m_to_s(VALUE self) {
 static VALUE rb_rect_s_old_load(VALUE klass, VALUE str) {
   (void) klass;
   VALUE ret = rect_alloc(rb_cRect);
-  struct Rect *ptr = rb_rect_data(ret);
+  struct Rect *ptr = rb_rect_data_mut(ret);
   StringValue(str);
   // Note: original RGSS doesn't check types.
   Check_Type(str, T_STRING);
   const char *s = RSTRING_PTR(str);
-  rb_rect_modify(ret);
   // Note: original RGSS doesn't check length.
   if(RSTRING_LEN(str) != sizeof(int32_t)*4) {
     rb_raise(rb_eArgError, "Corrupted marshal data for Rect.");

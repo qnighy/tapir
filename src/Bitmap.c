@@ -137,9 +137,10 @@ struct Bitmap *rb_bitmap_data(VALUE obj) {
   return ret;
 }
 
-void rb_bitmap_modify(VALUE obj) {
+struct Bitmap *rb_bitmap_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Bitmap");
+  return rb_bitmap_data(obj);
 }
 
 static void bitmap_mark(struct Bitmap *ptr) {
@@ -362,8 +363,7 @@ static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self) {
 }
 
 static VALUE rb_bitmap_m_fill_rect(int argc, VALUE *argv, VALUE self) {
-  struct Bitmap *ptr = rb_bitmap_data(self);
-  rb_bitmap_modify(self);
+  struct Bitmap *ptr = rb_bitmap_data_mut(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
   ptr->texture_invalidated = true;
 
@@ -400,8 +400,7 @@ static VALUE rb_bitmap_m_fill_rect(int argc, VALUE *argv, VALUE self) {
 }
 
 static VALUE rb_bitmap_m_clear(VALUE self) {
-  struct Bitmap *ptr = rb_bitmap_data(self);
-  rb_bitmap_modify(self);
+  struct Bitmap *ptr = rb_bitmap_data_mut(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
   ptr->texture_invalidated = true;
   SDL_FillRect(ptr->surface, NULL, 0x00000000);
@@ -410,8 +409,7 @@ static VALUE rb_bitmap_m_clear(VALUE self) {
 
 #if RGSS >= 2
 static VALUE rb_bitmap_m_clear_rect(int argc, VALUE *argv, VALUE self) {
-  struct Bitmap *ptr = rb_bitmap_data(self);
-  rb_bitmap_modify(self);
+  struct Bitmap *ptr = rb_bitmap_data_mut(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
   ptr->texture_invalidated = true;
 
@@ -454,8 +452,7 @@ static VALUE rb_bitmap_m_get_pixel(VALUE self, VALUE x, VALUE y) {
 }
 
 static VALUE rb_bitmap_m_set_pixel(VALUE self, VALUE x, VALUE y, VALUE color) {
-  struct Bitmap *ptr = rb_bitmap_data(self);
-  rb_bitmap_modify(self);
+  struct Bitmap *ptr = rb_bitmap_data_mut(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
   ptr->texture_invalidated = true;
   int xi = NUM2INT(x);
@@ -476,8 +473,7 @@ static VALUE rb_bitmap_m_set_pixel(VALUE self, VALUE x, VALUE y, VALUE color) {
 }
 
 static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
-  struct Bitmap *ptr = rb_bitmap_data(self);
-  rb_bitmap_modify(self);
+  struct Bitmap *ptr = rb_bitmap_data_mut(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
   ptr->texture_invalidated = true;
 
@@ -592,8 +588,7 @@ static VALUE rb_bitmap_m_font(VALUE self) {
 }
 
 static VALUE rb_bitmap_m_set_font(VALUE self, VALUE newval) {
-  struct Bitmap *ptr = rb_bitmap_data(self);
-  rb_font_modify(self);
+  struct Bitmap *ptr = rb_bitmap_data_mut(self);
   rb_font_set(ptr->font, newval);
   return newval;
 }

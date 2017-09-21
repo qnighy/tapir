@@ -13,7 +13,7 @@ struct Tone {
 
 bool rb_tone_data_p(VALUE obj);
 struct Tone *rb_tone_data(VALUE obj);
-void rb_tone_modify(VALUE obj);
+struct Tone *rb_tone_data_mut(VALUE obj);
 
 VALUE rb_tone_new(double red, double green, double blue, double gray);
 VALUE rb_tone_new2(void);

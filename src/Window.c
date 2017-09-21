@@ -126,9 +126,10 @@ struct Window *rb_window_data(VALUE obj) {
   return ret;
 }
 
-void rb_window_modify(VALUE obj) {
+struct Window *rb_window_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Window");
+  return rb_window_data(obj);
 }
 
 static void window_mark(struct Window *ptr) {
@@ -223,8 +224,7 @@ static VALUE rb_window_m_disposed_p(VALUE self) {
 #if RGSS == 3
 static VALUE rb_window_m_move(
     VALUE self, VALUE x, VALUE y, VALUE width, VALUE height) {
-  struct Window *ptr = rb_window_data(self);
-  rb_window_modify(self);
+  struct Window *ptr = rb_window_data_mut(self);
   ptr->x = NUM2INT(x);
   ptr->y = NUM2INT(y);
   ptr->width = NUM2INT(width);
@@ -249,8 +249,7 @@ static VALUE rb_window_m_windowskin(VALUE self) {
 }
 
 static VALUE rb_window_m_set_windowskin(VALUE self, VALUE newval) {
-  struct Window *ptr = rb_window_data(self);
-  rb_window_modify(self);
+  struct Window *ptr = rb_window_data_mut(self);
   if(newval != Qnil) rb_bitmap_data(newval);
   ptr->windowskin = newval;
   return newval;
@@ -262,8 +261,7 @@ static VALUE rb_window_m_contents(VALUE self) {
 }
 
 static VALUE rb_window_m_set_contents(VALUE self, VALUE newval) {
-  struct Window *ptr = rb_window_data(self);
-  rb_window_modify(self);
+  struct Window *ptr = rb_window_data_mut(self);
   if(newval != Qnil) rb_bitmap_data(newval);
   ptr->contents = newval;
   return newval;
@@ -275,8 +273,7 @@ static VALUE rb_window_m_visible(VALUE self) {
 }
 
 static VALUE rb_window_m_set_visible(VALUE self, VALUE newval) {
-  struct Window *ptr = rb_window_data(self);
-  rb_window_modify(self);
+  struct Window *ptr = rb_window_data_mut(self);
   ptr->visible = RTEST(newval);
   return newval;
 }
@@ -287,8 +284,7 @@ static VALUE rb_window_m_x(VALUE self) {
 }
 
 static VALUE rb_window_m_set_x(VALUE self, VALUE newval) {
-  struct Window *ptr = rb_window_data(self);
-  rb_window_modify(self);
+  struct Window *ptr = rb_window_data_mut(self);
   ptr->x = NUM2INT(newval);
   return newval;
 }
@@ -299,8 +295,7 @@ static VALUE rb_window_m_y(VALUE self) {
 }
 
 static VALUE rb_window_m_set_y(VALUE self, VALUE newval) {
-  struct Window *ptr = rb_window_data(self);
-  rb_window_modify(self);
+  struct Window *ptr = rb_window_data_mut(self);
   ptr->y = NUM2INT(newval);
   return newval;
 }
@@ -311,8 +306,7 @@ static VALUE rb_window_m_width(VALUE self) {
 }
 
 static VALUE rb_window_m_set_width(VALUE self, VALUE newval) {
-  struct Window *ptr = rb_window_data(self);
-  rb_window_modify(self);
+  struct Window *ptr = rb_window_data_mut(self);
   ptr->width = NUM2INT(newval);
   return newval;
 }
@@ -323,8 +317,7 @@ static VALUE rb_window_m_height(VALUE self) {
 }
 
 static VALUE rb_window_m_set_height(VALUE self, VALUE newval) {
-  struct Window *ptr = rb_window_data(self);
-  rb_window_modify(self);
+  struct Window *ptr = rb_window_data_mut(self);
   ptr->height = NUM2INT(newval);
   return newval;
 }
@@ -335,8 +328,7 @@ static VALUE rb_window_m_z(VALUE self) {
 }
 
 static VALUE rb_window_m_set_z(VALUE self, VALUE newval) {
-  struct Window *ptr = rb_window_data(self);
-  rb_window_modify(self);
+  struct Window *ptr = rb_window_data_mut(self);
   ptr->renderable.z = NUM2INT(newval);
   return newval;
 }
@@ -348,8 +340,7 @@ static VALUE rb_window_m_openness(VALUE self) {
 }
 
 static VALUE rb_window_m_set_openness(VALUE self, VALUE newval) {
-  struct Window *ptr = rb_window_data(self);
-  rb_window_modify(self);
+  struct Window *ptr = rb_window_data_mut(self);
   ptr->openness = saturateInt32(NUM2INT(newval), 0, 255);
   return newval;
 }

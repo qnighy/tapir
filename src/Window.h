@@ -21,7 +21,7 @@ struct Window {
 
 bool rb_window_data_p(VALUE obj);
 struct Window *rb_window_data(VALUE obj);
-void rb_window_modify(VALUE obj);
+struct Window *rb_window_data_mut(VALUE obj);
 
 void initWindowSDL(void);
 void deinitWindowSDL(void);

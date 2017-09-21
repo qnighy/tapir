@@ -51,11 +51,10 @@ VALUE rb_table_new(
 void rb_table_resize(
     VALUE self, int32_t new_dim, int32_t new_xsize,
     int32_t new_ysize, int32_t new_zsize) {
-  struct Table *ptr = rb_table_data(self);
+  struct Table *ptr = rb_table_data_mut(self);
   if(new_xsize < 0) new_xsize = 0;
   if(new_ysize < 0) new_ysize = 0;
   if(new_zsize < 0) new_zsize = 0;
-  rb_table_modify(self);
   int32_t new_size = multiply_size(new_xsize, new_ysize, new_zsize);
   int16_t *new_data = ALLOC_N(int16_t, new_size);
   for(int32_t i = 0; i < new_size; ++i) {
@@ -167,9 +166,10 @@ struct Table *rb_table_data(VALUE obj) {
   return ret;
 }
 
-void rb_table_modify(VALUE obj) {
+struct Table *rb_table_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Table");
+  return rb_table_data(obj);
 }
 
 static void table_mark(struct Table *ptr) {
@@ -212,9 +212,8 @@ static VALUE rb_table_m_initialize(int argc, VALUE *argv, VALUE self) {
   return Qnil;
 }
 static VALUE rb_table_m_initialize_copy(VALUE self, VALUE orig) {
-  struct Table *ptr = rb_table_data(self);
+  struct Table *ptr = rb_table_data_mut(self);
   struct Table *orig_ptr = rb_table_data(orig);
-  rb_table_modify(self);
   ptr->dim = orig_ptr->dim;
   ptr->xsize = orig_ptr->xsize;
   ptr->ysize = orig_ptr->ysize;
@@ -272,7 +271,7 @@ static VALUE rb_table_m_get(int argc, VALUE *argv, VALUE self) {
 }
 
 static VALUE rb_table_m_set(int argc, VALUE *argv, VALUE self) {
-  struct Table *ptr = rb_table_data(self);
+  struct Table *ptr = rb_table_data_mut(self);
   // Note: original RGSS wrongly accepts one less arguments.
   if(argc == ptr->dim+1) {
     int32_t x = 0 < argc-1 ? NUM2INT(argv[0]) : 0;
@@ -281,7 +280,6 @@ static VALUE rb_table_m_set(int argc, VALUE *argv, VALUE self) {
     int16_t val = (uint16_t)NUM2INT(argv[argc-1]);
     if(0 <= x && x < ptr->xsize && 0 <= y && y < ptr->ysize &&
         0 <= z && z < ptr->zsize) {
-      rb_table_modify(self);
       ptr->data[((z * ptr->ysize) + y) * ptr->xsize + x] = val;
       return INT2NUM(val);
     } else {
@@ -298,7 +296,7 @@ static VALUE rb_table_m_set(int argc, VALUE *argv, VALUE self) {
 static VALUE rb_table_s_old_load(VALUE klass, VALUE str) {
   (void) klass;
   VALUE ret = table_alloc(rb_cTable);
-  struct Table *ptr = rb_table_data(ret);
+  struct Table *ptr = rb_table_data_mut(ret);
   StringValue(str);
   // Note: original RGSS doesn't check types.
   Check_Type(str, T_STRING);
@@ -327,7 +325,6 @@ static VALUE rb_table_s_old_load(VALUE klass, VALUE str) {
   if(s_len - sizeof(int32_t)*5 != sizeof(int16_t)*ptr->size) {
     rb_raise(rb_eArgError, "Corrupted marshal data for Table.");
   }
-  rb_table_modify(ret);
   if(ptr->data) xfree(ptr->data);
   ptr->data = ALLOC_N(int16_t, ptr->size);
   for(int32_t i = 0; i < ptr->size; ++i) {

@@ -77,9 +77,10 @@ struct Viewport *rb_viewport_data(VALUE obj) {
   return ret;
 }
 
-void rb_viewport_modify(VALUE obj) {
+struct Viewport *rb_viewport_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Viewport");
+  return rb_viewport_data(obj);
 }
 
 static void viewport_mark(struct Viewport *ptr) {
@@ -173,8 +174,7 @@ static VALUE rb_viewport_m_rect(VALUE self) {
 }
 
 static VALUE rb_viewport_m_set_rect(VALUE self, VALUE newval) {
-  struct Viewport *ptr = rb_viewport_data(self);
-  rb_viewport_modify(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   rb_rect_set2(ptr->rect, newval);
   return newval;
 }
@@ -185,8 +185,7 @@ static VALUE rb_viewport_m_visible(VALUE self) {
 }
 
 static VALUE rb_viewport_m_set_visible(VALUE self, VALUE newval) {
-  struct Viewport *ptr = rb_viewport_data(self);
-  rb_viewport_modify(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   ptr->visible = RTEST(newval);
   return newval;
 }
@@ -197,8 +196,7 @@ static VALUE rb_viewport_m_z(VALUE self) {
 }
 
 static VALUE rb_viewport_m_set_z(VALUE self, VALUE newval) {
-  struct Viewport *ptr = rb_viewport_data(self);
-  rb_viewport_modify(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   ptr->z = NUM2INT(newval);
   return newval;
 }
@@ -209,8 +207,7 @@ static VALUE rb_viewport_m_ox(VALUE self) {
 }
 
 static VALUE rb_viewport_m_set_ox(VALUE self, VALUE newval) {
-  struct Viewport *ptr = rb_viewport_data(self);
-  rb_viewport_modify(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   ptr->ox = NUM2INT(newval);
   return newval;
 }
@@ -221,8 +218,7 @@ static VALUE rb_viewport_m_oy(VALUE self) {
 }
 
 static VALUE rb_viewport_m_set_oy(VALUE self, VALUE newval) {
-  struct Viewport *ptr = rb_viewport_data(self);
-  rb_viewport_modify(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   ptr->oy = NUM2INT(newval);
   return newval;
 }
@@ -233,8 +229,7 @@ static VALUE rb_viewport_m_color(VALUE self) {
 }
 
 static VALUE rb_viewport_m_set_color(VALUE self, VALUE newval) {
-  struct Viewport *ptr = rb_viewport_data(self);
-  rb_viewport_modify(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   rb_color_set2(ptr->color, newval);
   return newval;
 }
@@ -245,8 +240,7 @@ static VALUE rb_viewport_m_tone(VALUE self) {
 }
 
 static VALUE rb_viewport_m_set_tone(VALUE self, VALUE newval) {
-  struct Viewport *ptr = rb_viewport_data(self);
-  rb_viewport_modify(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   rb_tone_set2(ptr->tone, newval);
   return newval;
 }

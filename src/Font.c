@@ -36,9 +36,8 @@ VALUE rb_font_new(void) {
 }
 
 void rb_font_set(VALUE self, VALUE other) {
-  struct Font *ptr = rb_font_data(self);
+  struct Font *ptr = rb_font_data_mut(self);
   struct Font *orig_ptr = rb_font_data(other);
-  rb_font_modify(self);
   ptr->name = orig_ptr->name;
   ptr->size = orig_ptr->size;
   ptr->bold = orig_ptr->bold;
@@ -151,9 +150,10 @@ struct Font *rb_font_data(VALUE obj) {
   return ret;
 }
 
-void rb_font_modify(VALUE obj) {
+struct Font *rb_font_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Font");
+  return rb_font_data(obj);
 }
 
 static void font_mark(struct Font *ptr) {
@@ -262,8 +262,7 @@ static VALUE rb_font_m_name(VALUE self) {
 }
 
 static VALUE rb_font_m_set_name(VALUE self, VALUE newval) {
-  struct Font *ptr = rb_font_data(self);
-  rb_font_modify(self);
+  struct Font *ptr = rb_font_data_mut(self);
   ptr->name = newval;
   font_invalidate_cache(ptr);
   return newval;
@@ -275,8 +274,7 @@ static VALUE rb_font_m_size(VALUE self) {
 }
 
 static VALUE rb_font_m_set_size(VALUE self, VALUE newval) {
-  struct Font *ptr = rb_font_data(self);
-  rb_font_modify(self);
+  struct Font *ptr = rb_font_data_mut(self);
   ptr->size = NUM2INT(newval);
   font_invalidate_cache(ptr);
   return newval;
@@ -288,8 +286,7 @@ static VALUE rb_font_m_bold(VALUE self) {
 }
 
 static VALUE rb_font_m_set_bold(VALUE self, VALUE newval) {
-  struct Font *ptr = rb_font_data(self);
-  rb_font_modify(self);
+  struct Font *ptr = rb_font_data_mut(self);
   ptr->bold = RTEST(newval);
   font_invalidate_cache(ptr);
   return newval;
@@ -301,8 +298,7 @@ static VALUE rb_font_m_italic(VALUE self) {
 }
 
 static VALUE rb_font_m_set_italic(VALUE self, VALUE newval) {
-  struct Font *ptr = rb_font_data(self);
-  rb_font_modify(self);
+  struct Font *ptr = rb_font_data_mut(self);
   ptr->italic = RTEST(newval);
   font_invalidate_cache(ptr);
   return newval;
@@ -315,8 +311,7 @@ static VALUE rb_font_m_outline(VALUE self) {
 }
 
 static VALUE rb_font_m_set_outline(VALUE self, VALUE newval) {
-  struct Font *ptr = rb_font_data(self);
-  rb_font_modify(self);
+  struct Font *ptr = rb_font_data_mut(self);
   ptr->outline = RTEST(newval);
   font_invalidate_cache(ptr);
   return newval;
@@ -330,8 +325,7 @@ static VALUE rb_font_m_shadow(VALUE self) {
 }
 
 static VALUE rb_font_m_set_shadow(VALUE self, VALUE newval) {
-  struct Font *ptr = rb_font_data(self);
-  rb_font_modify(self);
+  struct Font *ptr = rb_font_data_mut(self);
   ptr->shadow = RTEST(newval);
   font_invalidate_cache(ptr);
   return newval;
@@ -344,8 +338,7 @@ static VALUE rb_font_m_color(VALUE self) {
 }
 
 static VALUE rb_font_m_set_color(VALUE self, VALUE newval) {
-  struct Font *ptr = rb_font_data(self);
-  rb_font_modify(self);
+  struct Font *ptr = rb_font_data_mut(self);
   rb_color_set2(ptr->color, newval);
   font_invalidate_cache(ptr);
   return newval;
@@ -358,8 +351,7 @@ static VALUE rb_font_m_out_color(VALUE self) {
 }
 
 static VALUE rb_font_m_set_out_color(VALUE self, VALUE newval) {
-  struct Font *ptr = rb_font_data(self);
-  rb_font_modify(self);
+  struct Font *ptr = rb_font_data_mut(self);
   rb_color_set2(ptr->out_color, newval);
   font_invalidate_cache(ptr);
   return newval;

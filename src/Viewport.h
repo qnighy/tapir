@@ -15,6 +15,6 @@ struct Viewport {
 
 bool rb_viewport_data_p(VALUE obj);
 struct Viewport *rb_viewport_data(VALUE obj);
-void rb_viewport_modify(VALUE obj);
+struct Viewport *rb_viewport_data_mut(VALUE obj);
 
 #endif /* VIEWPORT_H */

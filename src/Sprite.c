@@ -171,9 +171,10 @@ struct Sprite *rb_sprite_data(VALUE obj) {
   return ret;
 }
 
-void rb_sprite_modify(VALUE obj) {
+struct Sprite *rb_sprite_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Sprite");
+  return rb_sprite_data(obj);
 }
 
 static void sprite_mark(struct Sprite *ptr) {
@@ -300,8 +301,7 @@ static VALUE rb_sprite_m_bitmap(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_bitmap(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   if(newval != Qnil) rb_bitmap_data(newval);
   ptr->bitmap = newval;
   if(newval != Qnil) rb_rect_set2(ptr->src_rect, rb_bitmap_rect(newval));
@@ -326,8 +326,7 @@ static VALUE rb_sprite_m_src_rect(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_src_rect(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   rb_rect_set2(ptr->src_rect, newval);
   return newval;
 }
@@ -339,8 +338,7 @@ static VALUE rb_sprite_m_viewport(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_viewport(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   if(newval != Qnil) rb_viewport_data(newval);
   ptr->renderable.viewport = newval;
   return newval;
@@ -353,8 +351,7 @@ static VALUE rb_sprite_m_visible(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_visible(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->visible = RTEST(newval);
   return newval;
 }
@@ -365,8 +362,7 @@ static VALUE rb_sprite_m_x(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_x(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->x = NUM2INT(newval);
   return newval;
 }
@@ -377,8 +373,7 @@ static VALUE rb_sprite_m_y(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_y(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->y = NUM2INT(newval);
   return newval;
 }
@@ -389,8 +384,7 @@ static VALUE rb_sprite_m_z(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_z(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->renderable.z = NUM2INT(newval);
   return newval;
 }
@@ -401,8 +395,7 @@ static VALUE rb_sprite_m_ox(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_ox(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->ox = NUM2INT(newval);
   return newval;
 }
@@ -413,8 +406,7 @@ static VALUE rb_sprite_m_oy(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_oy(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->oy = NUM2INT(newval);
   return newval;
 }
@@ -425,8 +417,7 @@ static VALUE rb_sprite_m_zoom_x(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_zoom_x(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->zoom_x = NUM2DBL(newval);
   return newval;
 }
@@ -437,8 +428,7 @@ static VALUE rb_sprite_m_zoom_y(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_zoom_y(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->zoom_y = NUM2DBL(newval);
   return newval;
 }
@@ -449,8 +439,7 @@ static VALUE rb_sprite_m_angle(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_angle(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->angle = NUM2DBL(newval);
   return newval;
 }
@@ -462,8 +451,7 @@ static VALUE rb_sprite_m_wave_amp(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_wave_amp(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->wave_amp = NUM2INT(newval);
   return newval;
 }
@@ -474,8 +462,7 @@ static VALUE rb_sprite_m_wave_length(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_wave_length(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->wave_length = NUM2INT(newval);
   return newval;
 }
@@ -486,8 +473,7 @@ static VALUE rb_sprite_m_wave_speed(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_wave_speed(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->wave_speed = NUM2INT(newval);
   return newval;
 }
@@ -498,8 +484,7 @@ static VALUE rb_sprite_m_wave_phase(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_wave_phase(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->wave_phase = NUM2DBL(newval);
   return newval;
 }
@@ -511,8 +496,7 @@ static VALUE rb_sprite_m_mirror(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_mirror(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->mirror = RTEST(newval);
   return newval;
 }
@@ -523,8 +507,7 @@ static VALUE rb_sprite_m_bush_depth(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_bush_depth(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->bush_depth = NUM2INT(newval);
   return newval;
 }
@@ -536,8 +519,7 @@ static VALUE rb_sprite_m_bush_opacity(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_bush_opacity(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->bush_opacity = NUM2INT(newval);
   return newval;
 }
@@ -549,8 +531,7 @@ static VALUE rb_sprite_m_opacity(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_opacity(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   ptr->opacity = NUM2INT(newval);
   return newval;
 }
@@ -561,8 +542,7 @@ static VALUE rb_sprite_m_blend_type(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_blend_type(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   /* TODO: check range */
   ptr->blend_type = NUM2INT(newval);
   return newval;
@@ -574,8 +554,7 @@ static VALUE rb_sprite_m_color(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_color(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   rb_color_set2(ptr->color, newval);
   return newval;
 }
@@ -585,8 +564,7 @@ static VALUE rb_sprite_m_tone(VALUE self) {
 }
 
 static VALUE rb_sprite_m_set_tone(VALUE self, VALUE newval) {
-  struct Sprite *ptr = rb_sprite_data(self);
-  rb_sprite_modify(self);
+  struct Sprite *ptr = rb_sprite_data_mut(self);
   rb_tone_set2(ptr->tone, newval);
   return newval;
 }
