@@ -17,7 +17,7 @@ static void font_invalidate_cache(struct Font *ptr) {
 
 VALUE rb_font_new(void) {
   VALUE ret = font_alloc(rb_cFont);
-  struct Font *ptr = rb_font_data(ret);
+  struct Font *ptr = rb_font_data_mut(ret);
   ptr->name = rb_cv_get(rb_cFont, "@@default_name");
   ptr->size = NUM2INT(rb_cv_get(rb_cFont, "@@default_size"));
   ptr->bold = RTEST(rb_cv_get(rb_cFont, "@@default_bold"));
@@ -37,7 +37,7 @@ VALUE rb_font_new(void) {
 
 void rb_font_set(VALUE self, VALUE other) {
   struct Font *ptr = rb_font_data_mut(self);
-  struct Font *orig_ptr = rb_font_data(other);
+  const struct Font *orig_ptr = rb_font_data(other);
   ptr->name = orig_ptr->name;
   ptr->size = orig_ptr->size;
   ptr->bold = orig_ptr->bold;
@@ -55,7 +55,7 @@ void rb_font_set(VALUE self, VALUE other) {
 }
 
 TTF_Font *rb_font_to_sdl(VALUE self) {
-  struct Font *ptr = rb_font_data(self);
+  const struct Font *ptr = rb_font_data(self);
   if(ptr->cache) return ptr->cache;
   VALUE name;
   if(TYPE(ptr->name) == T_ARRAY) {
@@ -64,7 +64,7 @@ TTF_Font *rb_font_to_sdl(VALUE self) {
   } else {
     name = ptr->name;
   }
-  ptr->cache = loadFont(
+  ((struct Font *)ptr)->cache = loadFont(
       StringValueCStr(name), ptr->size, ptr->bold, ptr->italic);
   return ptr->cache;
 }
@@ -137,7 +137,7 @@ bool rb_font_data_p(VALUE obj) {
   return RDATA(obj)->dmark == (void(*)(void*))font_mark;
 }
 
-struct Font *rb_font_data(VALUE obj) {
+const struct Font *rb_font_data(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))font_mark) {
@@ -153,7 +153,7 @@ struct Font *rb_font_data(VALUE obj) {
 struct Font *rb_font_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Font");
-  return rb_font_data(obj);
+  return (struct Font *)rb_font_data(obj);
 }
 
 static void font_mark(struct Font *ptr) {
@@ -199,7 +199,7 @@ static VALUE font_alloc(VALUE klass) {
  * Creates a new font with optional name and size.
  */
 static VALUE rb_font_m_initialize(int argc, VALUE *argv, VALUE self) {
-  struct Font *ptr = rb_font_data(self);
+  struct Font *ptr = rb_font_data_mut(self);
   if(argc > 2) {
     rb_raise(rb_eArgError,
         "wrong number of arguments (%d for 0..2)", argc);
@@ -230,8 +230,8 @@ static VALUE rb_font_m_initialize(int argc, VALUE *argv, VALUE self) {
 }
 
 static VALUE rb_font_m_initialize_copy(VALUE self, VALUE orig) {
-  struct Font *ptr = rb_font_data(self);
-  struct Font *orig_ptr = rb_font_data(orig);
+  struct Font *ptr = rb_font_data_mut(self);
+  const struct Font *orig_ptr = rb_font_data(orig);
   ptr->name = orig_ptr->name;
   ptr->size = orig_ptr->size;
   ptr->bold = orig_ptr->bold;
@@ -257,7 +257,7 @@ static VALUE rb_font_s_exist_p(VALUE klass, VALUE name) {
 }
 
 static VALUE rb_font_m_name(VALUE self) {
-  struct Font *ptr = rb_font_data(self);
+  const struct Font *ptr = rb_font_data(self);
   return ptr->name;
 }
 
@@ -269,7 +269,7 @@ static VALUE rb_font_m_set_name(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_font_m_size(VALUE self) {
-  struct Font *ptr = rb_font_data(self);
+  const struct Font *ptr = rb_font_data(self);
   return INT2NUM(ptr->size);
 }
 
@@ -281,7 +281,7 @@ static VALUE rb_font_m_set_size(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_font_m_bold(VALUE self) {
-  struct Font *ptr = rb_font_data(self);
+  const struct Font *ptr = rb_font_data(self);
   return ptr->bold ? Qtrue : Qfalse;
 }
 
@@ -293,7 +293,7 @@ static VALUE rb_font_m_set_bold(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_font_m_italic(VALUE self) {
-  struct Font *ptr = rb_font_data(self);
+  const struct Font *ptr = rb_font_data(self);
   return ptr->italic ? Qtrue : Qfalse;
 }
 
@@ -306,7 +306,7 @@ static VALUE rb_font_m_set_italic(VALUE self, VALUE newval) {
 
 #if RGSS == 3
 static VALUE rb_font_m_outline(VALUE self) {
-  struct Font *ptr = rb_font_data(self);
+  const struct Font *ptr = rb_font_data(self);
   return ptr->outline ? Qtrue : Qfalse;
 }
 
@@ -320,7 +320,7 @@ static VALUE rb_font_m_set_outline(VALUE self, VALUE newval) {
 
 #if RGSS >= 2
 static VALUE rb_font_m_shadow(VALUE self) {
-  struct Font *ptr = rb_font_data(self);
+  const struct Font *ptr = rb_font_data(self);
   return ptr->shadow ? Qtrue : Qfalse;
 }
 
@@ -333,7 +333,7 @@ static VALUE rb_font_m_set_shadow(VALUE self, VALUE newval) {
 #endif
 
 static VALUE rb_font_m_color(VALUE self) {
-  struct Font *ptr = rb_font_data(self);
+  const struct Font *ptr = rb_font_data(self);
   return ptr->color;
 }
 
@@ -346,7 +346,7 @@ static VALUE rb_font_m_set_color(VALUE self, VALUE newval) {
 
 #if RGSS == 3
 static VALUE rb_font_m_out_color(VALUE self) {
-  struct Font *ptr = rb_font_data(self);
+  const struct Font *ptr = rb_font_data(self);
   return ptr->out_color;
 }
 

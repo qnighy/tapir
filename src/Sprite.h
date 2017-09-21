@@ -25,7 +25,7 @@ struct Sprite {
 };
 
 bool rb_sprite_data_p(VALUE obj);
-struct Sprite *rb_sprite_data(VALUE obj);
+const struct Sprite *rb_sprite_data(VALUE obj);
 struct Sprite *rb_sprite_data_mut(VALUE obj);
 
 void initSpriteSDL(void);

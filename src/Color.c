@@ -6,7 +6,7 @@ static VALUE color_alloc(VALUE klass);
 
 VALUE rb_color_new(double red, double green, double blue, double alpha) {
   VALUE ret = color_alloc(rb_cColor);
-  struct Color *ptr = rb_color_data(ret);
+  struct Color *ptr = rb_color_data_mut(ret);
   // Note: original RGSS wrongly saturates RGB within [-255, 255].
   ptr->red = saturateDouble(red, 0.0, 255.0);
   ptr->green = saturateDouble(green, 0.0, 255.0);
@@ -19,8 +19,8 @@ VALUE rb_color_new2(void) {
 }
 
 bool rb_color_equal(VALUE self, VALUE other) {
-  struct Color *ptr = rb_color_data(self);
-  struct Color *other_ptr = rb_color_data(other);
+  const struct Color *ptr = rb_color_data(self);
+  const struct Color *other_ptr = rb_color_data(other);
   return
     ptr->red == other_ptr->red &&
     ptr->green == other_ptr->green &&
@@ -41,7 +41,7 @@ void rb_color_set(
 
 void rb_color_set2(VALUE self, VALUE other) {
   struct Color *ptr = rb_color_data_mut(self);
-  struct Color *other_ptr = rb_color_data(other);
+  const struct Color *other_ptr = rb_color_data(other);
   // Note: original RGSS doesn't check saturation here.
   ptr->red = saturateDouble(other_ptr->red, 0.0, 255.0);
   ptr->green = saturateDouble(other_ptr->green, 0.0, 255.0);
@@ -50,7 +50,7 @@ void rb_color_set2(VALUE self, VALUE other) {
 }
 
 double rb_color_red(VALUE self) {
-  struct Color *ptr = rb_color_data(self);
+  const struct Color *ptr = rb_color_data(self);
   return ptr->red;
 }
 void rb_color_set_red(VALUE self, double newval) {
@@ -59,7 +59,7 @@ void rb_color_set_red(VALUE self, double newval) {
   ptr->red = saturateDouble(newval, 0.0, 255.0);
 }
 double rb_color_green(VALUE self) {
-  struct Color *ptr = rb_color_data(self);
+  const struct Color *ptr = rb_color_data(self);
   return ptr->green;
 }
 void rb_color_set_green(VALUE self, double newval) {
@@ -68,7 +68,7 @@ void rb_color_set_green(VALUE self, double newval) {
   ptr->green = saturateDouble(newval, 0.0, 255.0);
 }
 double rb_color_blue(VALUE self) {
-  struct Color *ptr = rb_color_data(self);
+  const struct Color *ptr = rb_color_data(self);
   return ptr->blue;
 }
 void rb_color_set_blue(VALUE self, double newval) {
@@ -77,7 +77,7 @@ void rb_color_set_blue(VALUE self, double newval) {
   ptr->blue = saturateDouble(newval, 0.0, 255.0);
 }
 double rb_color_alpha(VALUE self) {
-  struct Color *ptr = rb_color_data(self);
+  const struct Color *ptr = rb_color_data(self);
   return ptr->alpha;
 }
 void rb_color_set_alpha(VALUE self, double newval) {
@@ -137,7 +137,7 @@ bool rb_color_data_p(VALUE obj) {
   return RDATA(obj)->dmark == (void(*)(void*))color_mark;
 }
 
-struct Color *rb_color_data(VALUE obj) {
+const struct Color *rb_color_data(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))color_mark) {
@@ -153,7 +153,7 @@ struct Color *rb_color_data(VALUE obj) {
 struct Color *rb_color_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Color");
-  return rb_color_data(obj);
+  return (struct Color *)rb_color_data(obj);
 }
 
 static void color_mark(struct Color *ptr) {
@@ -371,7 +371,7 @@ static VALUE rb_color_m_set_alpha(VALUE self, VALUE newval) {
  * Returns the string representation of the color.
  */
 static VALUE rb_color_m_to_s(VALUE self) {
-  struct Color *ptr = rb_color_data(self);
+  const struct Color *ptr = rb_color_data(self);
   char s[100];
   snprintf(s, sizeof(s), "(%f, %f, %f, %f)",
       ptr->red, ptr->green, ptr->blue, ptr->alpha);
@@ -415,7 +415,7 @@ static VALUE rb_color_s_old_load(VALUE klass, VALUE str) {
 static VALUE rb_color_m_old_dump(VALUE self, VALUE limit) {
   (void) limit;
 
-  struct Color *ptr = rb_color_data(self);
+  const struct Color *ptr = rb_color_data(self);
   char s[sizeof(double)*4];
   writeDouble(s+sizeof(double)*0, ptr->red);
   writeDouble(s+sizeof(double)*1, ptr->green);

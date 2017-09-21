@@ -64,7 +64,7 @@ bool rb_viewport_data_p(VALUE obj) {
   return RDATA(obj)->dmark == (void(*)(void*))viewport_mark;
 }
 
-struct Viewport *rb_viewport_data(VALUE obj) {
+const struct Viewport *rb_viewport_data(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))viewport_mark) {
@@ -80,7 +80,7 @@ struct Viewport *rb_viewport_data(VALUE obj) {
 struct Viewport *rb_viewport_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Viewport");
-  return rb_viewport_data(obj);
+  return (struct Viewport *)rb_viewport_data(obj);
 }
 
 static void viewport_mark(struct Viewport *ptr) {
@@ -116,7 +116,7 @@ static VALUE viewport_alloc(VALUE klass) {
  * Creates a new viewport.
  */
 static VALUE rb_viewport_m_initialize(int argc, VALUE *argv, VALUE self) {
-  struct Viewport *ptr = rb_viewport_data(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   switch(argc) {
     case 1:
       rb_rect_set2(ptr->rect, argv[0]);
@@ -144,8 +144,8 @@ static VALUE rb_viewport_m_initialize(int argc, VALUE *argv, VALUE self) {
 }
 
 static VALUE rb_viewport_m_initialize_copy(VALUE self, VALUE orig) {
-  struct Viewport *ptr = rb_viewport_data(self);
-  struct Viewport *orig_ptr = rb_viewport_data(orig);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
+  const struct Viewport *orig_ptr = rb_viewport_data(orig);
   rb_rect_set2(ptr->rect, orig_ptr->rect);
   rb_color_set2(ptr->color, orig_ptr->color);
   rb_tone_set2(ptr->tone, orig_ptr->tone);
@@ -158,18 +158,18 @@ static VALUE rb_viewport_m_initialize_copy(VALUE self, VALUE orig) {
 }
 
 static VALUE rb_viewport_m_dispose(VALUE self) {
-  struct Viewport *ptr = rb_viewport_data(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   ptr->disposed = true;
   return Qnil;
 }
 
 static VALUE rb_viewport_m_disposed_p(VALUE self) {
-  struct Viewport *ptr = rb_viewport_data(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return ptr->disposed ? Qtrue : Qfalse;
 }
 
 static VALUE rb_viewport_m_rect(VALUE self) {
-  struct Viewport *ptr = rb_viewport_data(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return ptr->rect;
 }
 
@@ -180,7 +180,7 @@ static VALUE rb_viewport_m_set_rect(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_viewport_m_visible(VALUE self) {
-  struct Viewport *ptr = rb_viewport_data(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return ptr->visible ? Qtrue : Qfalse;
 }
 
@@ -191,7 +191,7 @@ static VALUE rb_viewport_m_set_visible(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_viewport_m_z(VALUE self) {
-  struct Viewport *ptr = rb_viewport_data(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return INT2NUM(ptr->z);
 }
 
@@ -202,7 +202,7 @@ static VALUE rb_viewport_m_set_z(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_viewport_m_ox(VALUE self) {
-  struct Viewport *ptr = rb_viewport_data(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return INT2NUM(ptr->ox);
 }
 
@@ -213,7 +213,7 @@ static VALUE rb_viewport_m_set_ox(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_viewport_m_oy(VALUE self) {
-  struct Viewport *ptr = rb_viewport_data(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return INT2NUM(ptr->oy);
 }
 
@@ -224,7 +224,7 @@ static VALUE rb_viewport_m_set_oy(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_viewport_m_color(VALUE self) {
-  struct Viewport *ptr = rb_viewport_data(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return ptr->color;
 }
 
@@ -235,7 +235,7 @@ static VALUE rb_viewport_m_set_color(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_viewport_m_tone(VALUE self) {
-  struct Viewport *ptr = rb_viewport_data(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return ptr->tone;
 }
 

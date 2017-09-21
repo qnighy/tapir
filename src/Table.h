@@ -14,7 +14,7 @@ struct Table {
 };
 
 bool rb_table_data_p(VALUE obj);
-struct Table *rb_table_data(VALUE obj);
+const struct Table *rb_table_data(VALUE obj);
 struct Table *rb_table_data_mut(VALUE obj);
 
 VALUE rb_table_new(
@@ -29,6 +29,5 @@ int32_t rb_table_zsize(VALUE self);
 int16_t rb_table_aref(VALUE self, int32_t x, int32_t y, int32_t z);
 void rb_table_aset(
     VALUE self, int32_t x, int32_t y, int32_t z, int16_t val);
-int16_t *rb_table_data2(VALUE self);
 
 #endif /* TABLE_H */

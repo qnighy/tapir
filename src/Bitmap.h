@@ -18,7 +18,7 @@ struct Bitmap {
 };
 
 bool rb_bitmap_data_p(VALUE obj);
-struct Bitmap *rb_bitmap_data(VALUE obj);
+const struct Bitmap *rb_bitmap_data(VALUE obj);
 struct Bitmap *rb_bitmap_data_mut(VALUE obj);
 
 VALUE rb_bitmap_new(int width, int height);

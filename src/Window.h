@@ -20,7 +20,7 @@ struct Window {
 };
 
 bool rb_window_data_p(VALUE obj);
-struct Window *rb_window_data(VALUE obj);
+const struct Window *rb_window_data(VALUE obj);
 struct Window *rb_window_data_mut(VALUE obj);
 
 void initWindowSDL(void);

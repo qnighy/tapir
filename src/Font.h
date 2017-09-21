@@ -27,7 +27,7 @@ struct Font {
 };
 
 bool rb_font_data_p(VALUE obj);
-struct Font *rb_font_data(VALUE obj);
+const struct Font *rb_font_data(VALUE obj);
 struct Font *rb_font_data_mut(VALUE obj);
 
 VALUE rb_font_new(void);

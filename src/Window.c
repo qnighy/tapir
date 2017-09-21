@@ -113,7 +113,7 @@ bool rb_window_data_p(VALUE obj) {
   return RDATA(obj)->dmark == (void(*)(void*))window_mark;
 }
 
-struct Window *rb_window_data(VALUE obj) {
+const struct Window *rb_window_data(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))window_mark) {
@@ -129,7 +129,7 @@ struct Window *rb_window_data(VALUE obj) {
 struct Window *rb_window_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Window");
-  return rb_window_data(obj);
+  return (struct Window *)rb_window_data(obj);
 }
 
 static void window_mark(struct Window *ptr) {
@@ -179,7 +179,7 @@ static VALUE window_alloc(VALUE klass) {
  * Creates a new window.
  */
 static VALUE rb_window_m_initialize(int argc, VALUE *argv, VALUE self) {
-  struct Window *ptr = rb_window_data(self);
+  struct Window *ptr = rb_window_data_mut(self);
   if(argc > 4) {
     rb_raise(rb_eArgError,
         "wrong number of arguments (%d for 4)", argc);
@@ -192,8 +192,8 @@ static VALUE rb_window_m_initialize(int argc, VALUE *argv, VALUE self) {
 }
 
 static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
-  struct Window *ptr = rb_window_data(self);
-  struct Window *orig_ptr = rb_window_data(orig);
+  struct Window *ptr = rb_window_data_mut(self);
+  const struct Window *orig_ptr = rb_window_data(orig);
   ptr->renderable.z = orig_ptr->renderable.z;
   ptr->renderable.viewport = orig_ptr->renderable.viewport;
   ptr->windowskin = orig_ptr->windowskin;
@@ -211,13 +211,13 @@ static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
 }
 
 static VALUE rb_window_m_dispose(VALUE self) {
-  struct Window *ptr = rb_window_data(self);
+  struct Window *ptr = rb_window_data_mut(self);
   ptr->disposed = true;
   return Qnil;
 }
 
 static VALUE rb_window_m_disposed_p(VALUE self) {
-  struct Window *ptr = rb_window_data(self);
+  const struct Window *ptr = rb_window_data(self);
   return ptr->disposed ? Qtrue : Qfalse;
 }
 
@@ -233,18 +233,18 @@ static VALUE rb_window_m_move(
 }
 
 static VALUE rb_window_m_open_p(VALUE self) {
-  struct Window *ptr = rb_window_data(self);
+  const struct Window *ptr = rb_window_data(self);
   return ptr->openness == 255 ? Qtrue : Qfalse;
 }
 
 static VALUE rb_window_m_close_p(VALUE self) {
-  struct Window *ptr = rb_window_data(self);
+  const struct Window *ptr = rb_window_data(self);
   return ptr->openness == 0 ? Qtrue : Qfalse;
 }
 #endif
 
 static VALUE rb_window_m_windowskin(VALUE self) {
-  struct Window *ptr = rb_window_data(self);
+  const struct Window *ptr = rb_window_data(self);
   return ptr->windowskin;
 }
 
@@ -256,7 +256,7 @@ static VALUE rb_window_m_set_windowskin(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_window_m_contents(VALUE self) {
-  struct Window *ptr = rb_window_data(self);
+  const struct Window *ptr = rb_window_data(self);
   return ptr->contents;
 }
 
@@ -268,7 +268,7 @@ static VALUE rb_window_m_set_contents(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_window_m_visible(VALUE self) {
-  struct Window *ptr = rb_window_data(self);
+  const struct Window *ptr = rb_window_data(self);
   return ptr->visible ? Qtrue : Qfalse;
 }
 
@@ -279,7 +279,7 @@ static VALUE rb_window_m_set_visible(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_window_m_x(VALUE self) {
-  struct Window *ptr = rb_window_data(self);
+  const struct Window *ptr = rb_window_data(self);
   return INT2NUM(ptr->x);
 }
 
@@ -290,7 +290,7 @@ static VALUE rb_window_m_set_x(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_window_m_y(VALUE self) {
-  struct Window *ptr = rb_window_data(self);
+  const struct Window *ptr = rb_window_data(self);
   return INT2NUM(ptr->y);
 }
 
@@ -301,7 +301,7 @@ static VALUE rb_window_m_set_y(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_window_m_width(VALUE self) {
-  struct Window *ptr = rb_window_data(self);
+  const struct Window *ptr = rb_window_data(self);
   return INT2NUM(ptr->width);
 }
 
@@ -312,7 +312,7 @@ static VALUE rb_window_m_set_width(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_window_m_height(VALUE self) {
-  struct Window *ptr = rb_window_data(self);
+  const struct Window *ptr = rb_window_data(self);
   return INT2NUM(ptr->height);
 }
 
@@ -323,7 +323,7 @@ static VALUE rb_window_m_set_height(VALUE self, VALUE newval) {
 }
 
 static VALUE rb_window_m_z(VALUE self) {
-  struct Window *ptr = rb_window_data(self);
+  const struct Window *ptr = rb_window_data(self);
   return INT2NUM(ptr->renderable.z);
 }
 
@@ -335,7 +335,7 @@ static VALUE rb_window_m_set_z(VALUE self, VALUE newval) {
 
 #if RGSS >= 2
 static VALUE rb_window_m_openness(VALUE self) {
-  struct Window *ptr = rb_window_data(self);
+  const struct Window *ptr = rb_window_data(self);
   return INT2NUM(ptr->openness);
 }
 
@@ -367,12 +367,12 @@ static void renderWindow(struct Renderable *renderable) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   if(ptr->windowskin != Qnil) {
-    struct Bitmap *skin_bitmap_ptr = rb_bitmap_data(ptr->windowskin);
+    const struct Bitmap *skin_bitmap_ptr = rb_bitmap_data(ptr->windowskin);
     SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
     if(!skin_surface) return;
 
     glActiveTexture(GL_TEXTURE0);
-    bitmapBindTexture(skin_bitmap_ptr);
+    bitmapBindTexture((struct Bitmap *)skin_bitmap_ptr);
 
     glUseProgram(shader1);
     glUniform1i(glGetUniformLocation(shader1, "windowskin"), 0);
@@ -409,7 +409,7 @@ static void renderWindow(struct Renderable *renderable) {
   }
 
   if(ptr->contents != Qnil && openness == 255) {
-    struct Bitmap *contents_bitmap_ptr = rb_bitmap_data(ptr->contents);
+    const struct Bitmap *contents_bitmap_ptr = rb_bitmap_data(ptr->contents);
     SDL_Surface *contents_surface = contents_bitmap_ptr->surface;
     if(!contents_surface) return;
 
@@ -419,7 +419,7 @@ static void renderWindow(struct Renderable *renderable) {
         window_width, window_height);
 
     glActiveTexture(GL_TEXTURE0);
-    bitmapBindTexture(contents_bitmap_ptr);
+    bitmapBindTexture((struct Bitmap *)contents_bitmap_ptr);
 
     gl_draw_rect(
         ptr->x, ptr->y,
