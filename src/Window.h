@@ -14,6 +14,10 @@ struct Window {
   VALUE windowskin, contents;
   bool disposed, visible;
   int x, y, width, height;
+  int ox, oy;
+#if RGSS == 3
+  int padding, padding_bottom;
+#endif
 #if RGSS >= 2
   int openness;
 #endif

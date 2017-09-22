@@ -355,7 +355,7 @@ VALUE main_rb(VALUE data) {
       "  end\n"
       "end\n"
       "class Window\n"
-      "  attr_unimplemented :active, :arrows_visible, :back_opacity, :contents_opacity, :cursor_rect, :opacity, :ox, :oy, :padding, :padding_bottom, :pause, :stretch, :tone, :viewport\n"
+      "  attr_unimplemented :active, :arrows_visible, :back_opacity, :contents_opacity, :cursor_rect, :opacity, :pause, :stretch, :tone, :viewport\n"
       "  def update\n"
       "    warn_unimplemented(\"Window#update\")\n"
       "  end\n"

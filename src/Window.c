@@ -45,6 +45,16 @@ static VALUE rb_window_m_height(VALUE self);
 static VALUE rb_window_m_set_height(VALUE self, VALUE newval);
 static VALUE rb_window_m_z(VALUE self);
 static VALUE rb_window_m_set_z(VALUE self, VALUE newval);
+static VALUE rb_window_m_ox(VALUE self);
+static VALUE rb_window_m_set_ox(VALUE self, VALUE newval);
+static VALUE rb_window_m_oy(VALUE self);
+static VALUE rb_window_m_set_oy(VALUE self, VALUE newval);
+#if RGSS == 3
+static VALUE rb_window_m_padding(VALUE self);
+static VALUE rb_window_m_set_padding(VALUE self, VALUE newval);
+static VALUE rb_window_m_padding_bottom(VALUE self);
+static VALUE rb_window_m_set_padding_bottom(VALUE self, VALUE newval);
+#endif
 #if RGSS >= 2
 static VALUE rb_window_m_openness(VALUE self);
 static VALUE rb_window_m_set_openness(VALUE self, VALUE newval);
@@ -87,6 +97,18 @@ void Init_Window(void) {
   rb_define_method(rb_cWindow, "height=", rb_window_m_set_height, 1);
   rb_define_method(rb_cWindow, "z", rb_window_m_z, 0);
   rb_define_method(rb_cWindow, "z=", rb_window_m_set_z, 1);
+  rb_define_method(rb_cWindow, "ox", rb_window_m_ox, 0);
+  rb_define_method(rb_cWindow, "ox=", rb_window_m_set_ox, 1);
+  rb_define_method(rb_cWindow, "oy", rb_window_m_oy, 0);
+  rb_define_method(rb_cWindow, "oy=", rb_window_m_set_oy, 1);
+#if RGSS == 3
+  rb_define_method(rb_cWindow, "padding", rb_window_m_padding, 0);
+  rb_define_method(rb_cWindow, "padding=", rb_window_m_set_padding, 1);
+  rb_define_method(rb_cWindow, "padding_bottom",
+      rb_window_m_padding_bottom, 0);
+  rb_define_method(rb_cWindow, "padding_bottom=",
+      rb_window_m_set_padding_bottom, 1);
+#endif
 #if RGSS >= 2
   rb_define_method(rb_cWindow, "openness", rb_window_m_openness, 0);
   rb_define_method(rb_cWindow, "openness=", rb_window_m_set_openness, 1);
@@ -160,6 +182,12 @@ static VALUE window_alloc(VALUE klass) {
   ptr->y = 0;
   ptr->width = 0;
   ptr->height = 0;
+  ptr->ox = 0;
+  ptr->oy = 0;
+#if RGSS == 3
+  ptr->padding = 12;
+  ptr->padding_bottom = 12;
+#endif
 #if RGSS >= 2
   ptr->openness = 255;
 #endif
@@ -204,6 +232,12 @@ static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
   ptr->y = orig_ptr->y;
   ptr->width = orig_ptr->width;
   ptr->height = orig_ptr->height;
+  ptr->ox = orig_ptr->ox;
+  ptr->oy = orig_ptr->oy;
+#if RGSS == 3
+  ptr->padding = orig_ptr->padding;
+  ptr->padding_bottom = orig_ptr->padding_bottom;
+#endif
 #if RGSS >= 2
   ptr->openness = orig_ptr->openness;
 #endif
@@ -333,6 +367,52 @@ static VALUE rb_window_m_set_z(VALUE self, VALUE newval) {
   return newval;
 }
 
+static VALUE rb_window_m_ox(VALUE self) {
+  const struct Window *ptr = rb_window_data(self);
+  return INT2NUM(ptr->ox);
+}
+
+static VALUE rb_window_m_set_ox(VALUE self, VALUE newval) {
+  struct Window *ptr = rb_window_data_mut(self);
+  ptr->ox = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_window_m_oy(VALUE self) {
+  const struct Window *ptr = rb_window_data(self);
+  return INT2NUM(ptr->oy);
+}
+
+static VALUE rb_window_m_set_oy(VALUE self, VALUE newval) {
+  struct Window *ptr = rb_window_data_mut(self);
+  ptr->oy = NUM2INT(newval);
+  return newval;
+}
+
+#if RGSS == 3
+static VALUE rb_window_m_padding(VALUE self) {
+  const struct Window *ptr = rb_window_data(self);
+  return INT2NUM(ptr->padding);
+}
+
+static VALUE rb_window_m_set_padding(VALUE self, VALUE newval) {
+  struct Window *ptr = rb_window_data_mut(self);
+  ptr->padding_bottom = ptr->padding = NUM2INT(newval);
+  return newval;
+}
+
+static VALUE rb_window_m_padding_bottom(VALUE self) {
+  const struct Window *ptr = rb_window_data(self);
+  return INT2NUM(ptr->padding_bottom);
+}
+
+static VALUE rb_window_m_set_padding_bottom(VALUE self, VALUE newval) {
+  struct Window *ptr = rb_window_data_mut(self);
+  ptr->padding_bottom = NUM2INT(newval);
+  return newval;
+}
+#endif
+
 #if RGSS >= 2
 static VALUE rb_window_m_openness(VALUE self) {
   const struct Window *ptr = rb_window_data(self);
@@ -413,6 +493,28 @@ static void renderWindow(struct Renderable *renderable) {
     SDL_Surface *contents_surface = contents_bitmap_ptr->surface;
     if(!contents_surface) return;
 
+#if RGSS == 3
+    int padding = ptr->padding;
+    int padding_bottom = ptr->padding_bottom;
+#else
+    // TODO: is the padding correct?
+    int padding = 16;
+    int padding_bottom = 16;
+#endif
+
+    int wcontent_width = ptr->width - padding * 2;
+    int wcontent_height = ptr->width - padding - padding_bottom;
+    int content_width = contents_surface->w;
+    int content_height = contents_surface->h;
+    int clip_left = ptr->ox;
+    if(clip_left < 0) clip_left = 0;
+    int clip_top = ptr->oy;
+    if(clip_top < 0) clip_top = 0;
+    int clip_right = ptr->ox + wcontent_width;
+    if(clip_right > content_width) clip_right = content_width;
+    int clip_bottom = ptr->oy + wcontent_height;
+    if(clip_bottom > content_height) clip_bottom = content_height;
+
     glUseProgram(shader4);
     glUniform1i(glGetUniformLocation(shader4, "contents"), 0);
     glUniform2f(glGetUniformLocation(shader4, "resolution"),
@@ -422,9 +524,14 @@ static void renderWindow(struct Renderable *renderable) {
     bitmapBindTexture((struct Bitmap *)contents_bitmap_ptr);
 
     gl_draw_rect(
-        ptr->x, ptr->y,
-        ptr->x + ptr->width, ptr->y + ptr->height,
-        0.0, 0.0, 1.0, 1.0);
+        ptr->x + padding + (clip_left - ptr->ox),
+        ptr->y + padding + (clip_top - ptr->oy),
+        ptr->x + padding + (clip_right - ptr->ox),
+        ptr->y + padding + (clip_bottom - ptr->oy),
+        (double)clip_left / content_width,
+        (double)clip_top / content_height,
+        (double)clip_right / content_width,
+        (double)clip_bottom / content_height);
   }
 
   glUseProgram(0);
