@@ -221,10 +221,14 @@ VALUE main_rb(VALUE data) {
 #endif
       "  end\n"
       "  def self.frame_rate=(rate)\n"
-      "    warn_unimplemented(\"Graphics.frame_rate=\")\n"
+      "    warn_unimplemented(\"Graphics.frame_rate\")\n"
+      "  end\n"
+      "  def self.frame_count\n"
+      "    warn_unimplemented(\"Graphics.frame_count\")\n"
+      "    0\n"
       "  end\n"
       "  def self.frame_count=(count)\n"
-      "    warn_unimplemented(\"Graphics.frame_count=\")\n"
+      "    warn_unimplemented(\"Graphics.frame_count\")\n"
       "  end\n"
       "  def self.brightness\n"
       "    warn_unimplemented(\"Graphics.brightness\")\n"
@@ -356,6 +360,14 @@ VALUE main_rb(VALUE data) {
       "end\n"
       "class Window\n"
       "  attr_unimplemented :active, :arrows_visible, :back_opacity, :contents_opacity, :cursor_rect, :opacity, :pause, :stretch, :tone, :viewport\n"
+      "  def opacity=(opacity)\n"
+      "    warn_unimplemented(\"Window#opacity\")\n"
+      "    @opacity = [[opacity, 0].max, 255].min\n"
+      "  end\n"
+      "  def contents_opacity=(contents_opacity)\n"
+      "    warn_unimplemented(\"Window#contents_opacity\")\n"
+      "    @contents_opacity = [[contents_opacity, 0].max, 255].min\n"
+      "  end\n"
       "  def update\n"
       "    warn_unimplemented(\"Window#update\")\n"
       "  end\n"
@@ -471,13 +483,16 @@ VALUE main_rb(VALUE data) {
 #endif
       "    attr_accessor :learnings\n"
 #if RGSS == 3
-      "    attr_accessor :params\n"
+      "    attr_accessor :exp_params, :params\n"
       "    def exp_for_level(level)\n"
-      // TODO: correct exp_for_level implementation
+      "      warn_unimplemented(\"Class#exp_for_level\")\n"
       "      1\n"
       "    end\n"
-#elif RGSS == 2
-#elif RGSS == 1
+#else
+      "    attr_accessor :armor_set, :element_ranks, :id, :name, :position, :state_ranks, :weapon_set\n"
+#if RGSS == 2
+      "    attr_accessor :skill_name, :skill_name_valid\n"
+#endif
 #endif
       "    class Learning\n"
       "      attr_accessor :level, :skill_id\n"
@@ -708,17 +723,16 @@ VALUE main_rb(VALUE data) {
       "  end\n"
 #endif
       "  class System\n"
-      "    attr_accessor :party_members, :start_map_id, :start_x, :start_y, :title_bgm\n"
 #if RGSS >= 2
-      "    attr_accessor :airship, :boat, :ship\n"
-      "    attr_accessor :terms\n"
+      "    attr_accessor :airship, :boat, :game_title, :ship, :sounds, :terms, :version_id\n"
 #endif
+      "    attr_accessor :battle_bgm, :battle_end_me, :battler_hue, :battler_name, :edit_map_id, :elements, :gameover_me, :party_members, :start_map_id, :start_x, :start_y, :switches, :test_battlers, :test_troop_id, :title_bgm, :variables\n"
 #if RGSS == 3
-      "    attr_accessor :currency_unit, :game_title, :opt_draw_title, :opt_followers, :opt_transparent, :opt_use_midi, :sounds, :title1_name, :title2_name, :window_tone\n"
+      "    attr_accessor :armor_types, :battleback1_name, :battleback2_name, :currency_unit, :japanese, :opt_display_tp, :opt_draw_title, :opt_extra_exp, :opt_floor_death, :opt_followers, :opt_slip_death, :opt_transparent, :opt_use_midi, :skill_types, :title1_name, :title2_name, :weapon_types, :window_tone\n"
 #elif RGSS == 2
-      "    attr_accessor :passages, :sounds\n"
-#elif RGSS == 1
-      "    attr_accessor :cursor_se, :decision_se, :title_name, :windowskin_name\n"
+      "    attr_accessor :passages\n"
+#else
+      "    attr_accessor :actor_collapse_se, :battle_start_se, :battle_transition, :battleback_name, :buzzer_se, :cancel_se, :cursor_se, :decision_se, :enemy_collapse_se, :equip_se, :escape_se, :gameover_name, :load_se, :magic_number, :save_se, :shop_se, :title_name, :windowskin_name, :words\n"
 #endif
       "    class "TERMS"\n"
 #if RGSS == 3
@@ -765,8 +779,13 @@ VALUE main_rb(VALUE data) {
       "  class Weather\n"
       "    attr_accessor :max, :ox, :oy, :type\n"
       "    def initialize(viewport=nil)\n"
+      "      warn_unimplemented(\"Weather.new\")\n"
       "    end\n"
       "    def update\n"
+      "      warn_unimplemented(\"Weather#update\")\n"
+      "    end\n"
+      "    def dispose\n"
+      "      warn_unimplemented(\"Weather#dispose\")\n"
       "    end\n"
       "  end\n"
 #endif
