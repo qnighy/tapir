@@ -503,7 +503,7 @@ static void renderWindow(struct Renderable *renderable) {
 #endif
 
     int wcontent_width = ptr->width - padding * 2;
-    int wcontent_height = ptr->width - padding - padding_bottom;
+    int wcontent_height = ptr->height - padding - padding_bottom;
     int content_width = contents_surface->w;
     int content_height = contents_surface->h;
     int clip_left = ptr->ox;

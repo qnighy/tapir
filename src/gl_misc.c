@@ -53,6 +53,7 @@ GLuint compileShaders(const char *vsh_source, const char *fsh_source) {
 void gl_draw_rect(
     double x0, double y0, double x1, double y1,
     double tx0, double ty0, double tx1, double ty1) {
+  if(x1 < x0 || y1 < y0) return;
   glBegin(GL_TRIANGLE_STRIP);
   glTexCoord2f(tx0, ty0);
   glVertex3f(x0, y0, 0.0f);
