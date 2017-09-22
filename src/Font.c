@@ -64,8 +64,14 @@ TTF_Font *rb_font_to_sdl(VALUE self) {
   } else {
     name = ptr->name;
   }
+#if RGSS == 3
+  // Note: Font#size seems to be px under 96dpi. multiplying 3/4 to convert to pt.
+  int ptsize = ptr->size * 3 / 4;
+#else
+  int ptsize = ptr->size;
+#endif
   ((struct Font *)ptr)->cache = loadFont(
-      StringValueCStr(name), ptr->size, ptr->bold, ptr->italic);
+      StringValueCStr(name), ptsize, ptr->bold, ptr->italic);
   return ptr->cache;
 }
 
