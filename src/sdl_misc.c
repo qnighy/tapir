@@ -6,6 +6,7 @@
 #include "sdl_misc.h"
 #include "Sprite.h"
 #include "Window.h"
+#include "Tilemap.h"
 
 #if RGSS >= 2
 int window_width = 544;
@@ -67,9 +68,11 @@ void initSDL() {
 
   initSpriteSDL();
   initWindowSDL();
+  initTilemapSDL();
 }
 
 void cleanupSDL() {
+  deinitTilemapSDL();
   deinitWindowSDL();
   deinitSpriteSDL();
   if(glcontext) SDL_GL_DeleteContext(glcontext);

@@ -20,8 +20,9 @@ endif
 endif
 OBJS = main.o main_rb.o archive.o openres.o gl_misc.o sdl_misc.o misc.o \
        font_lookup.o \
-       Bitmap.o Color.o Font.o Graphics.o Input.o RGSSError.o RGSSReset.o \
-       Rect.o Sprite.o Table.o Tone.o Viewport.o Window.o
+       Bitmap.o BitmapArray.o \
+       Color.o Font.o Graphics.o Input.o RGSSError.o RGSSReset.o \
+       Rect.o Sprite.o Table.o Tilemap.o Tone.o Viewport.o Window.o
 CFLAGS += -g -O2 -Wall -Wextra
 ifeq ($(RGSS),3)
 CPPFLAGS += -I$(RUBY_DIR)/include/ruby-1.9.1/$(RUBY_PLATFORM) \

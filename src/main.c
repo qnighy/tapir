@@ -9,6 +9,7 @@
 #include "openres.h"
 #include "font_lookup.h"
 #include "Bitmap.h"
+#include "BitmapArray.h"
 #include "Color.h"
 #include "Font.h"
 #include "Graphics.h"
@@ -18,6 +19,7 @@
 #include "Rect.h"
 #include "Sprite.h"
 #include "Table.h"
+#include "Tilemap.h"
 #include "Tone.h"
 #include "Viewport.h"
 #include "Window.h"
@@ -155,6 +157,8 @@ static void Init_RGSS(void) {
   Init_Viewport();
   Init_Sprite();
   Init_Window();
+  Init_Tilemap();
+  Init_BitmapArray();
   Init_Graphics();
   Init_Input();
   rb_define_global_function("load_data", rb_load_data, 1);
