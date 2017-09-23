@@ -53,6 +53,8 @@ static VALUE rb_tilemap_m_set_oy(VALUE self, VALUE newval);
 
 static void registerTilemap(struct Tilemap *ptr);
 static void unregisterTilemap(struct Tilemap *ptr);
+static void renderTilemapAt(struct Tilemap *ptr, int z_target);
+static void renderTile(struct Tilemap *ptr, int tile_id, int x, int y);
 
 VALUE rb_cTilemap;
 
@@ -372,26 +374,224 @@ static VALUE rb_tilemap_m_set_oy(VALUE self, VALUE newval) {
   return newval;
 }
 
+static size_t tilemaps_size, tilemaps_capacity;
+static struct Tilemap **tilemaps;
+
 static void registerTilemap(struct Tilemap *ptr) {
-  (void) ptr;
-  WARN_UNIMPLEMENTED("registerTilemap");
+  if(tilemaps_size >= tilemaps_capacity) {
+    tilemaps_capacity = tilemaps_capacity + tilemaps_capacity / 2;
+    tilemaps = realloc(tilemaps, sizeof(*tilemaps) * tilemaps_capacity);
+  }
+  tilemaps[tilemaps_size++] = ptr;
 }
 
 static void unregisterTilemap(struct Tilemap *ptr) {
-  (void) ptr;
-  WARN_UNIMPLEMENTED("unregisterTilemap");
+  size_t i;
+  for(i = 0; i < tilemaps_size; ++i) {
+    if(tilemaps[i] == ptr) break;
+  }
+  if(i == tilemaps_size) return;
+  tilemaps[i] = tilemaps[tilemaps_size - 1];
+  --tilemaps_size;
 }
 
-void renderTilemaps(void) {
-  WARN_UNIMPLEMENTED("renderTilemaps");
+#if RGSS >= 2
+#else
+static const int autotile_lookup[4][48] = {
+  { 26,  4, 26,  4, 26,  4, 26,  4, 26,  4, 26,  4, 26,  4, 26,  4,
+    24, 24, 24, 24, 14, 14, 14, 14, 28, 28,  4,  4, 38,  4, 38,  4,
+    24, 14, 12, 12, 16, 16, 40,  4, 36, 36, 12, 12, 36, 16, 12,  0},
+  { 27, 27,  5,  5, 27, 27,  5,  5, 27, 27,  5,  5, 27, 27,  5,  5,
+    25,  5, 25,  5, 15, 15, 15, 15, 29, 29, 29, 29, 39, 39,  5,  5,
+    29, 15, 13, 13, 17, 17, 41, 41, 37,  5, 17, 13, 41, 17, 17,  1},
+  { 32, 32, 32, 32, 32, 32, 32, 32, 10, 10, 10, 10, 10, 10, 10, 10,
+    30, 30, 30, 30, 20, 20, 10, 10, 34, 10, 34, 10, 44, 44, 44, 44,
+    30, 44, 18, 18, 22, 10, 46, 46, 42, 42, 18, 42, 42, 46, 42,  6},
+  { 33, 33, 33, 33, 11, 11, 11, 11, 33, 33, 33, 33, 11, 11, 11, 11,
+    31, 31, 11, 11, 21, 11, 21, 11, 35, 35, 35, 35, 45, 45, 45, 45,
+    35, 45, 19, 11, 23, 23, 47, 47, 43, 43, 23, 43, 47, 47, 47,  7}
+};
+#endif
+
+// render tilemaps for z_min < z <= z_max.
+void renderTilemaps(int z_min, int z_max) {
+#if RGSS >= 2
+  if(z_min < 0 && 0 <= z_max) {
+    for(size_t i = 0; i < tilemaps_size; ++i) {
+      renderTilemapAt(tilemaps[i], 0);
+    }
+  }
+  if(z_min < 100 && 100 <= z_max) {
+    for(size_t i = 0; i < tilemaps_size; ++i) {
+      renderTilemapAt(tilemaps[i], 100);
+    }
+  }
+#else
+  if(z_min < 0 && 0 <= z_max) {
+    for(size_t i = 0; i < tilemaps_size; ++i) {
+      renderTilemapAt(tilemaps[i], 0);
+    }
+  }
+  if(z_min < 0) z_min = 0;
+  while(z_min < z_max) {
+    // TODO how to cut z_max off
+    if(z_max > window_height + 32 * 10) z_max = window_height + 32 * 10;
+    int z = z_max;
+    for(size_t i = 0; i < tilemaps_size; ++i) {
+      int oy = tilemaps[i]->oy;
+      int y = ((z_min + oy) >> 5 << 5) - oy + 32;
+      if(y < z) z = y;
+    }
+    for(size_t i = 0; i < tilemaps_size; ++i) {
+      int oy = tilemaps[i]->oy;
+      int y = ((z_min + oy) >> 5 << 5) - oy + 32;
+      if(y == z)  {
+        renderTilemapAt(tilemaps[i], z);
+      }
+    }
+    z_min = z;
+  }
+#endif
+}
+
+static void renderTilemapAt(struct Tilemap *ptr, int z_target) {
+#if RGSS >= 2
+  (void) ptr;
+  (void) z_target;
+  WARN_UNIMPLEMENTED("renderTilemapAt");
+#else
+  if(ptr->map_data == Qnil) return;
+  const struct Table *map_data_ptr = rb_table_data(ptr->map_data);
+  int xsize = map_data_ptr->xsize;
+  int ysize = map_data_ptr->ysize;
+  int zsize = map_data_ptr->zsize;
+
+  const struct Table *priorities_ptr = NULL;
+  if(ptr->priorities != Qnil) rb_table_data(ptr->priorities);
+
+  int x_start = ptr->ox >> 5;
+  int x_end = (ptr->ox + window_width + 31) >> 5;
+  int y_start = ptr->oy >> 5;
+  int y_end = (ptr->oy + window_height + 31) >> 5;
+
+  for(int xi = x_start; xi <= x_end; ++xi) {
+    for(int yi = y_start; yi <= y_end; ++yi) {
+      for(int zi = 0; zi < zsize; ++zi) {
+        int xii = (xi % xsize + xsize) % xsize;
+        int yii = (yi % ysize + ysize) % ysize;
+        int tile_id = map_data_ptr->data[(zi * ysize + yii) * xsize + xii];
+
+        int priority = 0, z = 0;
+        if(priorities_ptr && 0 <= tile_id && tile_id < priorities_ptr->size) {
+          priority = priorities_ptr->data[tile_id];
+        }
+        if(priority > 0) {
+          z = (1 + priority + yi) * 32 - ptr->oy;
+        }
+        if(z != z_target) continue;
+        renderTile(ptr, tile_id, xi * 32 - ptr->ox, yi * 32 - ptr->oy);
+      }
+    }
+  }
+#endif
+}
+
+static void renderTile(struct Tilemap *ptr, int tile_id, int x, int y) {
+#if RGSS >= 2
+  (void) ptr;
+  (void) tile_id;
+  (void) x;
+  (void) y;
+  WARN_UNIMPLEMENTED("renderTile");
+#else
+  (void) index;
+  WARN_UNIMPLEMENTED("renderTile");
+  if(tile_id < 48) return;
+  if(tile_id < 384) {
+    int autotile_id = tile_id / 48 - 1;
+    int autotile_shape_id = tile_id % 48;
+
+    const struct BitmapArray *bitmaparray_ptr =
+      rb_bitmaparray_data(ptr->autotiles);
+    VALUE autotile = bitmaparray_ptr->data[autotile_id];
+    if(autotile == Qnil) return;
+    const struct Bitmap *autotile_ptr = rb_bitmap_data(autotile);
+    SDL_Surface *autotile_surface = autotile_ptr->surface;
+    if(!autotile_surface) return;
+
+    glUseProgram(shader);
+    glUniform1i(glGetUniformLocation(shader, "tex"), 0);
+    glUniform2f(glGetUniformLocation(shader, "resolution"),
+        window_width, window_height);
+
+    glActiveTexture(GL_TEXTURE0);
+    bitmapBindTexture((struct Bitmap *)autotile_ptr);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    for(int subtile = 0; subtile < 4; ++subtile) {
+      int autotile_shape = autotile_lookup[subtile][autotile_shape_id];
+      // TODO: animation
+      int autotile_x = autotile_shape % 6 * 16;
+      int autotile_y = autotile_shape / 6 * 16;
+      int target_x = x + (subtile % 2) * 16;
+      int target_y = y + (subtile / 2) * 16;
+      gl_draw_rect(
+          target_x, target_y, target_x + 16, target_y + 16,
+          autotile_x / (double)autotile_surface->w,
+          autotile_y  / (double)autotile_surface->h,
+          (autotile_x + 16) / (double)autotile_surface->w,
+          (autotile_y + 16) / (double)autotile_surface->h);
+    }
+  } else {
+    if(ptr->tileset == Qnil) return;
+    const struct Bitmap *tileset_ptr = rb_bitmap_data(ptr->tileset);
+    SDL_Surface *tileset_surface = tileset_ptr->surface;
+    if(!tileset_surface) return;
+
+    int tile_x = (tile_id - 384) % 8;
+    int tile_y = (tile_id - 384) / 8;
+
+    glUseProgram(shader);
+    glUniform1i(glGetUniformLocation(shader, "tex"), 0);
+    glUniform2f(glGetUniformLocation(shader, "resolution"),
+        window_width, window_height);
+
+    glActiveTexture(GL_TEXTURE0);
+    bitmapBindTexture((struct Bitmap *)tileset_ptr);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    gl_draw_rect(
+        x, y, x + 32, y + 32,
+        tile_x * 32 / (double)tileset_surface->w,
+        tile_y * 32 / (double)tileset_surface->h,
+        (tile_x + 1) * 32 / (double)tileset_surface->w,
+        (tile_y + 1) * 32 / (double)tileset_surface->h);
+  }
+#endif
 }
 
 void initTilemapSDL() {
+  tilemaps_capacity = 2;
+  tilemaps = malloc(sizeof(*tilemaps) * tilemaps_capacity);
+
   static const char *vsh_source =
     "#version 120\n"
     "\n"
+    "uniform vec2 resolution;\n"
+    "\n"
     "void main(void) {\n"
-    "    gl_Position = gl_Vertex;\n"
+    "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+    "    gl_Position.x = gl_Vertex.x / resolution.x * 2.0 - 1.0;\n"
+    "    gl_Position.y = 1.0 - gl_Vertex.y / resolution.y * 2.0;\n"
+    "    gl_Position.zw = vec2(0.0, 1.0);\n"
     "}\n";
 
   static const char *fsh_source =
@@ -401,29 +601,11 @@ void initTilemapSDL() {
     "#define texture2DProj textureProj\n"
     "#endif\n"
     "\n"
-    "uniform sampler2D tex;\n"
-    "uniform vec2 dst_size;\n"
-    "uniform vec2 dst_translate;\n"
-    "uniform vec2 src_translate;\n"
-    "uniform vec2 src_topleft;\n"
-    "uniform vec2 src_bottomright;\n"
-    "uniform vec2 src_size;\n"
-    "uniform vec2 zoom;\n"
-    // "uniform float angle;\n"
-    // "uniform vec4 tilemap_color;\n"
-    // "uniform vec4 tilemap_tone;\n"
+    "uniform sampler2D windowskin;\n"
     "\n"
     "void main(void) {\n"
-    "    vec2 coord = vec2(gl_FragCoord.x, dst_size.y - gl_FragCoord.y);\n"
-    "    coord = coord - dst_translate;\n"
-    "    coord = vec2(coord.x / zoom.x, coord.y / zoom.y);\n"
-    "    coord = coord + src_translate;\n"
-    "    if(src_topleft.x <= coord.x && src_topleft.y <= coord.y && coord.x <= src_bottomright.x && coord.y <= src_bottomright.y) {\n"
-    "      vec4 color = texture2D(tex, vec2(coord.x / src_size.x, coord.y / src_size.y));\n"
-    "      gl_FragColor = color;\n"
-    "    } else {\n"
-    "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
-    "    }\n"
+    "    vec4 color = texture2D(windowskin, vec2(gl_TexCoord[0].x, gl_TexCoord[0].y));\n"
+    "    gl_FragColor = color;\n"
     "}\n";
 
   shader = compileShaders(vsh_source, fsh_source);
@@ -431,4 +613,5 @@ void initTilemapSDL() {
 
 void deinitTilemapSDL() {
   if(shader) glDeleteProgram(shader);
+  if(tilemaps) free(tilemaps);
 }

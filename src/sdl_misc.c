@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <SDL_opengl.h>
@@ -98,9 +99,13 @@ void renderSDL() {
   SDL_GL_MakeCurrent(window, glcontext);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
+  int last_z = INT_MIN;
   for(size_t i = 0; i < registry_size; ++i) {
+    renderTilemaps(last_z, registry[i]->z);
+    last_z = registry[i]->z;
     registry[i]->render(registry[i]);
   }
+  renderTilemaps(last_z, INT_MAX);
   SDL_GL_SwapWindow(window);
 }
 

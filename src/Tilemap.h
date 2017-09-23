@@ -27,7 +27,7 @@ bool rb_tilemap_data_p(VALUE obj);
 const struct Tilemap *rb_tilemap_data(VALUE obj);
 struct Tilemap *rb_tilemap_data_mut(VALUE obj);
 
-void renderTilemaps(void);
+void renderTilemaps(int z_min, int z_max);
 void initTilemapSDL(void);
 void deinitTilemapSDL(void);
 
