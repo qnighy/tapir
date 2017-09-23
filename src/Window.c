@@ -438,11 +438,6 @@ static void renderWindow(struct Renderable *renderable) {
   if(openness == 0) return;
   if(openness < 255) WARN_UNIMPLEMENTED("Window#openness");
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -453,6 +448,11 @@ static void renderWindow(struct Renderable *renderable) {
 
     glActiveTexture(GL_TEXTURE0);
     bitmapBindTexture((struct Bitmap *)skin_bitmap_ptr);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glUseProgram(shader1);
     glUniform1i(glGetUniformLocation(shader1, "windowskin"), 0);
@@ -522,6 +522,11 @@ static void renderWindow(struct Renderable *renderable) {
 
     glActiveTexture(GL_TEXTURE0);
     bitmapBindTexture((struct Bitmap *)contents_bitmap_ptr);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     gl_draw_rect(
         ptr->x + padding + (clip_left - ptr->ox),
