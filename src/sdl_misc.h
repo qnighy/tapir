@@ -18,6 +18,7 @@ extern SDL_GLContext glcontext;
 
 void initSDL(void);
 void cleanupSDL(void);
+void event_loop(void);
 void renderSDL(void);
 
 void registerRenderable(struct Renderable *renderable);

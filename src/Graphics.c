@@ -1,11 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Graphics.h"
-#include "Input.h"
-#include "RGSSReset.h"
 #include "sdl_misc.h"
 
 VALUE rb_mGraphics;
+
+#if RGSS >= 2
+static int frame_rate = 60;
+#else
+static int frame_rate = 40;
+#endif
+static int performance_frame_count = 0;
+static Uint32 performance_last_ticks = 0;
 
 static VALUE rb_graphics_s_update(VALUE klass);
 static VALUE rb_graphics_s_width(VALUE klass);
@@ -34,35 +40,22 @@ void Init_Graphics() {
 }
 
 static VALUE rb_graphics_s_update(VALUE klass) {
-  SDL_Event e;
-  int quit = 0;
-
   (void) klass;
 
-  while(SDL_PollEvent(&e)) {
-    switch(e.type) {
-      case SDL_KEYDOWN:
-        if(e.key.keysym.sym == SDLK_F12) {
-          rb_raise(rb_eRGSSReset, "RGSS Reset");
-        }
-        if(!e.key.repeat) {
-          keyPressed(e.key.keysym.sym);
-        }
-        break;
-      case SDL_KEYUP:
-        keyReleased(e.key.keysym.sym);
-        break;
-      case SDL_QUIT:
-        quit = 1;
-        break;
-    }
-  }
+  event_loop();
+
   renderSDL();
   // TODO: use frame rate correctly
-  SDL_Delay(1000 / 60);
+  SDL_Delay(1000 / frame_rate);
 
-  if(quit) {
-    exit(0);
+  performance_frame_count++;
+  if(performance_frame_count >= frame_rate) {
+    Uint32 current_ticks = SDL_GetTicks();
+    Uint32 elapsed = current_ticks - performance_last_ticks;
+    fprintf(stderr, "FPS: %f\n", frame_rate * 1000.0 / (elapsed + 0.001));
+
+    performance_frame_count = 0;
+    performance_last_ticks = current_ticks;
   }
 
   return Qnil;

@@ -7,6 +7,8 @@
 #include "sdl_misc.h"
 #include "Sprite.h"
 #include "Window.h"
+#include "Input.h"
+#include "RGSSReset.h"
 #include "Tilemap.h"
 
 #if RGSS >= 2
@@ -91,6 +93,34 @@ static int compare_renderables(const void *o1, const void *o2) {
   if(r1->z < r2->z) return -1;
   if(r1->z > r2->z) return 1;
   return 0;
+}
+
+void event_loop() {
+  SDL_Event e;
+  int quit = 0;
+
+  while(SDL_PollEvent(&e)) {
+    switch(e.type) {
+      case SDL_KEYDOWN:
+        if(e.key.keysym.sym == SDLK_F12) {
+          rb_raise(rb_eRGSSReset, "RGSS Reset");
+        }
+        if(!e.key.repeat) {
+          keyPressed(e.key.keysym.sym);
+        }
+        break;
+      case SDL_KEYUP:
+        keyReleased(e.key.keysym.sym);
+        break;
+      case SDL_QUIT:
+        quit = 1;
+        break;
+    }
+  }
+
+  if(quit) {
+    exit(0);
+  }
 }
 
 void renderSDL() {
