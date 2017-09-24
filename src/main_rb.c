@@ -209,27 +209,6 @@ VALUE main_rb(VALUE data) {
 #endif
       "end\n"
       "module Graphics\n"
-      "  def self.frame_reset\n"
-      "    warn_unimplemented(\"Graphics.frame_reset\")\n"
-      "  end\n"
-      "  def self.frame_rate\n"
-      "    warn_unimplemented(\"Graphics.frame_rate\")\n"
-#if RGSS >= 2
-      "    60\n"
-#else
-      "    40\n"
-#endif
-      "  end\n"
-      "  def self.frame_rate=(rate)\n"
-      "    warn_unimplemented(\"Graphics.frame_rate\")\n"
-      "  end\n"
-      "  def self.frame_count\n"
-      "    warn_unimplemented(\"Graphics.frame_count\")\n"
-      "    0\n"
-      "  end\n"
-      "  def self.frame_count=(count)\n"
-      "    warn_unimplemented(\"Graphics.frame_count\")\n"
-      "  end\n"
       "  def self.brightness\n"
       "    warn_unimplemented(\"Graphics.brightness\")\n"
       "    255\n"
