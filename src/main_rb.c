@@ -340,14 +340,24 @@ VALUE main_rb(VALUE data) {
       "\n"
       "module RPG\n"
       "  class AudioFile\n"
-#if RGSS == 1
       "    attr_accessor :name, :pitch, :volume\n"
-#endif
       "  end\n"
 #if RGSS >= 2
       "  class BGM < AudioFile\n"
+#if RGSS == 3
+      "    def replay\n"
+      "      warn_unimplemented(\"RPG::BGM#replay\")\n"
+      "    end\n"
+      "    def play(pos=0)\n"
+      "      warn_unimplemented(\"RPG::BGM#play\")\n"
+      "    end\n"
+#else
       "    def play\n"
       "      warn_unimplemented(\"RPG::BGM#play\")\n"
+      "    end\n"
+#endif
+      "    def self.last\n"
+      "      warn_unimplemented(\"RPG::BGM.last\")\n"
       "    end\n"
       "    def self.stop\n"
       "      warn_unimplemented(\"RPG::BGM.stop\")\n"
@@ -357,8 +367,20 @@ VALUE main_rb(VALUE data) {
       "    end\n"
       "  end\n"
       "  class BGS < AudioFile\n"
+#if RGSS == 3
+      "    def replay\n"
+      "      warn_unimplemented(\"RPG::BGS#replay\")\n"
+      "    end\n"
+      "    def play(pos=0)\n"
+      "      warn_unimplemented(\"RPG::BGS#play\")\n"
+      "    end\n"
+#else
       "    def play\n"
       "      warn_unimplemented(\"RPG::BGS#play\")\n"
+      "    end\n"
+#endif
+      "    def self.last\n"
+      "      warn_unimplemented(\"RPG::BGS.last\")\n"
       "    end\n"
       "    def self.stop\n"
       "      warn_unimplemented(\"RPG::BGS.stop\")\n"
@@ -572,7 +594,7 @@ VALUE main_rb(VALUE data) {
       "    def self.icon(name)\n"
       "      load_bitmap(\"Graphics/Icons/\", name)\n"
       "    end\n"
-      "    def self.panoramas(name, hue)\n"
+      "    def self.panorama(name, hue)\n"
       "      load_bitmap(\"Graphics/Panoramas/\", name, hue)\n"
       "    end\n"
       "    def self.picture(name)\n"
