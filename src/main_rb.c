@@ -318,6 +318,54 @@ VALUE main_rb(VALUE data) {
       "end\n"
       "\n"
       "module RPG\n"
+      "  class Map\n"
+      "    attr_accessor :autoplay_bgm, :autoplay_bgs, :bgm, :bgs, :data, :encounter_list, :encounter_step, :events, :height, :width\n"
+#if RGSS >= 2
+      "    attr_accessor :disable_dashing, :parallax_loop_x, :parallax_loop_y, :parallax_name, :parallax_show, :parallax_sx, :parallax_sy, :scroll_type\n"
+#endif
+#if RGSS == 3
+      "    attr_accessor :battleback1_name, :battleback2_name, :display_name, :note, :specify_battleback, :tileset_id\n"
+      "    class Encounter\n"
+      "      attr_accessor :region_set, :troop_id, :weight\n"
+      "    end\n"
+#endif
+#if RGSS == 1
+      "    attr_accessor :tileset_id\n"
+#endif
+      "  end\n"
+      "  class MapInfo\n"
+      "    attr_accessor :expanded, :name, :order, :parent_id, :scroll_x, :scroll_y\n"
+      "  end\n"
+#if RGSS == 2
+      "  class Area\n"
+      "    attr_accessor :encounter_list, :id, :map_id, :name, :order, :rect\n"
+      "  end\n"
+#endif
+      "  class Event\n"
+      "    attr_accessor :id, :name, :pages, :x, :y\n"
+      "    class Page\n"
+      "      attr_accessor :condition, :direction_fix, :graphic, :list, :move_frequency, :move_route, :move_speed, :move_type, :step_anime, :through, :trigger, :walk_anime\n"
+#if RGSS >= 2
+      "      attr_accessor :priority_type\n"
+#elif RGSS == 1
+      "      attr_accessor :always_on_top\n"
+#endif
+      "      class Condition\n"
+      "        attr_accessor :self_switch_ch, :self_switch_valid, :switch1_id, :switch1_valid, :switch2_id, :switch2_valid, :variable_id, :variable_valid, :variable_value\n"
+#if RGSS >= 2
+      "        attr_accessor :actor_id, :actor_valid, :item_id, :item_valid\n"
+#endif
+      "      end\n"
+      "      class Graphic\n"
+      "        attr_accessor :character_name, :direction, :pattern, :tile_id\n"
+#if RGSS >= 2
+      "        attr_accessor :character_index\n"
+#elif RGSS == 1
+      "        attr_accessor :blend_type, :character_hue, :character_name, :opacity, :tile_id\n"
+#endif
+      "      end\n"
+      "    end\n"
+      "  end\n"
       "  class AudioFile\n"
       "    attr_accessor :name, :pitch, :volume\n"
       "  end\n"
@@ -394,10 +442,6 @@ VALUE main_rb(VALUE data) {
       "    class Timing\n"
       "    end\n"
       "  end\n"
-#if RGSS == 2
-      "  class Area\n"
-      "  end\n"
-#endif
 #if RGSS >= 2
       "  class BaseItem\n"
       "    attr_accessor :description, :icon_index, :id, :name, :note\n"
@@ -604,31 +648,6 @@ VALUE main_rb(VALUE data) {
       "    end\n"
 #endif
       "  end\n"
-      "  class Event\n"
-      "    attr_accessor :id, :name, :pages, :x, :y\n"
-      "    class Page\n"
-      "      attr_accessor :condition, :direction_fix, :graphic, :list, :move_frequency, :move_route, :move_speed, :move_type, :step_anime, :through, :trigger, :walk_anime\n"
-#if RGSS >= 2
-      "      attr_accessor :priority_type\n"
-#elif RGSS == 1
-      "      attr_accessor :always_on_top\n"
-#endif
-      "      class Condition\n"
-      "        attr_accessor :self_switch_ch, :self_switch_valid, :switch1_id, :switch1_valid, :switch2_id, :switch2_valid, :variable_id, :variable_valid, :variable_value\n"
-#if RGSS >= 2
-      "        attr_accessor :actor_id, :actor_valid, :item_id, :item_valid\n"
-#endif
-      "      end\n"
-      "      class Graphic\n"
-      "        attr_accessor :character_name, :direction, :pattern, :tile_id\n"
-#if RGSS >= 2
-      "        attr_accessor :character_index\n"
-#elif RGSS == 1
-      "        attr_accessor :blend_type, :character_hue, :character_name, :opacity, :tile_id\n"
-#endif
-      "      end\n"
-      "    end\n"
-      "  end\n"
       "  class EventCommand\n"
       "    attr_accessor :code, :parameters\n"
 #if RGSS == 3
@@ -636,23 +655,6 @@ VALUE main_rb(VALUE data) {
 #elif RGSS == 2
       "    attr_accessor :indent\n"
 #elif RGSS == 1
-#endif
-      "  end\n"
-      "  class Map\n"
-      "    attr_accessor :autoplay_bgm, :autoplay_bgs, :bgm, :bgs, :data, :encounter_list, :encounter_step, :events, :height, :width\n"
-#if RGSS >= 2
-      "    attr_accessor :disable_dashing, :parallax_loop_x, :parallax_loop_y, :parallax_name, :parallax_show, :parallax_sx, :parallax_sy, :scroll_type\n"
-#endif
-#if RGSS == 3
-      "    attr_accessor :battleback1_name, :battleback2_name, :display_name, :note, :specify_battleback, :tileset_id\n"
-#endif
-#if RGSS == 1
-      "    attr_accessor :tileset_id\n"
-#endif
-      "  end\n"
-      "  class MapInfo\n"
-#if RGSS == 1
-      "    attr_accessor :name\n"
 #endif
       "  end\n"
       "  class MoveCommand\n"
