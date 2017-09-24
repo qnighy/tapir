@@ -30,12 +30,9 @@ static VALUE rb_tilemap_m_map_data(VALUE self);
 static VALUE rb_tilemap_m_set_map_data(VALUE self, VALUE newval);
 static VALUE rb_tilemap_m_flash_data(VALUE self);
 static VALUE rb_tilemap_m_set_flash_data(VALUE self, VALUE newval);
-#if RGSS == 3
+#if RGSS >= 2
 static VALUE rb_tilemap_m_flags(VALUE self);
 static VALUE rb_tilemap_m_set_flags(VALUE self, VALUE newval);
-#elif RGSS == 2
-static VALUE rb_tilemap_m_passages(VALUE self);
-static VALUE rb_tilemap_m_set_passages(VALUE self, VALUE newval);
 #else
 static VALUE rb_tilemap_m_priorities(VALUE self);
 static VALUE rb_tilemap_m_set_priorities(VALUE self, VALUE newval);
@@ -83,8 +80,8 @@ void Init_Tilemap(void) {
   rb_define_method(rb_cTilemap, "flags", rb_tilemap_m_flags, 0);
   rb_define_method(rb_cTilemap, "flags=", rb_tilemap_m_set_flags, 1);
 #elif RGSS == 2
-  rb_define_method(rb_cTilemap, "passages", rb_tilemap_m_passages, 0);
-  rb_define_method(rb_cTilemap, "passages=", rb_tilemap_m_set_passages, 1);
+  rb_define_method(rb_cTilemap, "passages", rb_tilemap_m_flags, 0);
+  rb_define_method(rb_cTilemap, "passages=", rb_tilemap_m_set_flags, 1);
 #else
   rb_define_method(rb_cTilemap, "priorities", rb_tilemap_m_priorities, 0);
   rb_define_method(rb_cTilemap, "priorities=", rb_tilemap_m_set_priorities, 1);
@@ -126,12 +123,9 @@ struct Tilemap *rb_tilemap_data_mut(VALUE obj) {
 }
 
 static void tilemap_mark(struct Tilemap *ptr) {
-#if RGSS == 3
+#if RGSS >= 2
   rb_gc_mark(ptr->bitmaps);
   rb_gc_mark(ptr->flags);
-#elif RGSS == 2
-  rb_gc_mark(ptr->bitmaps);
-  rb_gc_mark(ptr->passages);
 #else
   rb_gc_mark(ptr->autotiles);
   rb_gc_mark(ptr->tileset);
@@ -158,10 +152,8 @@ static VALUE tilemap_alloc(VALUE klass) {
 #endif
   ptr->map_data = Qnil;
   ptr->flash_data = Qnil;
-#if RGSS == 3
+#if RGSS >= 2
   ptr->flags = Qnil;
-#elif RGSS == 2
-  ptr->passages = Qnil;
 #else
   ptr->priorities = Qnil;
 #endif
@@ -211,10 +203,8 @@ static VALUE rb_tilemap_m_initialize_copy(VALUE self, VALUE orig) {
 #endif
   ptr->map_data = orig_ptr->map_data;
   ptr->flash_data = orig_ptr->flash_data;
-#if RGSS == 3
+#if RGSS >= 2
   ptr->flags = orig_ptr->flags;
-#elif RGSS == 2
-  ptr->passages = orig_ptr->passages;
 #else
   ptr->priorities = orig_ptr->priorities;
 #endif
@@ -291,7 +281,7 @@ static VALUE rb_tilemap_m_set_flash_data(VALUE self, VALUE newval) {
   return newval;
 }
 
-#if RGSS == 3
+#if RGSS >= 2
 static VALUE rb_tilemap_m_flags(VALUE self) {
   const struct Tilemap *ptr = rb_tilemap_data(self);
   return ptr->flags;
@@ -301,18 +291,6 @@ static VALUE rb_tilemap_m_set_flags(VALUE self, VALUE newval) {
   struct Tilemap *ptr = rb_tilemap_data_mut(self);
   if(newval != Qnil) rb_table_data(newval);
   ptr->flags = newval;
-  return newval;
-}
-#elif RGSS == 2
-static VALUE rb_tilemap_m_passages(VALUE self) {
-  const struct Tilemap *ptr = rb_tilemap_data(self);
-  return ptr->passages;
-}
-
-static VALUE rb_tilemap_m_set_passages(VALUE self, VALUE newval) {
-  struct Tilemap *ptr = rb_tilemap_data_mut(self);
-  if(newval != Qnil) rb_table_data(newval);
-  ptr->passages = newval;
   return newval;
 }
 #else
@@ -482,13 +460,8 @@ static void renderTilemapAt(struct Tilemap *ptr, int z_target) {
   int ysize = map_data_ptr->ysize;
   int zsize = map_data_ptr->zsize;
 
-#if RGSS == 3
-  VALUE flags = ptr->flags;
-#else
-  VALUE flags = ptr->passages;
-#endif
   const struct Table *flags_ptr = NULL;
-  if(flags != Qnil) flags_ptr = rb_table_data(flags);
+  if(ptr->flags != Qnil) flags_ptr = rb_table_data(ptr->flags);
 
   int x_start = ptr->ox >> 5;
   int x_end = (ptr->ox + window_width + 31) >> 5;

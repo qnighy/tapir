@@ -10,10 +10,8 @@ extern VALUE rb_cTilemap;
 void Init_Tilemap(void);
 
 struct Tilemap {
-#if RGSS == 3
+#if RGSS >= 2
   VALUE bitmaps, flags;
-#elif RGSS == 2
-  VALUE bitmaps, passages;
 #else
   VALUE tileset, autotiles, priorities;
 #endif
