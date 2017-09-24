@@ -12,6 +12,8 @@ static int frame_rate = 40;
 #endif
 static int performance_frame_count = 0;
 static Uint32 performance_last_ticks = 0;
+static double cap_debt = 0.0;
+static Uint32 cap_last_ticks = 0;
 
 static VALUE rb_graphics_s_update(VALUE klass);
 static VALUE rb_graphics_s_width(VALUE klass);
@@ -45,12 +47,21 @@ static VALUE rb_graphics_s_update(VALUE klass) {
   event_loop();
 
   renderSDL();
-  // TODO: use frame rate correctly
-  SDL_Delay(1000 / frame_rate);
+
+  Uint32 current_ticks = SDL_GetTicks();
+  cap_debt += (current_ticks - cap_last_ticks);
+  cap_last_ticks = current_ticks;
+
+  cap_debt -= 1000.0 / frame_rate;
+  if(cap_debt < 0.0) {
+    SDL_Delay(-cap_debt);
+  } else {
+    cap_debt *= 0.999;
+  }
+
 
   performance_frame_count++;
   if(performance_frame_count >= frame_rate) {
-    Uint32 current_ticks = SDL_GetTicks();
     Uint32 elapsed = current_ticks - performance_last_ticks;
     fprintf(stderr, "FPS: %f\n", frame_rate * 1000.0 / (elapsed + 0.001));
 
