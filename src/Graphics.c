@@ -58,7 +58,10 @@ static VALUE rb_graphics_s_update(VALUE klass) {
 
   event_loop();
 
-  renderSDL();
+  // If debt is too large, skip this frame.
+  if(cap_debt < 1000.0 / frame_rate) {
+    renderSDL();
+  }
 
   Uint32 current_ticks = SDL_GetTicks();
   cap_debt += (current_ticks - cap_last_ticks);
