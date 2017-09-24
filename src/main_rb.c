@@ -366,6 +366,70 @@ VALUE main_rb(VALUE data) {
       "      end\n"
       "    end\n"
       "  end\n"
+      "  class EventCommand\n"
+      "    attr_accessor :code, :indent, :parameters\n"
+      "  end\n"
+      "  class MoveRoute\n"
+      "    attr_accessor :list, :repeat, :skippable\n"
+#if RGSS >= 2
+      "    attr_accessor :wait\n"
+#endif
+      "  end\n"
+      "  class MoveCommand\n"
+      "    attr_accessor :code, :parameters\n"
+      "  end\n"
+#if RGSS >= 2
+      "  class BaseItem\n"
+      "    attr_accessor :description, :icon_index, :id, :name, :note\n"
+#if RGSS == 3
+      "    attr_accessor :features\n"
+      "    class Feature\n"
+      "      attr_accessor :code, :data_id\n"
+      "    end\n"
+#endif
+      "  end\n"
+#endif
+#if RGSS == 3
+      "  class Actor < BaseItem\n"
+      "    attr_accessor :character_index, :character_name, :class_id, :equips, :face_index, :face_name, :initial_level, :max_level, :nickname\n"
+      "  end\n"
+#else
+      "  class Actor\n"
+      "    attr_accessor :armor1_id, :armor2_id, :armor3_id, :armor4_id, :class_id, :exp_basis, :exp_inflation, :id, :initial_level, :name, :parameters, :weapon_id\n"
+#if RGSS == 2
+      "    attr_accessor :auto_battle, :character_index, :character_name, :critical_bonus, :face_index, :face_name, :fix_equipment, :pharmacology, :super_guard, :two_swords_style\n"
+#else
+      "    attr_accessor :armor1_fix, :armor2_fix, :armor3_fix, :armor4_fix, :battler_hue, :battler_name, :character_hue, :character_name, :final_level, :weapon_fix\n"
+#endif
+      "  end\n"
+#endif
+#if RGSS == 3
+      "  class Class < BaseItem\n"
+#else
+      "  class Class\n"
+#endif
+      "    attr_accessor :learnings\n"
+#if RGSS == 3
+      "    attr_accessor :exp_params, :params\n"
+      "    def exp_for_level(level)\n"
+      "      level = level.to_f\n"
+      "      a = exp_params[0].to_f * (level - 1) ** (0.9 + exp_params[2].to_f / 250) * level * (level + 1)\n"
+      "      b = 6 + level ** 2 / 50 / exp_params[3].to_f\n"
+      "      (a / b + (level - 1) * exp_params[1].to_f).round.to_i\n"
+      "    end\n"
+#else
+      "    attr_accessor :armor_set, :element_ranks, :id, :name, :position, :state_ranks, :weapon_set\n"
+#if RGSS == 2
+      "    attr_accessor :skill_name, :skill_name_valid\n"
+#endif
+#endif
+      "    class Learning\n"
+      "      attr_accessor :level, :skill_id\n"
+#if RGSS == 3
+      "      attr_accessor :note\n"
+#endif
+      "    end\n"
+      "  end\n"
       "  class AudioFile\n"
       "    attr_accessor :name, :pitch, :volume\n"
       "  end\n"
@@ -440,56 +504,6 @@ VALUE main_rb(VALUE data) {
       "    class Frame\n"
       "    end\n"
       "    class Timing\n"
-      "    end\n"
-      "  end\n"
-#if RGSS >= 2
-      "  class BaseItem\n"
-      "    attr_accessor :description, :icon_index, :id, :name, :note\n"
-#if RGSS == 3
-      "    attr_accessor :features\n"
-      "    class Feature\n"
-      "      attr_accessor :code, :data_id\n"
-      "    end\n"
-#endif
-      "  end\n"
-#endif
-#if RGSS == 3
-      "  class Actor < BaseItem\n"
-#else
-      "  class Actor\n"
-#endif
-      "    attr_accessor :character_name, :class_id, :initial_level, :name\n"
-#if RGSS == 3
-      "    attr_accessor :character_index, :equips, :face_index, :face_name, :nickname\n"
-#elif RGSS == 2
-      "    attr_accessor :armor1_id, :armor2_id, :armor3_id, :armor4_id, :exp_basis, :exp_inflation, :character_index, :face_index, :face_name, :parameters, :weapon_id\n"
-#elif RGSS == 1
-      "    attr_accessor :armor1_id, :armor2_id, :armor3_id, :armor4_id, :battler_hue, :battler_name, :character_hue, :exp_basis, :exp_inflation, :final_level, :parameters, :weapon_id\n"
-#endif
-      "  end\n"
-#if RGSS == 3
-      "  class Class < BaseItem\n"
-#else
-      "  class Class\n"
-#endif
-      "    attr_accessor :learnings\n"
-#if RGSS == 3
-      "    attr_accessor :exp_params, :params\n"
-      "    def exp_for_level(level)\n"
-      "      warn_unimplemented(\"Class#exp_for_level\")\n"
-      "      1\n"
-      "    end\n"
-#else
-      "    attr_accessor :armor_set, :element_ranks, :id, :name, :position, :state_ranks, :weapon_set\n"
-#if RGSS == 2
-      "    attr_accessor :skill_name, :skill_name_valid\n"
-#endif
-#endif
-      "    class Learning\n"
-      "      attr_accessor :level, :skill_id\n"
-#if RGSS == 3
-      "      attr_accessor :note\n"
-#endif
       "    end\n"
       "  end\n"
 #if RGSS >= 2
@@ -646,24 +660,6 @@ VALUE main_rb(VALUE data) {
       "    def parallel?\n"
       "      @trigger == 2\n"
       "    end\n"
-#endif
-      "  end\n"
-      "  class EventCommand\n"
-      "    attr_accessor :code, :parameters\n"
-#if RGSS == 3
-      "    attr_accessor :indent\n"
-#elif RGSS == 2
-      "    attr_accessor :indent\n"
-#elif RGSS == 1
-#endif
-      "  end\n"
-      "  class MoveCommand\n"
-      "    attr_accessor :code, :parameters\n"
-      "  end\n"
-      "  class MoveRoute\n"
-      "    attr_accessor :list, :repeat, :skippable\n"
-#if RGSS >= 2
-      "    attr_accessor :wait\n"
 #endif
       "  end\n"
 #if RGSS == 1
