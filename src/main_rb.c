@@ -606,7 +606,7 @@ VALUE main_rb(VALUE data) {
       "  end\n"
 #elif RGSS == 2
       "  class Armor < BaseItem\n"
-      "    attr_accessor :agi, :animation_id, :atk, :critical_bonus, :def, :dual_attack, :element_set, :fast_attack, :hit, :price, :spi, :state_set, :two_handed\n"
+      "    attr_accessor :agi, :atk, :auto_hp_recover, :def, :double_exp_gain, :element_set, :eva, :half_mp_cost, :kind, :prevent_critical, :price, :spi, :state_set\n"
       "  end\n"
 #else
       "  class Armor\n"
@@ -644,6 +644,117 @@ VALUE main_rb(VALUE data) {
       "    end\n"
       "  end\n"
 #endif
+#if RGSS == 3
+      "  class State < BaseItem\n"
+      "    attr_accessor :auto_removal_timing, :chance_by_damage, :max_turns, :message1, :message2, :message3, :message4, :min_turns, :priority, :remove_at_battle_end, :remove_by_damage, :remove_by_restriction, :remove_by_walking, :restriction, :steps_to_remove\n"
+      "  end\n"
+#elif RGSS == 2
+      "  class State\n"
+      "    attr_accessor :id, :name, :icon_index, :restriction, :priority, :atk_rate, :def_rate, :spi_rate, :agi_rate, :nonresistance, :offset_by_opposite, :slip_damage, :reduce_hit_ratio, :battle_only, :release_by_damage, :hold_turn, :auto_release_prob, :message1, :message2, :message3, :message4, :element_set, :state_set, :note\n"
+      "  end\n"
+#elif RGSS == 1
+      "  class State\n"
+      "    attr_accessor :agi_rate, :animation_id, :atk_rate, :auto_release_prob, :battle_only, :cant_evade, :cant_get_exp, :dex_rate, :eva, :guard_element_set, :hit_rate, :hold_turn, :id, :int_rate, :maxhp_rate, :maxsp_rate, :mdef_rate, :minus_state_set, :name, :nonresistance, :pdef_rate, :plus_state_set, :rating, :restriction, :shock_release_prob, :slip_damage, :str_rate, :zero_hp\n"
+      "  end\n"
+#endif
+      "  class Troop\n"
+      "    attr_accessor :id, :name, :members, :pages\n"
+      "    class Member\n"
+      "      attr_accessor :enemy_id, :hidden, :x, :y\n"
+#if RGSS <= 2
+      "      attr_accessor :immortal\n"
+#endif
+      "    end\n"
+      "    class Page\n"
+      "      attr_accessor :condition, :list, :span\n"
+      "      class Condition\n"
+#if RGSS >= 2
+      "        attr_accessor :turn_ending\n"
+#endif
+      "        attr_accessor :actor_hp, :actor_id, :actor_valid, :enemy_hp, :enemy_index, :enemy_valid, :switch_id, :switch_valid, :turn_a, :turn_b, :turn_valid\n"
+      "      end\n"
+      "    end\n"
+      "  end\n"
+      "  class Animation\n"
+      "    attr_accessor :frame_max, :frames, :id, :name, :position, :timings\n"
+#if RGSS >= 2
+      "    attr_accessor :animation1_hue, :animation1_name, :animation2_hue, :animation2_name\n"
+#else
+      "    attr_accessor :animation_hue, :animation_name\n"
+#endif
+#if RGSS == 3
+      "    def to_screen?\n"
+      "      @position == 3\n"
+      "    end\n"
+#endif
+      "    class Frame\n"
+      "      attr_accessor :cell_data, :cell_max\n"
+      "    end\n"
+      "    class Timing\n"
+      "      attr_accessor :flash_color, :flash_duration, :flash_scope, :frame, :se\n"
+#if RGSS == 1
+      "      attr_accessor :condition\n"
+#endif
+      "    end\n"
+      "  end\n"
+#if RGSS == 3
+      "  class Tileset\n"
+      "    attr_accessor :flags, :id, :mode, :name, :note, :tileset_names\n"
+      "  end\n"
+#elif RGSS == 1
+      "  class Tileset\n"
+      "    attr_accessor :autotile_names, :battleback_name, :fog_blend_type, :fog_hue, :fog_name, :fog_opacity, :fog_sx, :fog_sy, :fog_zoom, :id, :name, :panorama_hue, :panorama_name, :passages, :priorities, :terrain_tags, :tileset_name\n"
+      "  end\n"
+#endif
+      "  class CommonEvent\n"
+      "    attr_accessor :id, :name, :trigger, :switch_id, :list\n"
+#if RGSS == 3
+      "    def autorun?\n"
+      "      @trigger == 1\n"
+      "    end\n"
+      "    def parallel?\n"
+      "      @trigger == 2\n"
+      "    end\n"
+#endif
+      "  end\n"
+      "  class System\n"
+#if RGSS >= 2
+      "    attr_accessor :airship, :boat, :game_title, :ship, :sounds, :terms, :version_id\n"
+#endif
+      "    attr_accessor :battle_bgm, :battle_end_me, :battler_hue, :battler_name, :edit_map_id, :elements, :gameover_me, :party_members, :start_map_id, :start_x, :start_y, :switches, :test_battlers, :test_troop_id, :title_bgm, :variables\n"
+#if RGSS == 3
+      "    attr_accessor :armor_types, :battleback1_name, :battleback2_name, :currency_unit, :japanese, :opt_display_tp, :opt_draw_title, :opt_extra_exp, :opt_floor_death, :opt_followers, :opt_slip_death, :opt_transparent, :opt_use_midi, :skill_types, :title1_name, :title2_name, :weapon_types, :window_tone\n"
+#elif RGSS == 2
+      "    attr_accessor :passages\n"
+#else
+      "    attr_accessor :actor_collapse_se, :battle_start_se, :battle_transition, :battleback_name, :buzzer_se, :cancel_se, :cursor_se, :decision_se, :enemy_collapse_se, :equip_se, :escape_se, :gameover_name, :load_se, :magic_number, :save_se, :shop_se, :title_name, :windowskin_name, :words\n"
+#endif
+      "    class "TERMS"\n"
+#if RGSS == 3
+      "      attr_accessor :basic, :commands, :etypes, :params\n"
+#else
+      "      attr_accessor :agi, :armor1, :armor2, :armor3, :armor4, :atk, :attack, :equip, :gold, :guard, :hp, :item, :skill, :weapon\n"
+#if RGSS == 2
+      "      attr_accessor :cancel, :continue, :def, :escape, :fight, :game_end, :hp_a, :level, :level_a, :mp, :mp_a, :new_game, :save, :shutdown, :spi, :status, :to_title, :weapon1, :weapon2\n"
+#else
+      "      attr_accessor :dex, :int, :mdef, :pdef, :sp, :str\n"
+#endif
+#endif
+      "    end\n"
+      "    class TestBattler\n"
+      "      attr_accessor :actor_id, :level\n"
+#if RGSS == 3
+      "      attr_accessor :equips\n"
+#else
+      "      attr_accessor :armor1_id, :armor2_id, :armor3_id, :armor4_id, :weapon_id\n"
+#endif
+      "    end\n"
+#if RGSS >= 2
+      "    class Vehicle\n"
+      "      attr_accessor :bgm, :character_index, :character_name, :start_map_id, :start_x, :start_y\n"
+      "    end\n"
+#endif
+      "  end\n"
       "  class AudioFile\n"
       "    attr_accessor :name, :pitch, :volume\n"
       "  end\n"
@@ -714,97 +825,6 @@ VALUE main_rb(VALUE data) {
       "    end\n"
       "  end\n"
 #endif
-      "  class Animation\n"
-      "    class Frame\n"
-      "    end\n"
-      "    class Timing\n"
-      "    end\n"
-      "  end\n"
-#if RGSS >= 2
-      "  class UsableItem < BaseItem\n"
-#if RGSS == 3
-      "    def need_selection?\n"
-      "      [1, 7, 9].include?(@scope)\n"
-      "    end\n"
-      "    class Effect\n"
-      "    end\n"
-      "    class Damage\n"
-      "    end\n"
-#endif
-      "  end\n"
-#endif
-#if RGSS >= 2
-      "  class Skill < UsableItem\n"
-#else
-      "  class Skill\n"
-#endif
-#if RGSS == 3
-      "    attr_accessor :id\n"
-#endif
-      "  end\n"
-#if RGSS >= 2
-      "  class Item < UsableItem\n"
-#else
-      "  class Item\n"
-#endif
-      "  end\n"
-#if RGSS == 3
-      "  class EquipItem < BaseItem\n"
-      "    attr_accessor :etype_id, :params\n"
-      "  end\n"
-#endif
-#if RGSS == 3
-      "  class Weapon < EquipItem\n"
-#elif RGSS == 2
-      "  class Weapon < BaseItem\n"
-#else
-      "  class Weapon\n"
-#endif
-#if RGSS == 3
-      "    attr_accessor :wtype_id\n"
-#endif
-      "  end\n"
-#if RGSS == 3
-      "  class Armor < EquipItem\n"
-#elif RGSS == 2
-      "  class Armor < BaseItem\n"
-#else
-      "  class Armor\n"
-#endif
-#if RGSS == 3
-      "    attr_accessor :atype_id\n"
-#elif RGSS == 2
-#elif RGSS == 1
-      "    attr_accessor :auto_state_id\n"
-#endif
-      "  end\n"
-#if RGSS == 3
-      "  class Enemy < BaseItem\n"
-#else
-      "  class Enemy\n"
-#endif
-      "    class Action\n"
-      "    end\n"
-#if RGSS >= 2
-      "    class DropItem\n"
-      "    end\n"
-#endif
-      "  end\n"
-#if RGSS == 3
-      "  class State < BaseItem\n"
-#else
-      "  class State\n"
-      "    attr_accessor :auto_release_prob, :agi_rate, :atk_rate, :battle_only, :hold_turn, :name, :nonresistance, :slip_damage, :id\n"
-#endif
-      "    attr_accessor :restriction\n"
-#if RGSS == 3
-      "    attr_accessor :auto_removal_timing, :chance_by_damage, :max_turns, :message1, :message2, :message3, :message4, :min_turns, :priority, :steps_to_remove, :remove_at_battle_end, :remove_by_damage, :remove_by_restriction, :remove_by_walking\n"
-#elif RGSS == 2
-      "    attr_accessor :def_rate, :element_set, :icon_index, :message1, :message2, :message3, :message4, :note, :offset_by_opposite, :priority, :reduce_hit_ratio, :release_by_damage, :spi_rate, :state_set\n"
-#elif RGSS == 1
-      "    attr_accessor :animation_id, :cant_evade, :cant_get_exp, :eva, :guard_element_set, :hit_rate, :int_rate, :maxhp_rate, :maxsp_rate, :mdef_rate, :minus_state_set, :pdef_rate, :plus_state_set, :rating, :shock_release_prob, :str_rate, :zero_hp\n"
-#endif
-      "  end\n"
 #if RGSS == 1
       "  module Cache\n"
       "    @cache = {}\n"
@@ -865,75 +885,51 @@ VALUE main_rb(VALUE data) {
       "    end\n"
       "  end\n"
 #endif
-      "  class CommonEvent\n"
-      "    attr_accessor :id, :name, :trigger, :switch_id, :list\n"
-#if RGSS == 3
-      "    def autorun?\n"
-      "      @trigger == 1\n"
-      "    end\n"
-      "    def parallel?\n"
-      "      @trigger == 2\n"
-      "    end\n"
-#endif
-      "  end\n"
 #if RGSS == 1
       "  class Sprite < ::Sprite\n"
       "    @@_animations = []\n"
-      "  end\n"
-#endif
-      "  class System\n"
-#if RGSS >= 2
-      "    attr_accessor :airship, :boat, :game_title, :ship, :sounds, :terms, :version_id\n"
-#endif
-      "    attr_accessor :battle_bgm, :battle_end_me, :battler_hue, :battler_name, :edit_map_id, :elements, :gameover_me, :party_members, :start_map_id, :start_x, :start_y, :switches, :test_battlers, :test_troop_id, :title_bgm, :variables\n"
-#if RGSS == 3
-      "    attr_accessor :armor_types, :battleback1_name, :battleback2_name, :currency_unit, :japanese, :opt_display_tp, :opt_draw_title, :opt_extra_exp, :opt_floor_death, :opt_followers, :opt_slip_death, :opt_transparent, :opt_use_midi, :skill_types, :title1_name, :title2_name, :weapon_types, :window_tone\n"
-#elif RGSS == 2
-      "    attr_accessor :passages\n"
-#else
-      "    attr_accessor :actor_collapse_se, :battle_start_se, :battle_transition, :battleback_name, :buzzer_se, :cancel_se, :cursor_se, :decision_se, :enemy_collapse_se, :equip_se, :escape_se, :gameover_name, :load_se, :magic_number, :save_se, :shop_se, :title_name, :windowskin_name, :words\n"
-#endif
-      "    class "TERMS"\n"
-#if RGSS == 3
-      "      attr_accessor :basic, :commands, :etypes, :params\n"
-#else
-      "      attr_accessor :agi, :armor1, :armor2, :armor3, :armor4, :atk, :attack, :equip, :gold, :guard, :hp, :item, :skill, :weapon\n"
-#if RGSS == 2
-      "      attr_accessor :cancel, :continue, :def, :escape, :fight, :game_end, :hp_a, :level, :level_a, :mp, :mp_a, :new_game, :save, :shutdown, :spi, :status, :to_title, :weapon1, :weapon2\n"
-#else
-      "      attr_accessor :dex, :int, :mdef, :pdef, :sp, :str\n"
-#endif
-#endif
+      "    def whiten\n"
+      "      warn_unimplemented(\"RPG::Sprite#whiten\")\n"
       "    end\n"
-      "    class TestBattler\n"
+      "    def appear\n"
+      "      warn_unimplemented(\"RPG::Sprite#appear\")\n"
       "    end\n"
-#if RGSS >= 2
-      "    class Vehicle\n"
-      "      attr_accessor :character_index, :character_name, :start_map_id, :start_x, :start_y\n"
-#if RGSS == 3
-#else
-      "      attr_accessor :bgm\n"
-#endif
+      "    def escape\n"
+      "      warn_unimplemented(\"RPG::Sprite#escape\")\n"
       "    end\n"
-#endif
-      "  end\n"
-#if RGSS == 3
-      "  class Tileset\n"
-      "    attr_accessor :flags, :id, :mode, :name, :note, :tileset_names\n"
-      "  end\n"
-#elif RGSS == 1
-      "  class Tileset\n"
-      "    attr_accessor :autotile_names, :battleback_name, :fog_blend_type, :fog_hue, :fog_name, :fog_opacity, :fog_sx, :fog_sy, :fog_zoom, :id, :name, :panorama_hue, :panorama_name, :passages, :priorities, :terrain_tags, :tileset_name\n"
-      "  end\n"
-#endif
-      "  class Troop\n"
-      "    class Member\n"
+      "    def collapse\n"
+      "      warn_unimplemented(\"RPG::Sprite#collapse\")\n"
       "    end\n"
-      "    class Page\n"
-      "      class Condition\n"
-      "      end\n"
+      "    def damage(value, critical)\n"
+      "      warn_unimplemented(\"RPG::Sprite#damage\")\n"
+      "    end\n"
+      "    def animation(animation, hit)\n"
+      "      warn_unimplemented(\"RPG::Sprite#animation\")\n"
+      "    end\n"
+      "    def loop_animation(animation)\n"
+      "      warn_unimplemented(\"RPG::Sprite#loop_animation\")\n"
+      "    end\n"
+      "    def blink_on\n"
+      "      warn_unimplemented(\"RPG::Sprite#blink_on\")\n"
+      "      @blink = true\n"
+      "    end\n"
+      "    def blink_off\n"
+      "      warn_unimplemented(\"RPG::Sprite#blink_off\")\n"
+      "      @blink = false\n"
+      "    end\n"
+      "    def blink?\n"
+      "      warn_unimplemented(\"RPG::Sprite#blink?\")\n"
+      "      @blink\n"
+      "    end\n"
+      "    def effect?\n"
+      "      warn_unimplemented(\"RPG::Sprite#effect?\")\n"
+      "      false\n"
+      "    end\n"
+      "    def update\n"
+      "      warn_unimplemented(\"RPG::Sprite#update\")\n"
       "    end\n"
       "  end\n"
+#endif
 #if RGSS == 1
       "  class Weather\n"
       "    attr_accessor :max, :ox, :oy, :type\n"
