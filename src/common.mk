@@ -45,7 +45,11 @@ all: $(EXEC)
 clean:
 	$(RM) $(EXEC) $(OBJS)
 
-.PHONY: all
+test:
+	mkdir -p test
+	cd test; ruby ../../src/test/test.rb $(RGSS) ../$(EXEC)
+
+.PHONY: all clean test
 
 $(EXEC): $(OBJS)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LDLIBS)
