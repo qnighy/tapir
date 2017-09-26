@@ -33,6 +33,7 @@ module RGSSTest
         return
       end
     end
+    message = "#{args.inspect} is not raised" if message.nil?
     raise AssertionFailedError, message
   end
 
@@ -45,19 +46,22 @@ module RGSSTest
       b.call
     rescue
       if args.any? {|k| $!.kind_of?(k) } then
+        message = "#{args.inspect} is raised" if message.nil?
         raise AssertionFailedError, message
       end
     end
   end
 
-  def assert_raise_with_message(exception, expected, msg = nil, &b)
+  def assert_raise_with_message(exception, expected, message = nil, &b)
     begin
       b.call
     rescue
-      if $!.kind_of?(exception) && $!.message == expected then
+      if $!.kind_of?(exception) && $!.message.include?(expected) then
         return
       end
+      raise
     end
+    message = "#{exception.inspect} is not raised with message #{expected.inspect}" if message.nil?
     raise AssertionFailedError, msg
   end
 
@@ -69,24 +73,28 @@ module RGSSTest
 
   def assert_equal(expected, actual, message = nil)
     if expected != actual then
+      message = "#{expected.inspect} != #{actual.inspect}" if message.nil?
       raise AssertionFailedError, message
     end
   end
 
   def assert_not_equal(expected, actual, message = nil)
     if expected == actual then
+      message = "#{expected.inspect} == #{actual.inspect}" if message.nil?
       raise AssertionFailedError, message
     end
   end
 
   def assert_same(expected, actual, message = nil)
     if !expected.equal?(actual) then
+      message = "!#{expected.inspect}.equal?(#{actual.inspect})" if message.nil?
       raise AssertionFailedError, message
     end
   end
 
   def assert_not_same(expected, actual, message = nil)
     if expected.equal?(actual) then
+      message = "#{expected.inspect}.equal?(#{actual.inspect})" if message.nil?
       raise AssertionFailedError, message
     end
   end

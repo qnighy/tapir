@@ -15,6 +15,7 @@ scripts = [
 ]
 
 scripts << "#{TEST_SRC}/test_general.rb"
+scripts << "#{TEST_SRC}/test_rpg.rb"
 
 scripts << "#{TEST_SRC}/epilogue.rb"
 
@@ -45,7 +46,7 @@ File.open("Game.ini", "wb:cp932") do|file|
 end
 
 # system("./Game.exe")
-system(ARGV[1])
+system(ARGV[1]) or raise "#{ARGV[1]} failed: #$?"
 
 $stdout.print(File.read("stdout.txt"))
 $stderr.print(File.read("stderr.txt"))
