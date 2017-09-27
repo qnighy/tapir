@@ -1,5 +1,6 @@
 #include <ruby.h>
 #include "main_rb.h"
+#include "RGSSReset.h"
 
 #if RGSS == 3
 #define RGSS_RESET "RGSSReset"
@@ -15,8 +16,37 @@
 #define SCRIPT_PATH "\"Data/Scripts.rxdata\""
 #endif
 
+static VALUE rescue_any(VALUE data, VALUE e);
+static VALUE main_rb2(VALUE data);
+static void load_libs(void);
+static void load_scripts(void);
+static VALUE rescue_reset(VALUE data, VALUE e);
+static VALUE load_scripts2(VALUE data);
+
 VALUE main_rb(VALUE data) {
+  return rb_rescue2(main_rb2, data, rescue_any, Qnil, rb_eException, NULL);
+}
+
+static VALUE rescue_any(VALUE data, VALUE e) {
   (void) data;
+  (void) e;
+  rb_eval_string(
+      "  $stderr.print(\"#{$!.class}: #{$!.message}\\n\")\n"
+      "  $!.backtrace.each do|frame|\n"
+      "    $stderr.print(\"\\tfrom #{frame}\\n\")\n"
+      "  end\n"
+  );
+  return Qnil;
+}
+
+static VALUE main_rb2(VALUE data) {
+  (void) data;
+  load_libs();
+  load_scripts();
+  return Qnil;
+}
+
+static void load_libs() {
   rb_eval_string(
 #if RGSS < 3
       "$KCODE = \"u\"\n"
@@ -1313,25 +1343,31 @@ VALUE main_rb(VALUE data) {
       "    Marshal.dump(obj, f)\n"
       "  end\n"
       "end\n"
-      "begin\n"
+  );
+}
+
+static void load_scripts() {
+  rb_rescue2(load_scripts2, Qnil, rescue_reset, Qnil, rb_eRGSSReset, NULL);
+}
+
+static VALUE rescue_reset(VALUE data, VALUE e) {
+  (void) data;
+  (void) e;
+  rb_eval_string("retry");
+  return Qnil;
+}
+
+static VALUE load_scripts2(VALUE data) {
+  (void) data;
+  rb_eval_string(
       /* TODO: determine script path from Game.ini */
-      "  $RGSS_SCRIPTS = load_data("SCRIPT_PATH")\n"
-      "  $RGSS_SCRIPTS.each do|num,title,script|\n"
-      "    s = Zlib::Inflate::inflate(script)\n"
-#if RGSS == 3
-      "    s.force_encoding(\"utf-8\")\n"
+      "$RGSS_SCRIPTS = load_data("SCRIPT_PATH")\n"
+      "$RGSS_SCRIPTS.each do|num,title,script|\n"
+      "  s = Zlib::Inflate::inflate(script)\n"
+#if RGS== 3
+      "  s.force_encoding(\"utf-8\")\n"
 #endif
-      "    eval(s, binding, title)\n"
-      "  end\n"
-      "rescue "RGSS_RESET"\n"
-      "  retry\n"
-      // "rescue SystemExit\n"
-      // "  raise\n"
-      "rescue Exception => e\n"
-      "  $stderr.print(\"#{e.class}: #{e.message}\\n\")\n"
-      "  e.backtrace.each do|frame|\n"
-      "    $stderr.print(\"\\tfrom #{frame}\\n\")\n"
-      "  end\n"
+      "  eval(s, binding, title)\n"
       "end\n"
   );
   return Qnil;
