@@ -3,15 +3,12 @@
 #include "RGSSReset.h"
 
 #if RGSS == 3
-#define RGSS_RESET "RGSSReset"
 #define TERMS "Terms"
 #define SCRIPT_PATH "\"Data/Scripts.rvdata2\""
 #elif RGSS == 2
-#define RGSS_RESET "Reset"
 #define TERMS "Terms"
 #define SCRIPT_PATH "\"Data/Scripts.rvdata\""
 #else
-#define RGSS_RESET "Reset"
 #define TERMS "Words"
 #define SCRIPT_PATH "\"Data/Scripts.rxdata\""
 #endif
@@ -1323,7 +1320,7 @@ static void load_libs() {
 #if RGSS == 3
       "def rgss_main\n"
       "  yield\n"
-      "rescue "RGSS_RESET"\n"
+      "rescue RGSSReset\n"
       "  GC.start\n"
       "  retry\n"
       "end\n"
