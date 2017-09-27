@@ -1,3 +1,5 @@
+# PROLOGUE
+
 $stdout.reopen("stdout.txt", "w")
 $stderr.reopen("stderr.txt", "w")
 
@@ -111,7 +113,9 @@ module RGSSTest
         i.send(method_name)
       rescue
         ok = false
-        message = "#{$!.class}: #{$!.message}"
+        backtrace = \
+          $!.kind_of?(AssertionFailedError) ? $!.backtrace[1] : $!.backtrace[0]
+        message = "#{$!.class}: #{$!.message} (at #{backtrace})"
       end
       if ok
         puts "  #{method_name}: OK"

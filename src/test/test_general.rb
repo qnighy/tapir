@@ -30,6 +30,9 @@ module RGSSTest
       else
         assert_equal($KCODE, "UTF8")
       end
+      assert_equal(
+        Zlib::Inflate::inflate($RGSS_SCRIPTS[0][2])[0,10],
+        "# PROLOGUE")
     end
 
     def test_global_namespaces
