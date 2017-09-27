@@ -325,18 +325,78 @@ VALUE main_rb(VALUE data) {
 #endif
 #if RGSS == 3
       "    attr_accessor :battleback1_name, :battleback2_name, :display_name, :note, :specify_battleback, :tileset_id\n"
-      "    def initialize\n"
-      "      warn_unimplemented(\"RPG::Map.new\")\n"
-      "    end\n"
-      "    class Encounter\n"
-      "      attr_accessor :region_set, :troop_id, :weight\n"
-      "      def initialize\n"
-      "        warn_unimplemented(\"RPG::Map::Encounter.new\")\n"
-      "      end\n"
-      "    end\n"
 #endif
 #if RGSS == 1
       "    attr_accessor :tileset_id\n"
+#endif
+      "    def initialize(width, height)\n"
+#if RGSS == 3
+      "      @autoplay_bgm = false\n"
+      "      @autoplay_bgs = false\n"
+      "      @battleback1_name = \"\"\n"
+      "      @battleback2_name = \"\"\n"
+      "      @bgm = RPG::BGM.new\n"
+      "      @bgs = RPG::BGS.new(\"\", 80)\n"
+      "      @data = Table.new(width, height, 4)\n"
+      "      @disable_dashing = false\n"
+      "      @display_name = \"\"\n"
+      "      @encounter_list = []\n"
+      "      @encounter_step = 30\n"
+      "      @events = {}\n"
+      "      @height = height\n"
+      "      @note = \"\"\n"
+      "      @parallax_loop_x = false\n"
+      "      @parallax_loop_y = false\n"
+      "      @parallax_name = \"\"\n"
+      "      @parallax_show = false\n"
+      "      @parallax_sx = 0\n"
+      "      @parallax_sy = 0\n"
+      "      @scroll_type = 0\n"
+      "      @specify_battleback = false\n"
+      "      @tileset_id = 1\n"
+      "      @width = width\n"
+#elif RGSS == 2
+      "      @autoplay_bgm = false\n"
+      "      @autoplay_bgs = false\n"
+      "      @bgm = RPG::BGM.new\n"
+      "      @bgs = RPG::BGS.new(\"\", 80)\n"
+      "      @data = Table.new(width, height, 3)\n"
+      "      @disable_dashing = false\n"
+      "      @encounter_list = []\n"
+      "      @encounter_step = 30\n"
+      "      @events = {}\n"
+      "      @height = height\n"
+      "      @parallax_loop_x = false\n"
+      "      @parallax_loop_y = false\n"
+      "      @parallax_name = \"\"\n"
+      "      @parallax_show = false\n"
+      "      @parallax_sx = 0\n"
+      "      @parallax_sy = 0\n"
+      "      @scroll_type = 0\n"
+      "      @width = width\n"
+#else
+      "      @autoplay_bgm = false\n"
+      "      @autoplay_bgs = false\n"
+      "      @bgm = RPG::AudioFile.new\n"
+      "      @bgs = RPG::AudioFile.new(\"\", 80)\n"
+      "      @data = Table.new(width, height, 3)\n"
+      "      @encounter_list = []\n"
+      "      @encounter_step = 30\n"
+      "      @events = {}\n"
+      "      @height = height\n"
+      "      @tileset_id = 1\n"
+      "      @width = width\n"
+#endif
+      "    end\n"
+#if RGSS == 3
+      "    class Encounter\n"
+      "      attr_accessor :region_set, :troop_id, :weight\n"
+      "      def initialize\n"
+      "        @region_set = []\n"
+      "        @troop_id = 1\n"
+      "        @weight = 10\n"
+      "      end\n"
+      "    end\n"
 #endif
       "  end\n"
       "  class MapInfo\n"
@@ -1202,6 +1262,20 @@ VALUE main_rb(VALUE data) {
 #endif
       "end\n"
       "\n"
+      // TODO: implement fake DL and Win32API
+#if RGSS == 3
+      "module DL\n"
+      "end\n"
+#elif RGSS == 2
+      "module NKF\n"
+      "end\n"
+#else
+      "class Hangup\n"
+      "end\n"
+#endif
+      "module Win32API\n"
+      "end\n"
+      "\n"
 #if RGSS == 3
       "def rgss_main\n"
       "  yield\n"
@@ -1218,6 +1292,7 @@ VALUE main_rb(VALUE data) {
       "def msgbox_p(*args)\n"
       "  p *args\n"
       "end\n"
+      "RGSS_VERSION = \"3.0.1\"\n"
 #endif
       "def save_data(obj, filename)\n"
       "  File.open(filename.gsub(/\\\\/, \"/\"), \"wb\") do|f|\n"
@@ -1226,7 +1301,8 @@ VALUE main_rb(VALUE data) {
       "end\n"
       "begin\n"
       /* TODO: determine script path from Game.ini */
-      "  load_data("SCRIPT_PATH").each do|num,title,script|\n"
+      "  $RGSS_SCRIPTS = load_data("SCRIPT_PATH")\n"
+      "  $RGSS_SCRIPTS.each do|num,title,script|\n"
       "    s = Zlib::Inflate::inflate(script)\n"
 #if RGSS == 3
       "    s.force_encoding(\"utf-8\")\n"
