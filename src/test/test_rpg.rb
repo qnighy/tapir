@@ -536,23 +536,17 @@ module RGSSTest
         obj = RPG::SE.new
         obj.play
       }
-      assert_equal(history, [[:se_stop]])
+      assert_equal(history, [])
 
       history = mock_audio {
         obj = RPG::SE.new("hoge", 22, 37)
         obj.play
 
         RPG::SE.stop
-
-        obj = RPG::SE.new("hoge", 22, 37)
-        obj.play
-        RPG::SE.fade(48)
       }
       assert_equal(history, [
         [:se_play, "Audio/SE/hoge", 22, 37],
-        [:se_stop],
-        [:se_play, "Audio/SE/hoge", 22, 37],
-        [:se_fade, 48]])
+        [:se_stop]])
     end
 
     def mock_audio(&b)
@@ -573,9 +567,11 @@ module RGSSTest
       audio_mock.history = []
       audio_original = Object::Audio
       begin
+        Object.send(:remove_const, :Audio)
         Object.const_set(:Audio, audio_mock)
         b.call
       ensure
+        Object.send(:remove_const, :Audio)
         Object.const_set(:Audio, audio_original)
       end
       audio_mock.history
