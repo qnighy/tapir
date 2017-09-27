@@ -18,9 +18,13 @@ static double cap_debt = 0.0;
 static Uint32 cap_last_ticks = 0;
 
 static VALUE rb_graphics_s_update(VALUE klass);
+static VALUE rb_graphics_s_frame_reset(VALUE klass);
+#if RGSS >= 2
 static VALUE rb_graphics_s_width(VALUE klass);
 static VALUE rb_graphics_s_height(VALUE klass);
-static VALUE rb_graphics_s_frame_reset(VALUE klass);
+static VALUE rb_graphics_s_resize_screen(
+    VALUE klass, VALUE width, VALUE height);
+#endif
 static VALUE rb_graphics_s_frame_rate(VALUE klass);
 static VALUE rb_graphics_s_set_frame_rate(VALUE klass, VALUE newval);
 static VALUE rb_graphics_s_frame_count(VALUE klass);
@@ -29,10 +33,14 @@ static VALUE rb_graphics_s_set_frame_count(VALUE klass, VALUE newval);
 void Init_Graphics() {
   rb_mGraphics = rb_define_module("Graphics");
   rb_define_singleton_method(rb_mGraphics, "update", rb_graphics_s_update, 0);
-  rb_define_singleton_method(rb_mGraphics, "width", rb_graphics_s_width, 0);
-  rb_define_singleton_method(rb_mGraphics, "height", rb_graphics_s_height, 0);
   rb_define_singleton_method(rb_mGraphics,
       "frame_reset", rb_graphics_s_frame_reset, 0);
+#if RGSS >= 2
+  rb_define_singleton_method(rb_mGraphics, "width", rb_graphics_s_width, 0);
+  rb_define_singleton_method(rb_mGraphics, "height", rb_graphics_s_height, 0);
+  rb_define_singleton_method(rb_mGraphics, "resize_screen",
+      rb_graphics_s_resize_screen, 2);
+#endif
   rb_define_singleton_method(rb_mGraphics,
       "frame_rate", rb_graphics_s_frame_rate, 0);
   rb_define_singleton_method(rb_mGraphics,
@@ -89,6 +97,13 @@ static VALUE rb_graphics_s_update(VALUE klass) {
   return Qnil;
 }
 
+static VALUE rb_graphics_s_frame_reset(VALUE klass) {
+  (void) klass;
+  cap_debt = 0.0;
+  return Qnil;
+}
+
+#if RGSS >= 2
 static VALUE rb_graphics_s_width(VALUE klass) {
   (void) klass;
 
@@ -101,11 +116,17 @@ static VALUE rb_graphics_s_height(VALUE klass) {
   return INT2NUM(window_height);
 }
 
-static VALUE rb_graphics_s_frame_reset(VALUE klass) {
+static VALUE rb_graphics_s_resize_screen(
+    VALUE klass, VALUE width, VALUE height) {
   (void) klass;
-  cap_debt = 0.0;
+  // TODO: saturate?
+  int newwidth = saturateInt32(NUM2INT(width), 1, 1280);
+  int newheight = saturateInt32(NUM2INT(height), 1, 1280);
+  SDL_SetWindowSize(window, newwidth, newheight);
+  SDL_GetWindowSize(window, &window_width, &window_height);
   return Qnil;
 }
+#endif
 
 static VALUE rb_graphics_s_frame_rate(VALUE klass) {
   (void) klass;

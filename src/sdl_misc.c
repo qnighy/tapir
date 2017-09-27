@@ -129,6 +129,8 @@ void renderSDL() {
   SDL_GL_MakeCurrent(window, glcontext);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
+  glScissor(0, 0, window_width, window_height);
+  glViewport(0, 0, window_width, window_height);
   int last_z = INT_MIN;
   for(size_t i = 0; i < registry_size; ++i) {
     renderTilemaps(last_z, registry[i]->z);
