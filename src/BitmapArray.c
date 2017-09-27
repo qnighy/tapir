@@ -25,8 +25,12 @@ static VALUE rb_bitmaparray_m_aset(VALUE self, VALUE index, VALUE newval);
 VALUE rb_cBitmapArray;
 
 void Init_BitmapArray(void) {
+#if RGSS >= 2
   rb_cBitmapArray = rb_define_class_under(
       rb_cTilemap, "BitmapArray", rb_cObject);
+#else
+  rb_cBitmapArray = rb_define_class("TilemapAutotiles", rb_cObject);
+#endif
   rb_define_method(rb_cBitmapArray, "[]", rb_bitmaparray_m_aref, 1);
   rb_define_method(rb_cBitmapArray, "[]=", rb_bitmaparray_m_aset, 2);
 }
@@ -41,7 +45,7 @@ const struct BitmapArray *rb_bitmaparray_data(VALUE obj) {
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))bitmaparray_mark) {
     rb_raise(rb_eTypeError,
-        "can't convert %s into Tilemap::"BITMAP_ARRAY_CLASS,
+        "can't convert %s into "BITMAP_ARRAY_CLASS,
         rb_class2name(rb_obj_class(obj)));
   }
   struct BitmapArray *ret;
@@ -51,7 +55,7 @@ const struct BitmapArray *rb_bitmaparray_data(VALUE obj) {
 
 struct BitmapArray *rb_bitmaparray_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
-  if(OBJ_FROZEN(obj)) rb_error_frozen("Tilemap::"BITMAP_ARRAY_CLASS);
+  if(OBJ_FROZEN(obj)) rb_error_frozen(BITMAP_ARRAY_CLASS);
   return (struct BitmapArray *)rb_bitmaparray_data(obj);
 }
 

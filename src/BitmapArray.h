@@ -8,7 +8,7 @@
 
 #if RGSS >= 2
 #define BITMAP_ARRAY_LENGTH 9
-#define BITMAP_ARRAY_CLASS "BitmapArray"
+#define BITMAP_ARRAY_CLASS "Tilemap::BitmapArray"
 #else
 #define BITMAP_ARRAY_LENGTH 7
 #define BITMAP_ARRAY_CLASS "TilemapAutotiles"
