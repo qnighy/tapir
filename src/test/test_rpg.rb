@@ -185,6 +185,80 @@ module RGSSTest
       assert_equal(encounter.weight, 10)
     end
 
+    def test_rpg_mapinfo
+      obj = RPG::MapInfo.new
+
+      assert_equal(RPG::MapInfo.superclass, Object)
+      assert_equal(RPG::MapInfo.constants, [])
+      assert_equal(RPG::MapInfo.class_variables, [])
+      assert_equal(RPG::MapInfo.methods - Object.methods, [])
+      assert_equal(
+        (obj.methods - Object.instance_methods).sort.map{|s|s.to_sym},
+        [ :expanded, :expanded=, :name, :name=, :order, :order=, :parent_id,
+          :parent_id=, :scroll_x, :scroll_x=, :scroll_y, :scroll_y=])
+      assert_equal(obj.instance_variables.sort.map{|s|s.to_sym}, [
+        :@expanded, :@name, :@order, :@parent_id, :@scroll_x, :@scroll_y])
+      assert_raise(ArgumentError) { RPG::MapInfo.new(:hoge) }
+      assert_equal(obj.expanded, false)
+      assert_equal(obj.name, "")
+      assert_equal(obj.order, 0)
+      assert_equal(obj.parent_id, 0)
+      assert_equal(obj.scroll_x, 0)
+      assert_equal(obj.scroll_y, 0)
+    end
+
+    def test_rpg_area
+      RGSSTest::RGSS == 2 or return
+      obj = RPG::Area.new
+
+      assert_equal(RPG::Area.superclass, Object)
+      assert_equal(RPG::Area.constants, [])
+      assert_equal(RPG::Area.class_variables, [])
+      assert_equal(RPG::Area.methods - Object.methods, [])
+      # Note: RPG::Area#id accidentally overrides Object#id
+      assert_equal((obj.methods - Object.instance_methods).sort, [
+        "encounter_list", "encounter_list=", "id=", "map_id", "map_id=",
+        "name", "name=", "order", "order=", "rect", "rect="])
+      assert_equal(obj.instance_variables.sort, [
+        "@encounter_list", "@id", "@map_id", "@name", "@order", "@rect"])
+      assert_raise(ArgumentError) { RPG::Area.new(:hoge) }
+      assert_equal(obj.encounter_list, [])
+      assert_equal(obj.id, 0)
+      assert_equal(obj.map_id, 0)
+      assert_equal(obj.name, "")
+      assert_equal(obj.order, 0)
+      assert_equal(obj.rect, Rect.new(0, 0, 0, 0))
+    end
+
+    def test_rpg_event
+      obj = RPG::Event.new(7, 6)
+
+      assert_equal(RPG::Event.superclass, Object)
+      assert_equal(RPG::Event.constants.sort.map{|s|s.to_sym}, [:Page])
+      assert_equal(RPG::Event.class_variables, [])
+      assert_equal(RPG::Event.methods - Object.methods, [])
+      if RGSSTest::RGSS == 3
+        assert_equal(
+          (obj.methods - Object.instance_methods).sort.map{|s|s.to_sym}, [
+            :id, :id=, :name, :name=, :pages, :pages=, :x, :x=, :y, :y=])
+      else
+        # Note: RPG::Event#id accidentally overrides Object#id
+        assert_equal(
+          (obj.methods - Object.instance_methods).sort.map{|s|s.to_sym}, [
+            :id=, :name, :name=, :pages, :pages=, :x, :x=, :y, :y=])
+      end
+      assert_equal(obj.instance_variables.sort.map{|s|s.to_sym}, [
+        :@id, :@name, :@pages, :@x, :@y])
+      assert_raise(ArgumentError) { RPG::Event.new(:hoge) }
+      assert_raise(ArgumentError) { RPG::Event.new(:hoge, :fuga, :piyo) }
+      assert_equal(obj.id, 0)
+      assert_equal(obj.name, "")
+      assert_equal(obj.pages.size, 1)
+      assert_equal(obj.pages[0].class, RPG::Event::Page)
+      assert_equal(obj.x, 7)
+      assert_equal(obj.y, 6)
+    end
+
     def test_rpg_audiofile
       audiofile = RPG::AudioFile.new
 
