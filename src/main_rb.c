@@ -48,12 +48,12 @@ static void load_libs() {
 #if RGSS < 3
       "$KCODE = \"u\"\n"
 #endif
-      "$unimplemented_warnings = {}\n"
       /* TODO: this is only for developing purpose. */
       /* We want to remove it when it becomes unnecessary. */
       "def warn_unimplemented(name)\n"
-      "  if !$unimplemented_warnings[name]\n"
-      "    $unimplemented_warnings[name] = true\n"
+      "  unimplemented_warnings = eval(\"$unimplemented_warnings ||= {}\")\n"
+      "  if !unimplemented_warnings[name]\n"
+      "    unimplemented_warnings[name] = true\n"
       "    $stderr.puts \"unimplemented: #{name}\"\n"
       "  end\n"
       "end\n"
