@@ -1314,8 +1314,6 @@ static void load_libs() {
       "class Hangup\n"
       "end\n"
 #endif
-      "module Win32API\n"
-      "end\n"
       "\n"
 #if RGSS == 3
       "def rgss_main\n"

@@ -22,6 +22,7 @@
 #include "Tilemap.h"
 #include "Tone.h"
 #include "Viewport.h"
+#include "Win32APIFake.h"
 #include "Window.h"
 
 static bool is_test_mode = false;
@@ -161,5 +162,6 @@ static void Init_RGSS(void) {
   Init_BitmapArray();
   Init_Graphics();
   Init_Input();
+  Init_Win32APIFake();
   rb_define_global_function("load_data", rb_load_data, 1);
 }
