@@ -119,9 +119,8 @@ static VALUE rb_graphics_s_height(VALUE klass) {
 static VALUE rb_graphics_s_resize_screen(
     VALUE klass, VALUE width, VALUE height) {
   (void) klass;
-  // TODO: saturate?
-  int newwidth = saturateInt32(NUM2INT(width), 1, 1280);
-  int newheight = saturateInt32(NUM2INT(height), 1, 1280);
+  int newwidth = saturateInt32(NUM2INT(width), 1, 640);
+  int newheight = saturateInt32(NUM2INT(height), 1, 480);
   SDL_SetWindowSize(window, newwidth, newheight);
   SDL_GetWindowSize(window, &window_width, &window_height);
   return Qnil;
