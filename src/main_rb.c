@@ -243,7 +243,7 @@ static void load_libs() {
       "  def self.brightness=(brightness)\n"
       "    warn_unimplemented(\"Graphics.brightness=\")\n"
       "  end\n"
-      "  def self.transition(frames = nil)\n"
+      "  def self.transition(duration = 10, filename = nil, vague = 40)\n"
       "    warn_unimplemented(\"Graphics.transition\")\n"
       "  end\n"
       "  def self.wait(duration)\n"
