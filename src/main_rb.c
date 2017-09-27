@@ -1359,7 +1359,7 @@ static VALUE load_scripts2(VALUE data) {
       "$RGSS_SCRIPTS = load_data("SCRIPT_PATH")\n"
       "$RGSS_SCRIPTS.each do|num,title,script|\n"
       "  s = Zlib::Inflate::inflate(script)\n"
-#if RGS== 3
+#if RGSS == 3
       "  s.force_encoding(\"utf-8\")\n"
 #endif
       "  eval(s, binding, title)\n"
