@@ -657,7 +657,9 @@ static void renderWindow(struct Renderable *renderable) {
   int openness = 255;
 #endif
   if(openness == 0) return;
-  if(openness < 255) WARN_UNIMPLEMENTED("Window#openness");
+
+  int open_height = ptr->height * openness / 255;
+  int open_y = ptr->y + (ptr->height - open_height) / 2;
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -681,8 +683,8 @@ static void renderWindow(struct Renderable *renderable) {
         window_width, window_height);
 
     gl_draw_rect(
-        ptr->x + 2, ptr->y + 2,
-        ptr->x + ptr->width - 2, ptr->y + ptr->height - 2,
+        ptr->x + 2, open_y + 2,
+        ptr->x + ptr->width - 2, open_y + open_height - 2,
         0.0, 0.0, 1.0, 1.0);
 
 #if RGSS >= 2
@@ -692,9 +694,9 @@ static void renderWindow(struct Renderable *renderable) {
         window_width, window_height);
 
     gl_draw_rect(
-        ptr->x + 2, ptr->y + 2,
-        ptr->x + ptr->width - 2, ptr->y + ptr->height - 2,
-        0.0, 0.0, (ptr->width - 2) / 64.0, (ptr->height - 2) / 64.0);
+        ptr->x + 2, open_y + 2,
+        ptr->x + ptr->width - 2, open_y + open_height - 2,
+        0.0, 0.0, (ptr->width - 2) / 64.0, (open_height - 2) / 64.0);
 #endif
 
     glUseProgram(shader3);
@@ -702,11 +704,11 @@ static void renderWindow(struct Renderable *renderable) {
     glUniform2f(glGetUniformLocation(shader3, "resolution"),
         window_width, window_height);
     glUniform2f(glGetUniformLocation(shader3, "bg_size"),
-        ptr->width, ptr->height);
+        ptr->width, open_height);
 
     gl_draw_rect(
-        ptr->x, ptr->y, ptr->x + ptr->width, ptr->y + ptr->height,
-        0.0, 0.0, ptr->width, ptr->height);
+        ptr->x, open_y, ptr->x + ptr->width, open_y + open_height,
+        0.0, 0.0, ptr->width, open_height);
   }
 
 #if RGSS == 3
@@ -762,7 +764,7 @@ static void renderWindow(struct Renderable *renderable) {
 
   const struct Rect *cursor_rect_ptr = rb_rect_data(ptr->cursor_rect);
 
-  if(ptr->windowskin != Qnil &&
+  if(ptr->windowskin != Qnil && openness == 255 &&
       cursor_rect_ptr->width > 0 && cursor_rect_ptr->height > 0) {
     const struct Bitmap *skin_bitmap_ptr = rb_bitmap_data(ptr->windowskin);
     SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
