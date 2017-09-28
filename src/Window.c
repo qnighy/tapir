@@ -14,6 +14,7 @@ static GLuint shader2;
 #endif
 static GLuint shader3;
 static GLuint shader4;
+static GLuint cursor_shader;
 
 static void window_mark(struct Window *ptr);
 static void window_free(struct Window *ptr);
@@ -413,7 +414,6 @@ static VALUE rb_window_m_cursor_rect(VALUE self) {
 }
 
 static VALUE rb_window_m_set_cursor_rect(VALUE self, VALUE newval) {
-  WARN_UNIMPLEMENTED("Window#cursor_rect");
   struct Window *ptr = rb_window_data_mut(self);
   rb_rect_set2(ptr->cursor_rect, newval);
   return newval;
@@ -709,19 +709,19 @@ static void renderWindow(struct Renderable *renderable) {
         0.0, 0.0, ptr->width, ptr->height);
   }
 
+#if RGSS == 3
+  int padding = ptr->padding;
+  int padding_bottom = ptr->padding_bottom;
+#else
+  // TODO: is the padding correct?
+  int padding = 16;
+  int padding_bottom = 16;
+#endif
+
   if(ptr->contents != Qnil && openness == 255) {
     const struct Bitmap *contents_bitmap_ptr = rb_bitmap_data(ptr->contents);
     SDL_Surface *contents_surface = contents_bitmap_ptr->surface;
     if(!contents_surface) return;
-
-#if RGSS == 3
-    int padding = ptr->padding;
-    int padding_bottom = ptr->padding_bottom;
-#else
-    // TODO: is the padding correct?
-    int padding = 16;
-    int padding_bottom = 16;
-#endif
 
     int wcontent_width = ptr->width - padding * 2;
     int wcontent_height = ptr->height - padding - padding_bottom;
@@ -758,6 +758,45 @@ static void renderWindow(struct Renderable *renderable) {
         (double)clip_top / content_height,
         (double)clip_right / content_width,
         (double)clip_bottom / content_height);
+  }
+
+  const struct Rect *cursor_rect_ptr = rb_rect_data(ptr->cursor_rect);
+
+  if(ptr->windowskin != Qnil &&
+      cursor_rect_ptr->width > 0 && cursor_rect_ptr->height > 0) {
+    const struct Bitmap *skin_bitmap_ptr = rb_bitmap_data(ptr->windowskin);
+    SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
+    if(!skin_surface) return;
+
+    glActiveTexture(GL_TEXTURE0);
+    bitmapBindTexture((struct Bitmap *)skin_bitmap_ptr);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    // TODO: clipping?
+#if RGSS == 3
+    int adjusted_x = ptr->x + cursor_rect_ptr->x + padding - ptr->ox;
+    int adjusted_y = ptr->y + cursor_rect_ptr->y + padding - ptr->oy;
+#else
+    int adjusted_x = ptr->x + cursor_rect_ptr->x + padding;
+    int adjusted_y = ptr->y + cursor_rect_ptr->y + padding;
+#endif
+
+    glUseProgram(cursor_shader);
+    glUniform1i(glGetUniformLocation(cursor_shader, "windowskin"), 0);
+    glUniform2f(glGetUniformLocation(cursor_shader, "resolution"),
+        window_width, window_height);
+    glUniform2f(glGetUniformLocation(cursor_shader, "cursor_size"),
+        cursor_rect_ptr->width, cursor_rect_ptr->height);
+
+    gl_draw_rect(
+        adjusted_x, adjusted_y,
+        adjusted_x + cursor_rect_ptr->width,
+        adjusted_y + cursor_rect_ptr->height,
+        0.0, 0.0, cursor_rect_ptr->width, cursor_rect_ptr->height);
   }
 
   glUseProgram(0);
@@ -920,9 +959,62 @@ void initWindowSDL() {
 
   shader4 = compileShaders(vsh4_source, fsh4_source);
 
+  static const char *cursor_vsh_source =
+    "#version 120\n"
+    "\n"
+    "uniform vec2 resolution;\n"
+    "\n"
+    "void main(void) {\n"
+    "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+    "    gl_Position.x = gl_Vertex.x / resolution.x * 2.0 - 1.0;\n"
+    "    gl_Position.y = 1.0 - gl_Vertex.y / resolution.y * 2.0;\n"
+    "    gl_Position.zw = vec2(0.0, 1.0);\n"
+    "}\n";
+
+  static const char *cursor_fsh_source =
+    "#version 120\n"
+    "#if __VERSION__ >= 130\n"
+    "#define texture2D texture\n"
+    "#define texture2DProj textureProj\n"
+    "#endif\n"
+    "\n"
+    "uniform sampler2D windowskin;\n"
+    "uniform vec2 cursor_size;\n"
+    "\n"
+    "void main(void) {\n"
+    "    vec2 coord = gl_TexCoord[0].xy;\n"
+    "    vec2 reverse_coord = cursor_size - coord;\n"
+    "    vec2 src_coord;\n"
+    "    if(coord.x < 2.0) {\n"
+    "      src_coord.x = coord.x;\n"
+    "    } else if(reverse_coord.x < 2.0) {\n"
+    "      src_coord.x = 32.0 - reverse_coord.x;\n"
+    "    } else {\n"
+    "      src_coord.x = mod(coord.x - 2.0, 28.0) + 2.0;\n"
+    "    }\n"
+    "    if(coord.y < 16.0) {\n"
+    "      src_coord.y = coord.y;\n"
+    "    } else if(reverse_coord.y < 16.0) {\n"
+    "      src_coord.y = 32.0 - reverse_coord.y;\n"
+    "    } else {\n"
+    "      src_coord.y = mod(coord.y - 2.0, 28.0) + 2.0;\n"
+    "    }\n"
+#if RGSS >= 2
+    "    src_coord.x = (src_coord.x + 64.0) / 128.0;\n"
+    "    src_coord.y = (src_coord.y + 64.0) / 128.0;\n"
+#else
+    "    src_coord.x = (src_coord.x + 128.0) / 192.0;\n"
+    "    src_coord.y = (src_coord.y + 64.0) / 128.0;\n"
+#endif
+    "    gl_FragColor = texture2D(windowskin, src_coord);\n"
+    "}\n";
+
+  cursor_shader = compileShaders(cursor_vsh_source, cursor_fsh_source);
+
 }
 
 void deinitWindowSDL() {
+  if(cursor_shader) glDeleteProgram(cursor_shader);
   if(shader4) glDeleteProgram(shader4);
   if(shader3) glDeleteProgram(shader3);
 #if RGSS >= 2
