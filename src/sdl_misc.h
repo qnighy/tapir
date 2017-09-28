@@ -12,6 +12,7 @@ struct Renderable {
 
 extern int window_width;
 extern int window_height;
+extern int window_brightness;
 extern SDL_Window *window;
 extern SDL_Renderer *renderer;
 extern SDL_GLContext glcontext;

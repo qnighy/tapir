@@ -3,7 +3,7 @@
 #include <limits.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
-#include <SDL_opengl.h>
+#include "gl_misc.h"
 #include "sdl_misc.h"
 #include "Sprite.h"
 #include "Window.h"
@@ -18,10 +18,16 @@ int window_height = 416;
 int window_width = 640;
 int window_height = 480;
 #endif
+int window_brightness = 255;
 SDL_Window *window = NULL;
 SDL_GLContext glcontext = NULL;
 static size_t registry_size, registry_capacity;
 static struct Renderable **registry;
+
+static GLuint transition_shader;
+
+static void initTransition(void);
+static void deinitTransition(void);
 
 void initSDL() {
   registry_capacity = 100;
@@ -69,6 +75,7 @@ void initSDL() {
     exit(1);
   }
 
+  initTransition();
   initSpriteSDL();
   initWindowSDL();
   initTilemapSDL();
@@ -78,6 +85,7 @@ void cleanupSDL() {
   deinitTilemapSDL();
   deinitWindowSDL();
   deinitSpriteSDL();
+  deinitTransition();
   if(glcontext) SDL_GL_DeleteContext(glcontext);
   if(window) SDL_DestroyWindow(window);
   TTF_Quit();
@@ -138,6 +146,22 @@ void renderSDL() {
     registry[i]->render(registry[i]);
   }
   renderTilemaps(last_z, INT_MAX);
+
+  if(window_brightness != 255) {
+    // transition
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glUseProgram(transition_shader);
+    glUniform1f(glGetUniformLocation(transition_shader, "brightness"),
+        window_brightness / 255.0);
+
+    gl_draw_rect(-1.0, -1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+
+    glUseProgram(0);
+  }
+
   SDL_GL_SwapWindow(window);
 }
 
@@ -157,4 +181,31 @@ void unregisterRenderable(struct Renderable *renderable) {
   if(i == registry_size) return;
   registry[i] = registry[registry_size - 1];
   --registry_size;
+}
+
+static void initTransition(void) {
+  static const char *vsh_source =
+    "#version 120\n"
+    "\n"
+    "void main(void) {\n"
+    "    gl_Position = gl_Vertex;\n"
+    "}\n";
+
+  static const char *fsh_source =
+    "#version 120\n"
+    "#if __VERSION__ >= 130\n"
+    "#define texture2D texture\n"
+    "#define texture2DProj textureProj\n"
+    "#endif\n"
+    "\n"
+    "uniform float brightness;\n"
+    "\n"
+    "void main(void) {\n"
+    "    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0 - brightness);\n"
+    "}\n";
+
+  transition_shader = compileShaders(vsh_source, fsh_source);
+}
+static void deinitTransition(void) {
+  if(transition_shader) glDeleteProgram(transition_shader);
 }
