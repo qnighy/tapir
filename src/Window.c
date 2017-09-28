@@ -253,7 +253,11 @@ static VALUE window_alloc(VALUE klass) {
   ptr->padding_bottom = 12;
 #endif
   ptr->opacity = 255;
+#if RGSS == 3
+  ptr->back_opacity = 192;
+#else
   ptr->back_opacity = 255;
+#endif
   ptr->contents_opacity = 255;
 #if RGSS >= 2
   ptr->openness = 255;
@@ -590,7 +594,6 @@ static VALUE rb_window_m_opacity(VALUE self) {
 }
 
 static VALUE rb_window_m_set_opacity(VALUE self, VALUE newval) {
-  WARN_UNIMPLEMENTED("Window#opacity");
   struct Window *ptr = rb_window_data_mut(self);
   ptr->opacity = saturateInt32(NUM2INT(newval), 0, 255);
   return newval;
@@ -602,7 +605,6 @@ static VALUE rb_window_m_back_opacity(VALUE self) {
 }
 
 static VALUE rb_window_m_set_back_opacity(VALUE self, VALUE newval) {
-  WARN_UNIMPLEMENTED("Window#back_opacity");
   struct Window *ptr = rb_window_data_mut(self);
   ptr->back_opacity = saturateInt32(NUM2INT(newval), 0, 255);
   return newval;
@@ -614,7 +616,6 @@ static VALUE rb_window_m_contents_opacity(VALUE self) {
 }
 
 static VALUE rb_window_m_set_contents_opacity(VALUE self, VALUE newval) {
-  WARN_UNIMPLEMENTED("Window#contents_opacity");
   struct Window *ptr = rb_window_data_mut(self);
   ptr->contents_opacity = saturateInt32(NUM2INT(newval), 0, 255);
   return newval;
@@ -681,6 +682,8 @@ static void renderWindow(struct Renderable *renderable) {
     glUniform1i(glGetUniformLocation(shader1, "windowskin"), 0);
     glUniform2f(glGetUniformLocation(shader1, "resolution"),
         window_width, window_height);
+    glUniform1f(glGetUniformLocation(shader1, "opacity"),
+        ptr->opacity * ptr->back_opacity / (255.0 * 255.0));
 
     gl_draw_rect(
         ptr->x + 2, open_y + 2,
@@ -692,6 +695,8 @@ static void renderWindow(struct Renderable *renderable) {
     glUniform1i(glGetUniformLocation(shader2, "windowskin"), 0);
     glUniform2f(glGetUniformLocation(shader2, "resolution"),
         window_width, window_height);
+    glUniform1f(glGetUniformLocation(shader2, "opacity"),
+        ptr->opacity * ptr->back_opacity / (255.0 * 255.0));
 
     gl_draw_rect(
         ptr->x + 2, open_y + 2,
@@ -703,6 +708,8 @@ static void renderWindow(struct Renderable *renderable) {
     glUniform1i(glGetUniformLocation(shader3, "windowskin"), 0);
     glUniform2f(glGetUniformLocation(shader3, "resolution"),
         window_width, window_height);
+    glUniform1f(glGetUniformLocation(shader3, "opacity"),
+        ptr->opacity / 255.0);
     glUniform2f(glGetUniformLocation(shader3, "bg_size"),
         ptr->width, open_height);
 
@@ -742,6 +749,8 @@ static void renderWindow(struct Renderable *renderable) {
     glUniform1i(glGetUniformLocation(shader4, "contents"), 0);
     glUniform2f(glGetUniformLocation(shader4, "resolution"),
         window_width, window_height);
+    glUniform1f(glGetUniformLocation(shader4, "opacity"),
+        ptr->contents_opacity / 255.0);
 
     glActiveTexture(GL_TEXTURE0);
     bitmapBindTexture((struct Bitmap *)contents_bitmap_ptr);
@@ -791,6 +800,8 @@ static void renderWindow(struct Renderable *renderable) {
     glUniform1i(glGetUniformLocation(cursor_shader, "windowskin"), 0);
     glUniform2f(glGetUniformLocation(cursor_shader, "resolution"),
         window_width, window_height);
+    glUniform1f(glGetUniformLocation(cursor_shader, "opacity"),
+        ptr->contents_opacity / 255.0);
     glUniform2f(glGetUniformLocation(cursor_shader, "cursor_size"),
         cursor_rect_ptr->width, cursor_rect_ptr->height);
 
@@ -825,6 +836,7 @@ void initWindowSDL() {
     "#endif\n"
     "\n"
     "uniform sampler2D windowskin;\n"
+    "uniform float opacity;\n"
     "\n"
     "void main(void) {\n"
 #if RGSS >= 2
@@ -832,6 +844,7 @@ void initWindowSDL() {
 #else
     "    vec4 color = texture2D(windowskin, vec2(gl_TexCoord[0].x * (2.0 / 3.0), gl_TexCoord[0].y));\n"
 #endif
+    "    color.a *= opacity;\n"
     "    gl_FragColor = color;\n"
     "}\n";
 
@@ -858,6 +871,7 @@ void initWindowSDL() {
     "#endif\n"
     "\n"
     "uniform sampler2D windowskin;\n"
+    "uniform float opacity;\n"
     "\n"
     "void main(void) {\n"
     "    vec2 coord = mod(gl_TexCoord[0].xy, 1.0);\n"
@@ -866,6 +880,7 @@ void initWindowSDL() {
 #else
     "    vec4 color = texture2D(windowskin, vec2(coord.x * (2.0 / 3.0), coord.y));\n"
 #endif
+    "    color.a *= opacity;\n"
     "    gl_FragColor = color;\n"
     "}\n";
 
@@ -892,6 +907,7 @@ void initWindowSDL() {
     "#endif\n"
     "\n"
     "uniform sampler2D windowskin;\n"
+    "uniform float opacity;\n"
     "uniform vec2 bg_size;\n"
     "\n"
     "void main(void) {\n"
@@ -929,6 +945,7 @@ void initWindowSDL() {
     "    } else {\n"
     "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
     "    }\n"
+    "    gl_FragColor.a *= opacity;\n"
     "}\n";
 
   shader3 = compileShaders(vsh3_source, fsh3_source);
@@ -953,9 +970,11 @@ void initWindowSDL() {
     "#endif\n"
     "\n"
     "uniform sampler2D windowskin;\n"
+    "uniform float opacity;\n"
     "\n"
     "void main(void) {\n"
     "    vec4 color = texture2D(windowskin, vec2(gl_TexCoord[0].x, gl_TexCoord[0].y));\n"
+    "    color.a *= opacity;\n"
     "    gl_FragColor = color;\n"
     "}\n";
 
@@ -981,6 +1000,7 @@ void initWindowSDL() {
     "#endif\n"
     "\n"
     "uniform sampler2D windowskin;\n"
+    "uniform float opacity;\n"
     "uniform vec2 cursor_size;\n"
     "\n"
     "void main(void) {\n"
@@ -1009,6 +1029,7 @@ void initWindowSDL() {
     "    src_coord.y = (src_coord.y + 64.0) / 128.0;\n"
 #endif
     "    gl_FragColor = texture2D(windowskin, src_coord);\n"
+    "    gl_FragColor.a *= opacity;\n"
     "}\n";
 
   cursor_shader = compileShaders(cursor_vsh_source, cursor_fsh_source);
