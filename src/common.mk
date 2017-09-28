@@ -30,6 +30,9 @@ CPPFLAGS += -I$(RUBY_DIR)/include/ruby-1.9.1/$(RUBY_PLATFORM) \
 	    -I$(RUBY_DIR)/include/ruby-1.9.1 \
 	    $(shell pkg-config $(PC_LIBS) --cflags-only-I) \
 	    -DRGSS=$(RGSS)
+LDLIBS += $(RUBY_SRC_DIR)/enc/trans/single_byte.o \
+	  $(RUBY_SRC_DIR)/enc/trans/utf_16_32.o \
+	  $(RUBY_SRC_DIR)/enc/trans/japanese_sjis.o
 else
 CPPFLAGS += -I$(RUBY_DIR)/lib/ruby/1.8/$(RUBY_PLATFORM) \
 	    $(shell pkg-config $(PC_LIBS) --cflags-only-I) \
@@ -37,9 +40,9 @@ CPPFLAGS += -I$(RUBY_DIR)/lib/ruby/1.8/$(RUBY_PLATFORM) \
 endif
 LDFLAGS += -L$(RUBY_DIR)/lib \
 	   $(shell pkg-config $(PC_LIBS) --libs-only-L --libs-only-other)
-LDLIBS = $(RUBY_SRC_DIR)/ext/zlib/zlib.a -lz \
-	 -lruby-static -lpthread -lrt -ldl -lcrypt -lm \
-	 $(shell pkg-config $(PC_LIBS) --libs-only-l)
+LDLIBS += $(RUBY_SRC_DIR)/ext/zlib/zlib.a -lz \
+	  -lruby-static -lpthread -lrt -ldl -lcrypt -lm \
+	  $(shell pkg-config $(PC_LIBS) --libs-only-l)
 
 all: $(EXEC)
 

@@ -30,6 +30,11 @@ static bool is_btest_mode = false;
 static bool is_console_mode = false;
 
 void Init_zlib(void);
+#if RGSS == 3
+void Init_single_byte(void);
+void Init_utf_16_32(void);
+void Init_japanese_sjis(void);
+#endif
 static void Init_RGSS(void);
 static void tapir_atexit(void);
 
@@ -113,6 +118,11 @@ int main(int argc, char **argv) {
     RUBY_INIT_STACK;
     ruby_init();
     Init_zlib();
+#if RGSS == 3
+    Init_single_byte();
+    Init_utf_16_32();
+    Init_japanese_sjis();
+#endif
     Init_RGSS();
     rb_protect(main_rb, Qnil, &state);
   }
