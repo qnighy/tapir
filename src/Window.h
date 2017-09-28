@@ -11,10 +11,20 @@ void Init_Window(void);
 
 struct Window {
   struct Renderable renderable;
-  VALUE windowskin, contents;
-  bool disposed, visible;
+  VALUE windowskin, contents, cursor_rect;
+#if RGSS == 3
+  VALUE tone;
+#endif
+  bool disposed, visible, active, pause;
+#if RGSS == 3
+  bool arrows_visible;
+#endif
+#if RGSS == 1
+  bool stretch;
+#endif
   int x, y, width, height;
   int ox, oy;
+  int opacity, back_opacity, contents_opacity;
 #if RGSS == 3
   int padding, padding_bottom;
 #endif

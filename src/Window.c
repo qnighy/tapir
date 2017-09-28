@@ -23,18 +23,37 @@ static VALUE rb_window_m_initialize(int argc, VALUE *argv, VALUE self);
 static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig);
 static VALUE rb_window_m_dispose(VALUE self);
 static VALUE rb_window_m_disposed_p(VALUE self);
+static VALUE rb_window_m_update(VALUE self);
 #if RGSS == 3
 static VALUE rb_window_m_move(
     VALUE self, VALUE x, VALUE y, VALUE width, VALUE height);
 static VALUE rb_window_m_open_p(VALUE self);
 static VALUE rb_window_m_close_p(VALUE self);
 #endif
-static VALUE rb_window_m_visible(VALUE self);
-static VALUE rb_window_m_set_visible(VALUE self, VALUE newval);
 static VALUE rb_window_m_windowskin(VALUE self);
 static VALUE rb_window_m_set_windowskin(VALUE self, VALUE newval);
 static VALUE rb_window_m_contents(VALUE self);
 static VALUE rb_window_m_set_contents(VALUE self, VALUE newval);
+#if RGSS == 1
+static VALUE rb_window_m_stretch(VALUE self);
+static VALUE rb_window_m_set_stretch(VALUE self, VALUE newval);
+#endif
+static VALUE rb_window_m_cursor_rect(VALUE self);
+static VALUE rb_window_m_set_cursor_rect(VALUE self, VALUE newval);
+static VALUE rb_window_m_viewport(VALUE self);
+#if RGSS >= 2
+static VALUE rb_window_m_set_viewport(VALUE self, VALUE newval);
+#endif
+static VALUE rb_window_m_active(VALUE self);
+static VALUE rb_window_m_set_active(VALUE self, VALUE newval);
+static VALUE rb_window_m_visible(VALUE self);
+static VALUE rb_window_m_set_visible(VALUE self, VALUE newval);
+#if RGSS == 3
+static VALUE rb_window_m_arrows_visible(VALUE self);
+static VALUE rb_window_m_set_arrows_visible(VALUE self, VALUE newval);
+#endif
+static VALUE rb_window_m_pause(VALUE self);
+static VALUE rb_window_m_set_pause(VALUE self, VALUE newval);
 static VALUE rb_window_m_x(VALUE self);
 static VALUE rb_window_m_set_x(VALUE self, VALUE newval);
 static VALUE rb_window_m_y(VALUE self);
@@ -55,9 +74,19 @@ static VALUE rb_window_m_set_padding(VALUE self, VALUE newval);
 static VALUE rb_window_m_padding_bottom(VALUE self);
 static VALUE rb_window_m_set_padding_bottom(VALUE self, VALUE newval);
 #endif
+static VALUE rb_window_m_opacity(VALUE self);
+static VALUE rb_window_m_set_opacity(VALUE self, VALUE newval);
+static VALUE rb_window_m_back_opacity(VALUE self);
+static VALUE rb_window_m_set_back_opacity(VALUE self, VALUE newval);
+static VALUE rb_window_m_contents_opacity(VALUE self);
+static VALUE rb_window_m_set_contents_opacity(VALUE self, VALUE newval);
 #if RGSS >= 2
 static VALUE rb_window_m_openness(VALUE self);
 static VALUE rb_window_m_set_openness(VALUE self, VALUE newval);
+#endif
+#if RGSS == 3
+static VALUE rb_window_m_tone(VALUE self);
+static VALUE rb_window_m_set_tone(VALUE self, VALUE newval);
 #endif
 
 static void renderWindow(struct Renderable *renderable);
@@ -76,6 +105,7 @@ void Init_Window(void) {
       rb_window_m_initialize_copy, 1);
   rb_define_method(rb_cWindow, "dispose", rb_window_m_dispose, 0);
   rb_define_method(rb_cWindow, "disposed?", rb_window_m_disposed_p, 0);
+  rb_define_method(rb_cWindow, "update", rb_window_m_update, 0);
 #if RGSS == 3
   rb_define_method(rb_cWindow, "move", rb_window_m_move, 4);
   rb_define_method(rb_cWindow, "open?", rb_window_m_open_p, 0);
@@ -85,8 +115,28 @@ void Init_Window(void) {
   rb_define_method(rb_cWindow, "windowskin=", rb_window_m_set_windowskin, 1);
   rb_define_method(rb_cWindow, "contents", rb_window_m_contents, 0);
   rb_define_method(rb_cWindow, "contents=", rb_window_m_set_contents, 1);
+#if RGSS == 1
+  rb_define_method(rb_cWindow, "stretch", rb_window_m_stretch, 0);
+  rb_define_method(rb_cWindow, "stretch=", rb_window_m_set_stretch, 1);
+#endif
+  rb_define_method(rb_cWindow, "cursor_rect", rb_window_m_cursor_rect, 0);
+  rb_define_method(rb_cWindow, "cursor_rect=", rb_window_m_set_cursor_rect, 1);
+  rb_define_method(rb_cWindow, "viewport", rb_window_m_viewport, 0);
+#if RGSS >= 2
+  rb_define_method(rb_cWindow, "viewport=", rb_window_m_set_viewport, 1);
+#endif
+  rb_define_method(rb_cWindow, "active", rb_window_m_active, 0);
+  rb_define_method(rb_cWindow, "active=", rb_window_m_set_active, 1);
   rb_define_method(rb_cWindow, "visible", rb_window_m_visible, 0);
   rb_define_method(rb_cWindow, "visible=", rb_window_m_set_visible, 1);
+#if RGSS == 3
+  rb_define_method(rb_cWindow, "arrows_visible",
+      rb_window_m_arrows_visible, 0);
+  rb_define_method(rb_cWindow, "arrows_visible=",
+      rb_window_m_set_arrows_visible, 1);
+#endif
+  rb_define_method(rb_cWindow, "pause", rb_window_m_pause, 0);
+  rb_define_method(rb_cWindow, "pause=", rb_window_m_set_pause, 1);
   rb_define_method(rb_cWindow, "x", rb_window_m_x, 0);
   rb_define_method(rb_cWindow, "x=", rb_window_m_set_x, 1);
   rb_define_method(rb_cWindow, "y", rb_window_m_y, 0);
@@ -109,25 +159,23 @@ void Init_Window(void) {
   rb_define_method(rb_cWindow, "padding_bottom=",
       rb_window_m_set_padding_bottom, 1);
 #endif
+  rb_define_method(rb_cWindow, "opacity", rb_window_m_opacity, 0);
+  rb_define_method(rb_cWindow, "opacity=", rb_window_m_set_opacity, 1);
+  rb_define_method(rb_cWindow, "back_opacity", rb_window_m_back_opacity, 0);
+  rb_define_method(rb_cWindow, "back_opacity=",
+      rb_window_m_set_back_opacity, 1);
+  rb_define_method(rb_cWindow, "contents_opacity",
+      rb_window_m_contents_opacity, 0);
+  rb_define_method(rb_cWindow, "contents_opacity=",
+      rb_window_m_set_contents_opacity, 1);
 #if RGSS >= 2
   rb_define_method(rb_cWindow, "openness", rb_window_m_openness, 0);
   rb_define_method(rb_cWindow, "openness=", rb_window_m_set_openness, 1);
 #endif
-  // TODO: implement Window#update
-  // TODO: implement Window#contents, Window#contents=
-  // TODO: implement Window#cursor_rect
-  // TODO: implement Window#viewport
-  // TODO: implement Window#active
-  // TODO: implement Window#arrows_visible
-  // TODO: implement Window#pause
-  // TODO: implement Window#ox
-  // TODO: implement Window#oy
-  // TODO: implement Window#padding
-  // TODO: implement Window#padding_bottom
-  // TODO: implement Window#opacity
-  // TODO: implement Window#back_opacity
-  // TODO: implement Window#contents_opacity
-  // TODO: implement Window#tone
+#if RGSS == 3
+  rb_define_method(rb_cWindow, "tone", rb_window_m_tone, 0);
+  rb_define_method(rb_cWindow, "tone=", rb_window_m_set_tone, 1);
+#endif
 }
 
 bool rb_window_data_p(VALUE obj) {
@@ -158,6 +206,10 @@ static void window_mark(struct Window *ptr) {
   rb_gc_mark(ptr->renderable.viewport);
   rb_gc_mark(ptr->windowskin);
   rb_gc_mark(ptr->contents);
+  rb_gc_mark(ptr->cursor_rect);
+#if RGSS == 3
+  rb_gc_mark(ptr->tone);
+#endif
 }
 
 static void window_free(struct Window *ptr) {
@@ -168,29 +220,47 @@ static void window_free(struct Window *ptr) {
 static VALUE window_alloc(VALUE klass) {
   struct Window *ptr = ALLOC(struct Window);
   ptr->renderable.render = renderWindow;
+  ptr->disposed = false;
+
+  ptr->windowskin = Qnil;
+  ptr->contents = rb_bitmap_new(1, 1);
+#if RGSS == 1
+  ptr->stretch = true;
+#endif
+  ptr->cursor_rect = rb_rect_new2();
+  ptr->renderable.viewport = Qnil;
+  ptr->active = true;
+  ptr->visible = true;
+#if RGSS == 3
+  ptr->arrows_visible = true;
+#endif
+  ptr->pause = false;
+  ptr->x = 0;
+  ptr->y = 0;
+  ptr->width = 0;
+  ptr->height = 0;
+  // TODO: In RGSS1, content Z and background Z differ.
 #if RGSS == 3
   ptr->renderable.z = 100;
 #else
   ptr->renderable.z = 0;
 #endif
-  ptr->renderable.viewport = Qnil;
-  ptr->windowskin = Qnil;
-  ptr->contents = rb_bitmap_new(1, 1);
-  ptr->disposed = false;
-  ptr->visible = true;
-  ptr->x = 0;
-  ptr->y = 0;
-  ptr->width = 0;
-  ptr->height = 0;
   ptr->ox = 0;
   ptr->oy = 0;
 #if RGSS == 3
   ptr->padding = 12;
   ptr->padding_bottom = 12;
 #endif
+  ptr->opacity = 255;
+  ptr->back_opacity = 255;
+  ptr->contents_opacity = 255;
 #if RGSS >= 2
   ptr->openness = 255;
 #endif
+#if RGSS == 3
+  ptr->tone = rb_tone_new2();
+#endif
+
   registerRenderable(&ptr->renderable);
   VALUE ret = Data_Wrap_Struct(klass, window_mark, window_free, ptr);
   return ret;
@@ -222,24 +292,39 @@ static VALUE rb_window_m_initialize(int argc, VALUE *argv, VALUE self) {
 static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
   struct Window *ptr = rb_window_data_mut(self);
   const struct Window *orig_ptr = rb_window_data(orig);
-  ptr->renderable.z = orig_ptr->renderable.z;
-  ptr->renderable.viewport = orig_ptr->renderable.viewport;
+  ptr->disposed = orig_ptr->disposed;
   ptr->windowskin = orig_ptr->windowskin;
   ptr->contents = orig_ptr->contents;
-  ptr->disposed = orig_ptr->disposed;
+#if RGSS == 1
+  ptr->stretch = orig_ptr->stretch;
+#endif
+  rb_rect_set2(ptr->cursor_rect, orig_ptr->cursor_rect);
+  ptr->renderable.viewport = orig_ptr->renderable.viewport;
+  ptr->active = orig_ptr->active;
   ptr->visible = orig_ptr->visible;
+#if RGSS == 3
+  ptr->arrows_visible = orig_ptr->arrows_visible;
+#endif
+  ptr->pause = orig_ptr->pause;
   ptr->x = orig_ptr->x;
   ptr->y = orig_ptr->y;
   ptr->width = orig_ptr->width;
   ptr->height = orig_ptr->height;
+  ptr->renderable.z = orig_ptr->renderable.z;
   ptr->ox = orig_ptr->ox;
   ptr->oy = orig_ptr->oy;
 #if RGSS == 3
   ptr->padding = orig_ptr->padding;
   ptr->padding_bottom = orig_ptr->padding_bottom;
 #endif
+  ptr->opacity = orig_ptr->opacity;
+  ptr->back_opacity = orig_ptr->back_opacity;
+  ptr->contents_opacity = orig_ptr->contents_opacity;
 #if RGSS >= 2
   ptr->openness = orig_ptr->openness;
+#endif
+#if RGSS == 3
+  ptr->tone = orig_ptr->tone;
 #endif
   return Qnil;
 }
@@ -253,6 +338,13 @@ static VALUE rb_window_m_dispose(VALUE self) {
 static VALUE rb_window_m_disposed_p(VALUE self) {
   const struct Window *ptr = rb_window_data(self);
   return ptr->disposed ? Qtrue : Qfalse;
+}
+
+static VALUE rb_window_m_update(VALUE self) {
+  struct Window *ptr = rb_window_data_mut(self);
+  (void) ptr;
+  WARN_UNIMPLEMENTED("Window#update");
+  return Qnil;
 }
 
 #if RGSS == 3
@@ -301,6 +393,59 @@ static VALUE rb_window_m_set_contents(VALUE self, VALUE newval) {
   return newval;
 }
 
+#if RGSS == 1
+static VALUE rb_window_m_stretch(VALUE self) {
+  const struct Window *ptr = rb_window_data(self);
+  return ptr->stretch ? Qtrue : Qfalse;
+}
+
+static VALUE rb_window_m_set_stretch(VALUE self, VALUE newval) {
+  WARN_UNIMPLEMENTED("Window#stretch");
+  struct Window *ptr = rb_window_data_mut(self);
+  ptr->stretch = RTEST(newval);
+  return newval;
+}
+#endif
+
+static VALUE rb_window_m_cursor_rect(VALUE self) {
+  const struct Window *ptr = rb_window_data(self);
+  return ptr->cursor_rect;
+}
+
+static VALUE rb_window_m_set_cursor_rect(VALUE self, VALUE newval) {
+  WARN_UNIMPLEMENTED("Window#cursor_rect");
+  struct Window *ptr = rb_window_data_mut(self);
+  rb_rect_set2(ptr->cursor_rect, newval);
+  return newval;
+}
+
+static VALUE rb_window_m_viewport(VALUE self) {
+  const struct Window *ptr = rb_window_data(self);
+  return ptr->renderable.viewport;
+}
+
+#if RGSS >= 2
+static VALUE rb_window_m_set_viewport(VALUE self, VALUE newval) {
+  WARN_UNIMPLEMENTED("Window#viewport");
+  struct Window *ptr = rb_window_data_mut(self);
+  if(newval != Qnil) rb_viewport_data(newval);
+  ptr->renderable.viewport = newval;
+  return newval;
+}
+#endif
+
+static VALUE rb_window_m_active(VALUE self) {
+  const struct Window *ptr = rb_window_data(self);
+  return ptr->active ? Qtrue : Qfalse;
+}
+
+static VALUE rb_window_m_set_active(VALUE self, VALUE newval) {
+  WARN_UNIMPLEMENTED("Window#active");
+  struct Window *ptr = rb_window_data_mut(self);
+  ptr->active = RTEST(newval);
+  return newval;
+}
+
 static VALUE rb_window_m_visible(VALUE self) {
   const struct Window *ptr = rb_window_data(self);
   return ptr->visible ? Qtrue : Qfalse;
@@ -309,6 +454,32 @@ static VALUE rb_window_m_visible(VALUE self) {
 static VALUE rb_window_m_set_visible(VALUE self, VALUE newval) {
   struct Window *ptr = rb_window_data_mut(self);
   ptr->visible = RTEST(newval);
+  return newval;
+}
+
+#if RGSS == 3
+static VALUE rb_window_m_arrows_visible(VALUE self) {
+  const struct Window *ptr = rb_window_data(self);
+  return ptr->arrows_visible ? Qtrue : Qfalse;
+}
+
+static VALUE rb_window_m_set_arrows_visible(VALUE self, VALUE newval) {
+  WARN_UNIMPLEMENTED("Window#arrows_visible");
+  struct Window *ptr = rb_window_data_mut(self);
+  ptr->arrows_visible = RTEST(newval);
+  return newval;
+}
+#endif
+
+static VALUE rb_window_m_pause(VALUE self) {
+  const struct Window *ptr = rb_window_data(self);
+  return ptr->pause ? Qtrue : Qfalse;
+}
+
+static VALUE rb_window_m_set_pause(VALUE self, VALUE newval) {
+  WARN_UNIMPLEMENTED("Window#pause");
+  struct Window *ptr = rb_window_data_mut(self);
+  ptr->pause = RTEST(newval);
   return newval;
 }
 
@@ -413,6 +584,42 @@ static VALUE rb_window_m_set_padding_bottom(VALUE self, VALUE newval) {
 }
 #endif
 
+static VALUE rb_window_m_opacity(VALUE self) {
+  const struct Window *ptr = rb_window_data(self);
+  return INT2NUM(ptr->opacity);
+}
+
+static VALUE rb_window_m_set_opacity(VALUE self, VALUE newval) {
+  WARN_UNIMPLEMENTED("Window#opacity");
+  struct Window *ptr = rb_window_data_mut(self);
+  ptr->opacity = saturateInt32(NUM2INT(newval), 0, 255);
+  return newval;
+}
+
+static VALUE rb_window_m_back_opacity(VALUE self) {
+  const struct Window *ptr = rb_window_data(self);
+  return INT2NUM(ptr->back_opacity);
+}
+
+static VALUE rb_window_m_set_back_opacity(VALUE self, VALUE newval) {
+  WARN_UNIMPLEMENTED("Window#back_opacity");
+  struct Window *ptr = rb_window_data_mut(self);
+  ptr->back_opacity = saturateInt32(NUM2INT(newval), 0, 255);
+  return newval;
+}
+
+static VALUE rb_window_m_contents_opacity(VALUE self) {
+  const struct Window *ptr = rb_window_data(self);
+  return INT2NUM(ptr->contents_opacity);
+}
+
+static VALUE rb_window_m_set_contents_opacity(VALUE self, VALUE newval) {
+  WARN_UNIMPLEMENTED("Window#contents_opacity");
+  struct Window *ptr = rb_window_data_mut(self);
+  ptr->contents_opacity = saturateInt32(NUM2INT(newval), 0, 255);
+  return newval;
+}
+
 #if RGSS >= 2
 static VALUE rb_window_m_openness(VALUE self) {
   const struct Window *ptr = rb_window_data(self);
@@ -422,6 +629,20 @@ static VALUE rb_window_m_openness(VALUE self) {
 static VALUE rb_window_m_set_openness(VALUE self, VALUE newval) {
   struct Window *ptr = rb_window_data_mut(self);
   ptr->openness = saturateInt32(NUM2INT(newval), 0, 255);
+  return newval;
+}
+#endif
+
+#if RGSS == 3
+static VALUE rb_window_m_tone(VALUE self) {
+  const struct Window *ptr = rb_window_data(self);
+  return ptr->tone;
+}
+
+static VALUE rb_window_m_set_tone(VALUE self, VALUE newval) {
+  WARN_UNIMPLEMENTED("Window#tone");
+  struct Window *ptr = rb_window_data_mut(self);
+  rb_tone_set2(ptr->tone, newval);
   return newval;
 }
 #endif
