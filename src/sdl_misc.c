@@ -2,12 +2,14 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 #include <SDL_ttf.h>
 #include "gl_misc.h"
 #include "sdl_misc.h"
 #include "Sprite.h"
 #include "Window.h"
 #include "Input.h"
+#include "Audio.h"
 #include "RGSSReset.h"
 #include "Tilemap.h"
 
@@ -33,7 +35,7 @@ void initSDL() {
   registry_capacity = 100;
   registry = malloc(sizeof(*registry) * registry_capacity);
 
-  if(SDL_Init(SDL_INIT_VIDEO)) {
+  if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
     fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
     exit(1);
   }
@@ -46,6 +48,19 @@ void initSDL() {
 
   if(TTF_Init()) {
     fprintf(stderr, "TTF_Init Error: %s\n", TTF_GetError());
+    exit(1);
+  }
+
+  int mix_init_flags = Mix_Init(MIX_INIT_MP3|MIX_INIT_OGG);
+  if((mix_init_flags & MIX_INIT_MP3) == 0) {
+    fprintf(stderr, "Mix_Init warning: could not init MP3\n");
+  }
+  if((mix_init_flags & MIX_INIT_OGG) == 0) {
+    fprintf(stderr, "Mix_Init warning: could not init OGG\n");
+  }
+
+  if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) < 0) {
+    printf("Mix_OpenAudio Error: %s\n", Mix_GetError());
     exit(1);
   }
 
@@ -79,15 +94,19 @@ void initSDL() {
   initSpriteSDL();
   initWindowSDL();
   initTilemapSDL();
+  initAudioSDL();
 }
 
 void cleanupSDL() {
+  deinitAudioSDL();
   deinitTilemapSDL();
   deinitWindowSDL();
   deinitSpriteSDL();
   deinitTransition();
   if(glcontext) SDL_GL_DeleteContext(glcontext);
   if(window) SDL_DestroyWindow(window);
+  Mix_CloseAudio();
+  Mix_Quit();
   TTF_Quit();
   IMG_Quit();
   SDL_Quit();

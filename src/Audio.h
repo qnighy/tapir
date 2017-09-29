@@ -7,4 +7,7 @@
 extern VALUE rb_mAudio;
 void Init_Audio(void);
 
+void initAudioSDL(void);
+void deinitAudioSDL(void);
+
 #endif /* AUDIO_H */
