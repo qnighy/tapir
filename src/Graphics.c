@@ -117,7 +117,8 @@ static VALUE rb_graphics_s_update(VALUE klass) {
   performance_frame_count++;
   if(performance_frame_count >= frame_rate * 10) {
     Uint32 elapsed = current_ticks - performance_last_ticks;
-    fprintf(stderr, "FPS: %f\n", frame_rate * 1000.0 / (elapsed + 0.001));
+    fprintf(stderr, "FPS: %f\n",
+        performance_frame_count * 1000.0 / (elapsed + 0.001));
 
     performance_frame_count = 0;
     performance_last_ticks = current_ticks;
