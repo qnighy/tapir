@@ -18,6 +18,7 @@ scripts << "#{TEST_SRC}/test_general.rb"
 scripts << "#{TEST_SRC}/test_rgsserror.rb"
 scripts << "#{TEST_SRC}/test_rgssreset.rb"
 scripts << "#{TEST_SRC}/test_rpg.rb"
+scripts << "#{TEST_SRC}/test_rpg_audiofile.rb"
 
 scripts << "#{TEST_SRC}/epilogue.rb"
 
