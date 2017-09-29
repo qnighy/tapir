@@ -4,7 +4,7 @@ module RGSSTest
 
     def test_global_variables
       if RGSSTest::RGSS == 3
-        assert_equal(global_variables.sort, [
+        assert_symset_equal(global_variables, [
           :$!, :$", :$$, :"$&", :"$'", :$*, :"$+", :$,, :$-0, :$-F, :$-I, :$-K,
           :$-W, :$-d, :$-i, :$-v, :$-w, :$., :$/, :$0, :"$1", :"$2", :"$3",
           :"$4", :"$5", :"$6", :"$7", :"$8", :"$9", :$:, :$;, :$<, :$=, :$>,
@@ -12,22 +12,19 @@ module RGSSTest
           :$LOAD_PATH, :$PROGRAM_NAME, :$RGSS_SCRIPTS, :$SAFE, :$TEST,
           :$VERBOSE, :$\, :$_, :"$`", :$stderr, :$stdin, :$stdout, :$~])
       else
-        assert_equal(global_variables.sort, [
-          "$!", "$\"", "$$", "$&", "$'", "$*", "$+", "$,", "$-0", "$-F", "$-I",
-          "$-K", "$-a", "$-d", "$-i", "$-l", "$-p", "$-v", "$-w", "$.", "$/",
-          "$0", "$:", "$;", "$<", "$=", "$>", "$?", "$@", "$BTEST", "$DEBUG",
-          "$FILENAME", "$KCODE", "$LOAD_PATH", "$RGSS_SCRIPTS", "$SAFE",
-          "$TEST", "$VERBOSE", "$\\", "$_", "$`", "$deferr", "$defout",
-          "$stderr", "$stdin", "$stdout", "$~"])
+        assert_symset_equal(global_variables, [
+          :$!, :$", :$$, :"$&", :"$'", :$*, :"$+", :$,, :$-0, :$-F, :$-I, :$-K,
+          :$-a, :$-d, :$-i, :$-l, :$-p, :$-v, :$-w, :$., :$/, :$0, :$:, :$;,
+          :$<, :$=, :$>, :$?, :$@, :$BTEST, :$DEBUG, :$FILENAME, :$KCODE,
+          :$LOAD_PATH, :$RGSS_SCRIPTS, :$SAFE, :$TEST, :$VERBOSE, :$\, :$_,
+          :"$`", :$deferr, :$defout, :$stderr, :$stdin, :$stdout, :$~])
       end
       if RGSSTest::RGSS >= 2
         assert_equal($TEST, false)
       end
       assert_equal($DEBUG, false)
       assert_equal($BTEST, false)
-      if RGSSTest::RGSS == 3
-        assert_equal($KCODE, nil)
-      else
+      if RGSSTest::RGSS <= 2
         assert_equal($KCODE, "UTF8")
       end
       assert_equal(
@@ -37,7 +34,7 @@ module RGSSTest
 
     def test_global_namespaces
       if RGSSTest::RGSS == 3
-        assert_equal(Object.constants.sort, [
+        assert_symset_equal(Object.constants, [
           :ARGF, :ARGV, :ArgumentError, :Array, :Audio, :BasicObject, :Bignum,
           :Binding, :Bitmap, :Class, :Color, :Comparable, :Complex, :DL, :Data,
           :Dir, :ENV, :EOFError, :Encoding, :EncodingError, :Enumerable,
@@ -60,51 +57,33 @@ module RGSSTest
           :ThreadGroup, :Tilemap, :Time, :Tone, :TrueClass, :TypeError,
           :UnboundMethod, :Viewport, :Win32API, :Window, :ZeroDivisionError,
           :Zlib])
-      elsif RGSSTest::RGSS == 2
-        assert_equal(Object.constants.sort, [
-          "ARGF", "ARGV", "ArgumentError", "Array", "Audio", "Bignum",
-          "Binding", "Bitmap", "Class", "Color", "Comparable", "Continuation",
-          "Data", "Dir", "ENV", "EOFError", "Enumerable", "Errno", "Exception",
-          "FALSE", "FalseClass", "File", "FileTest", "Fixnum", "Float",
-          "FloatDomainError", "Font", "GC", "Graphics", "Hash", "IO",
-          "IOError", "IndexError", "Input", "Integer", "Interrupt", "Kernel",
-          "LoadError", "LocalJumpError", "Marshal", "MatchData",
-          "MatchingData", "Math", "Method", "Module", "NIL", "NKF",
-          "NameError", "NilClass", "NoMemoryError", "NoMethodError",
-          "NotImplementedError", "Numeric", "Object", "ObjectSpace",
-          "PLATFORM", "Plane", "Precision", "Proc", "Process", "RELEASE_DATE",
-          "RGSSError", "RGSSTest", "RPG", "RUBY_PLATFORM", "RUBY_RELEASE_DATE",
-          "RUBY_VERSION", "Range", "RangeError", "Rect", "Regexp",
-          "RegexpError", "RuntimeError", "STDERR", "STDIN", "STDOUT",
-          "ScriptError", "SecurityError", "Signal", "SignalException",
-          "Sprite", "StandardError", "String", "Struct", "Symbol",
-          "SyntaxError", "SystemCallError", "SystemExit", "SystemStackError",
-          "TOPLEVEL_BINDING", "TRUE", "Table", "Thread", "ThreadError",
-          "ThreadGroup", "Tilemap", "Time", "Tone", "TrueClass", "TypeError",
-          "UnboundMethod", "VERSION", "Viewport", "Win32API", "Window",
-          "ZeroDivisionError", "Zlib"])
       else
-        assert_equal(Object.constants.sort, [
-          "ARGF", "ARGV", "ArgumentError", "Array", "Audio", "Bignum",
-          "Binding", "Bitmap", "Class", "Color", "Comparable", "Continuation",
-          "Data", "Dir", "ENV", "EOFError", "Enumerable", "Errno", "Exception",
-          "FALSE", "FalseClass", "File", "FileTest", "Fixnum", "Float",
-          "FloatDomainError", "Font", "GC", "Graphics", "Hangup", "Hash", "IO",
-          "IOError", "IndexError", "Input", "Integer", "Interrupt", "Kernel",
-          "LoadError", "LocalJumpError", "Marshal", "MatchData",
-          "MatchingData", "Math", "Method", "Module", "NIL", "NameError",
-          "NilClass", "NoMemoryError", "NoMethodError", "NotImplementedError",
-          "Numeric", "Object", "ObjectSpace", "PLATFORM", "Plane", "Precision",
-          "Proc", "Process", "RELEASE_DATE", "RGSSError", "RGSSTest", "RPG",
-          "RUBY_PLATFORM", "RUBY_RELEASE_DATE", "RUBY_VERSION", "Range",
-          "RangeError", "Rect", "Regexp", "RegexpError", "RuntimeError",
-          "STDERR", "STDIN", "STDOUT", "ScriptError", "SecurityError",
-          "Signal", "SignalException", "Sprite", "StandardError", "String",
-          "Struct", "Symbol", "SyntaxError", "SystemCallError", "SystemExit",
-          "SystemStackError", "TOPLEVEL_BINDING", "TRUE", "Table", "Thread",
-          "ThreadError", "ThreadGroup", "Tilemap", "TilemapAutotiles", "Time",
-          "Tone", "TrueClass", "TypeError", "UnboundMethod", "VERSION",
-          "Viewport", "Win32API", "Window", "ZeroDivisionError", "Zlib"])
+        expected_globals = [
+          :ARGF, :ARGV, :ArgumentError, :Array, :Audio, :Bignum, :Binding,
+          :Bitmap, :Class, :Color, :Comparable, :Continuation, :Data, :Dir,
+          :ENV, :EOFError, :Enumerable, :Errno, :Exception, :FALSE,
+          :FalseClass, :File, :FileTest, :Fixnum, :Float, :FloatDomainError,
+          :Font, :GC, :Graphics, :Hash, :IO, :IOError, :IndexError, :Input,
+          :Integer, :Interrupt, :Kernel, :LoadError, :LocalJumpError,
+          :Marshal, :MatchData, :MatchingData, :Math, :Method, :Module, :NIL,
+          :NameError, :NilClass, :NoMemoryError, :NoMethodError,
+          :NotImplementedError, :Numeric, :Object, :ObjectSpace, :PLATFORM,
+          :Plane, :Precision, :Proc, :Process, :RELEASE_DATE, :RGSSError,
+          :RGSSTest, :RPG, :RUBY_PLATFORM, :RUBY_RELEASE_DATE, :RUBY_VERSION,
+          :Range, :RangeError, :Rect, :Regexp, :RegexpError, :RuntimeError,
+          :STDERR, :STDIN, :STDOUT, :ScriptError, :SecurityError, :Signal,
+          :SignalException, :Sprite, :StandardError, :String, :Struct, :Symbol,
+          :SyntaxError, :SystemCallError, :SystemExit, :SystemStackError,
+          :TOPLEVEL_BINDING, :TRUE, :Table, :Thread, :ThreadError,
+          :ThreadGroup, :Tilemap, :Time, :Tone, :TrueClass, :TypeError,
+          :UnboundMethod, :VERSION, :Viewport, :Win32API, :Window,
+          :ZeroDivisionError, :Zlib]
+        if RGSSTest::RGSS == 2
+          expected_globals += [:NKF]
+        else
+          expected_globals += [:Hangup, :TilemapAutotiles]
+        end
+        assert_symset_equal(Object.constants, expected_globals)
       end
     end
 

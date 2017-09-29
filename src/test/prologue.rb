@@ -87,6 +87,22 @@ module RGSSTest
     end
   end
 
+  def assert_symset_equal(expected, actual, message = nil)
+    expected = expected.map {|s| s.to_s}.sort
+    actual = actual.map {|s| s.to_s}.sort
+    if expected != actual then
+      expected_have = (expected - actual).map {|s| s.to_sym}
+      actual_have = (actual - expected).map {|s| s.to_sym}
+      expected = expected.map {|s| s.to_sym}
+      actual = actual.map {|s| s.to_sym}
+      message = \
+        "#{expected.inspect} != #{actual.inspect} " +
+        "(Only in lhs: #{expected_have.inspect}, " +
+        "Only in rhs: #{actual_have.inspect})" if message.nil?
+      raise AssertionFailedError, message
+    end
+  end
+
   def assert_same(expected, actual, message = nil)
     if !expected.equal?(actual) then
       message = "!#{expected.inspect}.equal?(#{actual.inspect})" if message.nil?
@@ -99,6 +115,17 @@ module RGSSTest
       message = "#{expected.inspect}.equal?(#{actual.inspect})" if message.nil?
       raise AssertionFailedError, message
     end
+  end
+
+  def owned_instance_methods(klass)
+    klass.instance_methods.select {|m|
+      method = klass.instance_method(m)
+      if method.respond_to?(:owner)
+        method.owner == klass
+      else
+        method.inspect !~ /\(/
+      end
+    }
   end
 
   def self.run_test(klass)
