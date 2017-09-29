@@ -141,7 +141,7 @@ static void load_libs() {
       "  def blur\n"
       "    warn_unimplemented(\"Bitmap#blur\")\n"
       "  end\n"
-      "  def radial_blur\n"
+      "  def radial_blur(angle, division)\n"
       "    warn_unimplemented(\"Bitmap#radial_blur\")\n"
       "  end\n"
       "  def stretch_blt(*args)\n"
