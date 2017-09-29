@@ -8,6 +8,7 @@
 #include "archive.h"
 #include "openres.h"
 #include "font_lookup.h"
+#include "Audio.h"
 #include "Bitmap.h"
 #include "BitmapArray.h"
 #include "Color.h"
@@ -172,6 +173,7 @@ static void Init_RGSS(void) {
   Init_BitmapArray();
   Init_Graphics();
   Init_Input();
+  Init_Audio();
   Init_Win32APIFake();
   rb_define_global_function("load_data", rb_load_data, 1);
 }

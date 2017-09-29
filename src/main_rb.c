@@ -74,68 +74,6 @@ static void load_libs() {
       "  end\n"
       "end\n"
       "module Audio\n"
-#if RGSS == 3
-      "  def self.setup_midi\n"
-      "    warn_unimplemented(\"Audio.setup_midi\")\n"
-      "  end\n"
-#endif
-#if RGSS == 3
-      "  def self.bgm_play(path, volume=nil, pitch=nil, pos=nil)\n"
-      "    warn_unimplemented(\"Audio.bgm_play\")\n"
-      "  end\n"
-#else
-      "  def self.bgm_play(path, volume=nil, pitch=nil)\n"
-      "    warn_unimplemented(\"Audio.bgm_play\")\n"
-      "  end\n"
-#endif
-      "  def self.bgm_stop\n"
-      "    warn_unimplemented(\"Audio.bgm_stop\")\n"
-      "  end\n"
-      "  def self.bgm_fade(time)\n"
-      "    warn_unimplemented(\"Audio.bgm_fade\")\n"
-      "  end\n"
-#if RGSS == 3
-      "  def self.bgm_pos\n"
-      "    warn_unimplemented(\"Audio.bgm_pos\")\n"
-      "    0\n"
-      "  end\n"
-#endif
-#if RGSS == 3
-      "  def self.bgs_play(path, volume=nil, pitch=nil, pos=nil)\n"
-      "    warn_unimplemented(\"Audio.bgs_play\")\n"
-      "  end\n"
-#else
-      "  def self.bgs_play(path, volume=nil, pitch=nil)\n"
-      "    warn_unimplemented(\"Audio.bgs_play\")\n"
-      "  end\n"
-#endif
-      "  def self.bgs_stop\n"
-      "    warn_unimplemented(\"Audio.bgs_stop\")\n"
-      "  end\n"
-      "  def self.bgs_fade(time)\n"
-      "    warn_unimplemented(\"Audio.bgs_fade\")\n"
-      "  end\n"
-#if RGSS == 3
-      "  def self.bgs_pos\n"
-      "    warn_unimplemented(\"Audio.bgs_pos\")\n"
-      "    0\n"
-      "  end\n"
-#endif
-      "  def self.me_play(path, volume=nil, pitch=nil)\n"
-      "    warn_unimplemented(\"Audio.me_play\")\n"
-      "  end\n"
-      "  def self.me_stop\n"
-      "    warn_unimplemented(\"Audio.me_stop\")\n"
-      "  end\n"
-      "  def self.me_fade(time)\n"
-      "    warn_unimplemented(\"Audio.me_fade\")\n"
-      "  end\n"
-      "  def self.se_play(path, volume=nil, pitch=nil)\n"
-      "    warn_unimplemented(\"Audio.se_play\")\n"
-      "  end\n"
-      "  def self.se_stop\n"
-      "    warn_unimplemented(\"Audio.se_stop\")\n"
-      "  end\n"
       "end\n"
       "class Bitmap\n"
       "  def blur\n"

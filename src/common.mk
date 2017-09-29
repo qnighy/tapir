@@ -21,7 +21,7 @@ endif
 OBJS = main.o main_rb.o archive.o openres.o gl_misc.o sdl_misc.o misc.o \
        font_lookup.o \
        Bitmap.o BitmapArray.o \
-       Color.o Font.o Graphics.o Input.o RGSSError.o RGSSReset.o \
+       Audio.o Color.o Font.o Graphics.o Input.o RGSSError.o RGSSReset.o \
        Rect.o Sprite.o Table.o Tilemap.o Tone.o \
        Viewport.o Win32APIFake.o Window.o
 CFLAGS += -g -O2 -Wall -Wextra
