@@ -510,60 +510,74 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
   const struct Font *font_ptr = rb_font_data(ptr->font);
   TTF_Font *sdl_font = rb_font_to_sdl(ptr->font);
 
+  const struct Color *font_color_ptr = rb_color_data(font_ptr->color);
+  SDL_Color fg_color = {
+    font_color_ptr->red,
+    font_color_ptr->green,
+    font_color_ptr->blue,
+    font_color_ptr->alpha
+  };
+  SDL_Surface *fg_rendered = TTF_RenderUTF8_Blended(sdl_font, cstr, fg_color);
+  SDL_SetSurfaceBlendMode(fg_rendered, SDL_BLENDMODE_BLEND);
+  int fg_width = fg_rendered->w;
+  int fg_height = fg_rendered->h;
+
+  // TODO: implement scaling
+  rect.x += (rect.w - fg_width) * align / 2;
+  if(rect.h > fg_height) rect.y += (rect.h - fg_height) / 2;
+  rect.w = fg_width;
+  rect.h = fg_height;
+
 #if RGSS == 3
   if(font_ptr->outline) {
     TTF_SetFontOutline(sdl_font, 1);
 
     const struct Color *font_out_color_ptr =
       rb_color_data(font_ptr->out_color);
-
-    int out_width, out_height;
-    TTF_SizeUTF8(sdl_font, cstr, &out_width, &out_height);
-
-    SDL_Rect out_rect = rect;
-    out_rect.x += (out_rect.w - out_width) * align / 2;
-    out_rect.y--;
-    out_rect.w = out_width;
-    out_rect.h = out_height;
-
-    SDL_Color outline_fg = {
+    SDL_Color out_color = {
       font_out_color_ptr->red,
       font_out_color_ptr->green,
       font_out_color_ptr->blue,
       font_out_color_ptr->alpha
     };
-    SDL_Surface *rendered = TTF_RenderUTF8_Blended(sdl_font, cstr, outline_fg);
-    SDL_SetSurfaceBlendMode(rendered, SDL_BLENDMODE_BLEND);
-    SDL_BlitSurface(rendered, NULL, ptr->surface, &out_rect);
-    SDL_FreeSurface(rendered);
+    SDL_Surface *out_rendered =
+      TTF_RenderUTF8_Blended(sdl_font, cstr, out_color);
+    SDL_SetSurfaceBlendMode(out_rendered, SDL_BLENDMODE_BLEND);
+    int out_width = out_rendered->w;
+    int out_height = out_rendered->h;
+
+    SDL_Rect out_rect = rect;
+    // out_rect.x -= (out_width - rect.w) / 2;
+    // out_rect.y -= (out_height - rect.h) / 2;
+    --out_rect.x;
+    --out_rect.y;
+    out_rect.w = out_width;
+    out_rect.h = out_height;
+
+    SDL_BlitSurface(out_rendered, NULL, ptr->surface, &out_rect);
+    SDL_FreeSurface(out_rendered);
 
     TTF_SetFontOutline(sdl_font, 0);
   }
 #endif
 
-  const struct Color *font_color_ptr = rb_color_data(font_ptr->color);
+#if RGSS >= 2
+  if(font_ptr->shadow) {
+    SDL_Color shadow_color = { 0, 0, 0, 255 };
+    SDL_Surface *shadow_rendered =
+      TTF_RenderUTF8_Blended(sdl_font, cstr, shadow_color);
+    SDL_SetSurfaceBlendMode(shadow_rendered, SDL_BLENDMODE_BLEND);
+    SDL_Rect shadow_rect = rect;
+    ++shadow_rect.x;
+    ++shadow_rect.y;
 
-  int width, height;
-  TTF_SizeUTF8(sdl_font, cstr, &width, &height);
+    SDL_BlitSurface(shadow_rendered, NULL, ptr->surface, &shadow_rect);
+    SDL_FreeSurface(shadow_rendered);
+  }
+#endif
 
-  rect.x += (rect.w - width) * align / 2;
-  rect.w = width;
-  rect.h = height;
-
-  SDL_Color fg = {
-    font_color_ptr->red,
-    font_color_ptr->green,
-    font_color_ptr->blue,
-    font_color_ptr->alpha
-  };
-  SDL_Surface *rendered = TTF_RenderUTF8_Blended(sdl_font, cstr, fg);
-  SDL_SetSurfaceBlendMode(rendered, SDL_BLENDMODE_BLEND);
-
-  // TODO: implement scaling
-  // TODO: implement shadow
-  // TODO: implement outline
-  SDL_BlitSurface(rendered, NULL, ptr->surface, &rect);
-  SDL_FreeSurface(rendered);
+  SDL_BlitSurface(fg_rendered, NULL, ptr->surface, &rect);
+  SDL_FreeSurface(fg_rendered);
   return Qnil;
 }
 
