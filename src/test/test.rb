@@ -20,6 +20,7 @@ scripts << "#{TEST_SRC}/test_rgssreset.rb"
 scripts << "#{TEST_SRC}/test_rpg.rb"
 scripts << "#{TEST_SRC}/test_rpg_audiofile.rb"
 scripts << "#{TEST_SRC}/test_rpg_sprite.rb"
+scripts << "#{TEST_SRC}/test_rpg_weather.rb"
 
 scripts << "#{TEST_SRC}/epilogue.rb"
 

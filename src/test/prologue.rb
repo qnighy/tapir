@@ -128,6 +128,76 @@ module RGSSTest
     }
   end
 
+  def assert_bitmap_equal(expected, actual, message = nil)
+    comparison = compare_bitmap(expected, actual)
+    unless comparison < 1e-5
+      message = \
+        "#{expected.inspect} != #{actual.inspect} " +
+        "(difference: #{comparison})" if message.nil?
+      save_bitmap(actual, "actual.png") rescue nil
+      save_bitmap(expected, "expected.png") rescue nil
+      raise AssertionFailedError, message
+    end
+  end
+
+  def compare_bitmap(bitmap0, bitmap1)
+    (bitmap0.width == bitmap1.width && bitmap0.height == bitmap1.height) or
+      return 1.0 / 0.0
+
+    width = bitmap0.width
+    height = bitmap0.height
+    sum = 0.0
+    height.times do|y|
+      width.times do|x|
+        c0 = bitmap0.get_pixel(x, y)
+        c1 = bitmap1.get_pixel(x, y)
+        sum += (c0.red - c1.red) ** 2
+        sum += (c0.green - c1.green) ** 2
+        sum += (c0.blue - c1.blue) ** 2
+        sum += (c0.alpha - c1.alpha) ** 2
+      end
+    end
+    sum /= 255.0 * 255.0 * width * height * 4
+    Math.sqrt(sum)
+  end
+
+  def save_bitmap(bitmap, path)
+    width = bitmap.width
+    height = bitmap.height
+    bit_depth = 8
+    color_type = (2 | 4)  # 2 = color, 4 = alpha
+    compression = 0  # zlib
+    filter_method = 0
+    interlace = 0  # no interlace
+
+    raw_data = Zlib::Deflate.new
+    height.times do|y|
+      raw_data << "\0"
+      width.times do|x|
+        pixel = bitmap.get_pixel(x, y)
+        raw_data << [
+          pixel.red, pixel.green, pixel.blue, pixel.alpha].pack("C4")
+      end
+    end
+    raw_data = raw_data.finish
+
+    File.open(path, "wb") do|file|
+      file.print("\x89PNG\r\n\x1a\n")
+      write_chunk = proc {|type, data|
+        file.print([(data.bytesize rescue data.size)].pack("N"))
+        file.print(type)
+        file.print(data)
+        file.print([Zlib.crc32(data, Zlib.crc32(type))].pack("N"))
+      }
+      ihdr = [
+        width, height, bit_depth, color_type, compression, filter_method,
+        interlace].pack("NNCCCCC")
+      write_chunk.call("IHDR", ihdr)
+      write_chunk.call("IDAT", raw_data)
+      write_chunk.call("IEND", "")
+    end
+  end
+
   def self.run_test(klass)
     puts "Running tests #{klass.name}..."
     i = klass.new
