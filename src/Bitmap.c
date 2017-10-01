@@ -344,7 +344,7 @@ static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self) {
 #endif
       if(src_a == 0) continue;
 
-      Uint32 src_t = 255 - src_a;
+      Uint32 src_t = 255 - (src_a * opacity) / 255;
       Uint32 new_ag = dst_a * src_t + src_a * opacity;
       Uint32 new_a = new_ag / 255;
       Uint32 new_r =
