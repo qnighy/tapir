@@ -308,9 +308,9 @@ static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self) {
   int xend = src_rect_ptr->x + src_rect_ptr->width;
   if(xend > src_ptr->surface->w) xend = src_ptr->surface->w;
   if(xend > ptr->surface->w - xdiff) xend = ptr->surface->w - xdiff;
-  int yend = src_rect_ptr->y + src_rect_ptr->width;
-  if(yend > src_ptr->surface->w) yend = src_ptr->surface->w;
-  if(yend > ptr->surface->w - ydiff) yend = ptr->surface->w - ydiff;
+  int yend = src_rect_ptr->y + src_rect_ptr->height;
+  if(yend > src_ptr->surface->h) yend = src_ptr->surface->h;
+  if(yend > ptr->surface->h - ydiff) yend = ptr->surface->h - ydiff;
 
   for(int sy = ybegin; sy < yend; ++sy) {
     for(int sx = xbegin; sx < xend; ++sx) {
