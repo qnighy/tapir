@@ -221,6 +221,8 @@ module RGSSTest
         puts "  #{method_name}: Failed: #{message}"
       end
       allcnt += 1
+      $stderr.flush
+      $stdout.flush
     end
     puts "Summary: #{successcnt} / #{allcnt}"
     puts ""

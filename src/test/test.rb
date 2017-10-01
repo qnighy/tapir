@@ -51,8 +51,9 @@ File.open("Game.ini", "wb:cp932") do|file|
   end
 end
 
-# system("./Game.exe")
-system(ARGV[1]) or raise "#{ARGV[1]} failed: #$?"
-
-$stdout.print(File.read("stdout.txt"))
-$stderr.print(File.read("stderr.txt"))
+begin
+  system(ARGV[1]) or raise "#{ARGV[1]} failed: #$?"
+ensure
+  $stdout.print(File.read("stdout.txt"))
+  $stderr.print(File.read("stderr.txt"))
+end
