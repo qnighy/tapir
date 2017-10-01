@@ -283,11 +283,23 @@ static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self) {
   int y = NUM2INT(argv[1]);
   const struct Bitmap *src_ptr = rb_bitmap_data(argv[2]);
   const struct Rect *src_rect_ptr = rb_rect_data(argv[3]);
-  int opacity = argc > 4 ? saturateInt32(NUM2INT(argv[4]), 0, 255) : 255;
-
   if(!src_ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
 
+  int opacity = argc > 4 ? saturateInt32(NUM2INT(argv[4]), 0, 255) : 255;
   if(opacity == 0) return Qnil;
+
+  int sgn_width = src_rect_ptr->width < 0 ? -1 : 1;
+  int abs_width = src_rect_ptr->width * sgn_width;
+  int sgn_height = src_rect_ptr->height < 0 ? -1 : 1;
+  int abs_height = src_rect_ptr->height * sgn_height;
+
+  int src_start_x = (src_rect_ptr->width < 0 ? -1 : 0) + src_rect_ptr->x;
+  int src_start_y = (src_rect_ptr->height < 0 ? -1 : 0) + src_rect_ptr->y;
+
+  int src_width = src_ptr->surface->w;
+  int src_height = src_ptr->surface->h;
+  int dst_width = ptr->surface->w;
+  int dst_height = ptr->surface->h;
 
   SDL_LockSurface(ptr->surface);
   SDL_LockSurface(src_ptr->surface);
@@ -297,25 +309,18 @@ static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self) {
   Uint32 *dst_pixels = ptr->surface->pixels;
   int dst_pitch = ptr->surface->pitch / 4;
 
-  int xdiff = x - src_rect_ptr->x;
-  int ydiff = y - src_rect_ptr->y;
-  int xbegin = src_rect_ptr->x;
-  if(xbegin < 0) xbegin = 0;
-  if(xbegin < -xdiff) xbegin = -xdiff;
-  int ybegin = src_rect_ptr->y;
-  if(ybegin < 0) ybegin = 0;
-  if(ybegin < -ydiff) ybegin = -ydiff;
-  int xend = src_rect_ptr->x + src_rect_ptr->width;
-  if(xend > src_ptr->surface->w) xend = src_ptr->surface->w;
-  if(xend > ptr->surface->w - xdiff) xend = ptr->surface->w - xdiff;
-  int yend = src_rect_ptr->y + src_rect_ptr->height;
-  if(yend > src_ptr->surface->h) yend = src_ptr->surface->h;
-  if(yend > ptr->surface->h - ydiff) yend = ptr->surface->h - ydiff;
-
-  for(int sy = ybegin; sy < yend; ++sy) {
-    for(int sx = xbegin; sx < xend; ++sx) {
-      int dx = sx + xdiff;
-      int dy = sy + ydiff;
+  for(int yi = 0; yi < abs_height; ++yi) {
+    for(int xi = 0; xi < abs_width; ++xi) {
+      int sx = src_start_x + xi * sgn_width;
+      int sy = src_start_y + yi * sgn_height;
+      int dx = x + xi;
+      int dy = y + yi;
+      if(!(0 <= sx && sx < src_width && 0 <= sy && sy < src_height)) {
+        continue;
+      }
+      if(!(0 <= dx && dx < dst_width && 0 <= dy && dy < dst_height)) {
+        continue;
+      }
       Uint32 src_rgba = src_pixels[sy * src_pitch + sx];
       Uint32 dst_rgba = dst_pixels[dy * dst_pitch + dx];
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
