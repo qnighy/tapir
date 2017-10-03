@@ -47,6 +47,7 @@ static VALUE rb_bitmap_m_disposed_p(VALUE self);
 static VALUE rb_bitmap_m_width(VALUE self);
 static VALUE rb_bitmap_m_height(VALUE self);
 static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self);
+static VALUE rb_bitmap_m_stretch_blt(int argc, VALUE *argv, VALUE self);
 static VALUE rb_bitmap_m_fill_rect(int argc, VALUE *argv, VALUE self);
 static VALUE rb_bitmap_m_clear(VALUE self);
 #if RGSS >= 2
@@ -97,6 +98,7 @@ void Init_Bitmap(void) {
   rb_define_method(rb_cBitmap, "width", rb_bitmap_m_width, 0);
   rb_define_method(rb_cBitmap, "height", rb_bitmap_m_height, 0);
   rb_define_method(rb_cBitmap, "blt", rb_bitmap_m_blt, -1);
+  rb_define_method(rb_cBitmap, "stretch_blt", rb_bitmap_m_stretch_blt, -1);
   rb_define_method(rb_cBitmap, "fill_rect", rb_bitmap_m_fill_rect, -1);
   rb_define_method(rb_cBitmap, "clear", rb_bitmap_m_clear, 0);
 #if RGSS >= 2
@@ -111,8 +113,6 @@ void Init_Bitmap(void) {
   // TODO: implement Bitmap#dispose
   // TODO: implement Bitmap#disposed?
   // TODO: implement Bitmap#rect
-  // TODO: implement Bitmap#blt
-  // TODO: implement Bitmap#stretch_blt
   // TODO: implement Bitmap#gradient_fill_rect
   // TODO: implement Bitmap#hue_change
   // TODO: implement Bitmap#blur
@@ -271,54 +271,33 @@ static VALUE rb_bitmap_m_height(VALUE self) {
   return INT2NUM(ptr->surface->h);
 }
 
-static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self) {
-  struct Bitmap *ptr = rb_bitmap_data_mut(self);
-  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
-  ptr->texture_invalidated = true;
-  if(argc != 4 && argc != 5) {
-    rb_raise(rb_eArgError,
-        "wrong number of arguments (%d for 4..5)", argc);
-  }
-  int x = NUM2INT(argv[0]);
-  int y = NUM2INT(argv[1]);
-  const struct Bitmap *src_ptr = rb_bitmap_data(argv[2]);
-  const struct Rect *src_rect_ptr = rb_rect_data(argv[3]);
-  if(!src_ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+static void blt(
+    SDL_Surface *dst, SDL_Surface *src,
+    int dst_x, int dst_y, int dst_w, int dst_h,
+    int src_x, int src_y, int src_w, int src_h, int opacity) {
+  SDL_LockSurface(dst);
+  SDL_LockSurface(src);
 
-  int opacity = argc > 4 ? saturateInt32(NUM2INT(argv[4]), 0, 255) : 255;
-  if(opacity == 0) return Qnil;
+  Uint32 *src_pixels = src->pixels;
+  int src_pitch = src->pitch / 4;
+  Uint32 *dst_pixels = dst->pixels;
+  int dst_pitch = dst->pitch / 4;
 
-  int sgn_width = src_rect_ptr->width < 0 ? -1 : 1;
-  int abs_width = src_rect_ptr->width * sgn_width;
-  int sgn_height = src_rect_ptr->height < 0 ? -1 : 1;
-  int abs_height = src_rect_ptr->height * sgn_height;
+  int ratio_x = 256 * src_w / dst_w;
+  int ratio_y = 256 * src_h / dst_h;
+  if(ratio_x < 0) --src_x;
+  if(ratio_y < 0) --src_y;
 
-  int src_start_x = (src_rect_ptr->width < 0 ? -1 : 0) + src_rect_ptr->x;
-  int src_start_y = (src_rect_ptr->height < 0 ? -1 : 0) + src_rect_ptr->y;
-
-  int src_width = src_ptr->surface->w;
-  int src_height = src_ptr->surface->h;
-  int dst_width = ptr->surface->w;
-  int dst_height = ptr->surface->h;
-
-  SDL_LockSurface(ptr->surface);
-  SDL_LockSurface(src_ptr->surface);
-
-  Uint32 *src_pixels = src_ptr->surface->pixels;
-  int src_pitch = src_ptr->surface->pitch / 4;
-  Uint32 *dst_pixels = ptr->surface->pixels;
-  int dst_pitch = ptr->surface->pitch / 4;
-
-  for(int yi = 0; yi < abs_height; ++yi) {
-    for(int xi = 0; xi < abs_width; ++xi) {
-      int sx = src_start_x + xi * sgn_width;
-      int sy = src_start_y + yi * sgn_height;
-      int dx = x + xi;
-      int dy = y + yi;
-      if(!(0 <= sx && sx < src_width && 0 <= sy && sy < src_height)) {
+  for(int yi = 0; yi < dst_h; ++yi) {
+    for(int xi = 0; xi < dst_w; ++xi) {
+      int sx = src_x + xi * ratio_x / 256;
+      int sy = src_y + yi * ratio_y / 256;
+      int dx = dst_x + xi;
+      int dy = dst_y + yi;
+      if(!(0 <= sx && sx < src->w && 0 <= sy && sy < src->h)) {
         continue;
       }
-      if(!(0 <= dx && dx < dst_width && 0 <= dy && dy < dst_height)) {
+      if(!(0 <= dx && dx < dst->w && 0 <= dy && dy < dst->h)) {
         continue;
       }
       Uint32 src_rgba = src_pixels[sy * src_pitch + sx];
@@ -367,8 +346,57 @@ static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self) {
     }
   }
 
-  SDL_UnlockSurface(src_ptr->surface);
-  SDL_UnlockSurface(ptr->surface);
+  SDL_UnlockSurface(src);
+  SDL_UnlockSurface(dst);
+}
+
+static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self) {
+  struct Bitmap *ptr = rb_bitmap_data_mut(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  ptr->texture_invalidated = true;
+  if(argc != 4 && argc != 5) {
+    rb_raise(rb_eArgError,
+        "wrong number of arguments (%d for 4..5)", argc);
+  }
+  int x = NUM2INT(argv[0]);
+  int y = NUM2INT(argv[1]);
+  const struct Bitmap *src_ptr = rb_bitmap_data(argv[2]);
+  const struct Rect *src_rect_ptr = rb_rect_data(argv[3]);
+  if(!src_ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+
+  int opacity = argc > 4 ? saturateInt32(NUM2INT(argv[4]), 0, 255) : 255;
+  if(opacity == 0) return Qnil;
+
+  blt(ptr->surface, src_ptr->surface,
+      x, y, abs(src_rect_ptr->width), abs(src_rect_ptr->height),
+      src_rect_ptr->x, src_rect_ptr->y,
+      src_rect_ptr->width, src_rect_ptr->height, opacity);
+
+  return Qnil;
+}
+
+static VALUE rb_bitmap_m_stretch_blt(int argc, VALUE *argv, VALUE self) {
+  struct Bitmap *ptr = rb_bitmap_data_mut(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  ptr->texture_invalidated = true;
+  if(argc != 3 && argc != 4) {
+    rb_raise(rb_eArgError,
+        "wrong number of arguments (%d for 3..4)", argc);
+  }
+  const struct Rect *dst_rect_ptr = rb_rect_data(argv[0]);
+  const struct Bitmap *src_ptr = rb_bitmap_data(argv[1]);
+  const struct Rect *src_rect_ptr = rb_rect_data(argv[2]);
+  if(!src_ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+
+  int opacity = argc > 3 ? saturateInt32(NUM2INT(argv[3]), 0, 255) : 255;
+  if(opacity == 0) return Qnil;
+
+  blt(ptr->surface, src_ptr->surface,
+      dst_rect_ptr->x, dst_rect_ptr->y,
+      dst_rect_ptr->width, dst_rect_ptr->height,
+      src_rect_ptr->x, src_rect_ptr->y,
+      src_rect_ptr->width, src_rect_ptr->height, opacity);
+
   return Qnil;
 }
 
