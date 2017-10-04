@@ -13,6 +13,20 @@
 #include "RGSSReset.h"
 #include "Tilemap.h"
 
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+#define RMASK 0xff000000
+#define GMASK 0x00ff0000
+#define BMASK 0x0000ff00
+#define AMASK 0x000000ff
+#define PIXELFORMAT_RGBA32 SDL_PIXELFORMAT_RGBA8888
+#else
+#define RMASK 0x000000ff
+#define GMASK 0x0000ff00
+#define BMASK 0x00ff0000
+#define AMASK 0xff000000
+#define PIXELFORMAT_RGBA32 SDL_PIXELFORMAT_ABGR8888
+#endif
+
 #if RGSS >= 2
 int window_width = 544;
 int window_height = 416;
@@ -150,14 +164,8 @@ void event_loop() {
   }
 }
 
-void renderSDL() {
+static void renderScreen() {
   qsort(registry, registry_size, sizeof(*registry), compare_renderables);
-
-  SDL_GL_MakeCurrent(window, glcontext);
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
-  glScissor(0, 0, window_width, window_height);
-  glViewport(0, 0, window_width, window_height);
   int last_z = INT_MIN;
   for(size_t i = 0; i < registry_size; ++i) {
     renderTilemaps(last_z, registry[i]->z);
@@ -165,6 +173,15 @@ void renderSDL() {
     registry[i]->render(registry[i]);
   }
   renderTilemaps(last_z, INT_MAX);
+}
+
+void renderSDL() {
+  SDL_GL_MakeCurrent(window, glcontext);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glScissor(0, 0, window_width, window_height);
+  glViewport(0, 0, window_width, window_height);
+  renderScreen();
 
   if(window_brightness != 255) {
     // transition
@@ -182,6 +199,34 @@ void renderSDL() {
   }
 
   SDL_GL_SwapWindow(window);
+}
+
+void capturedRenderSDL(SDL_Surface *surface) {
+  SDL_GL_MakeCurrent(window, glcontext);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glScissor(0, 0, window_width, window_height);
+  glViewport(0, 0, window_width, window_height);
+  renderScreen();
+
+  glReadPixels(0, 0, window_width, window_height,
+      GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
+
+  // Swap y
+  //
+  Uint32 *pixels = (Uint32 *)surface->pixels;
+  size_t h = surface->h;
+  size_t w = surface->w;
+  size_t pitch = surface->pitch / 4;
+
+  for(size_t y0 = 0; y0 * 2 + 1 < h; ++y0) {
+    size_t y1 = h - 1 - y0;
+    for(size_t x = 0; x < w; ++x) {
+      Uint32 c0 = pixels[y0 * pitch + x];
+      pixels[y0 * pitch + x] = pixels[y1 * pitch + x];
+      pixels[y1 * pitch + x] = c0;
+    }
+  }
 }
 
 void registerRenderable(struct Renderable *renderable) {

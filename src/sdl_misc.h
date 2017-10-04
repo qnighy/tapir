@@ -21,6 +21,7 @@ void initSDL(void);
 void cleanupSDL(void);
 void event_loop(void);
 void renderSDL(void);
+void capturedRenderSDL(SDL_Surface *surface);
 
 void registerRenderable(struct Renderable *renderable);
 void unregisterRenderable(struct Renderable *renderable);

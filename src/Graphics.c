@@ -190,8 +190,10 @@ static VALUE rb_graphics_s_transition(int argc, VALUE *argv, VALUE klass) {
 #if RGSS >= 2
 static VALUE rb_graphics_s_snap_to_bitmap(VALUE klass) {
   (void) klass;
-  WARN_UNIMPLEMENTED("Graphics.snap_to_bitmap");
-  return rb_bitmap_new(window_width, window_height);
+  VALUE bitmap = rb_bitmap_new(window_width, window_height);
+  struct Bitmap *bitmap_ptr = rb_bitmap_data_mut(bitmap);
+  capturedRenderSDL(bitmap_ptr->surface);
+  return bitmap;
 }
 #endif
 
