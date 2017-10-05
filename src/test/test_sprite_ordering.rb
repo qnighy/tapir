@@ -279,6 +279,72 @@ module RGSSTest
           snap, Bitmap.new("#@@imgdir/test_y_ordering_tilemap.png"))
       end
     end
+
+    def test_t_ordering_1
+      cleaned do
+        w1 = register(Window.new)
+        w1.z = 0
+        w1.windowskin = filled_bitmap(128, 128, Color.new(0, 0, 255, 255))
+        w1.back_opacity = 255
+        w1.width = 100
+        w1.height = 200
+
+        s1 = register(Sprite.new)
+        s1.z = 0
+        s1.bitmap = filled_bitmap(200, 100, Color.new(0, 255, 0, 255))
+
+        snap = Graphics.snap_to_bitmap
+        assert_bitmap_equal(
+          snap, Bitmap.new("#@@imgdir/test_t_ordering_1.png"))
+      end
+    end
+
+    def test_t_ordering_2
+      cleaned do
+        s1 = register(Sprite.new)
+        s1.z = 0
+        s1.bitmap = filled_bitmap(200, 100, Color.new(0, 255, 0, 255))
+
+        w1 = register(Window.new)
+        w1.z = 0
+        w1.windowskin = filled_bitmap(128, 128, Color.new(0, 0, 255, 255))
+        w1.back_opacity = 255
+        w1.width = 100
+        w1.height = 200
+
+        snap = Graphics.snap_to_bitmap
+        assert_bitmap_equal(
+          snap, Bitmap.new("#@@imgdir/test_t_ordering_2.png"))
+      end
+    end
+
+    def test_t_reordering
+      cleaned do
+        s1 = register(Sprite.new)
+        s1.z = 0
+        s1.bitmap = filled_bitmap(200, 100, Color.new(0, 255, 0, 255))
+
+        s2 = register(Sprite.new)
+        s2.z = 0
+        s2.bitmap = filled_bitmap(100, 200, Color.new(255, 0, 0, 255))
+
+        snap = Graphics.snap_to_bitmap
+        assert_bitmap_equal(
+          snap, Bitmap.new("#@@imgdir/test_t_reordering_a.png"))
+
+        s1.y = 1
+
+        snap = Graphics.snap_to_bitmap
+        assert_bitmap_equal(
+          snap, Bitmap.new("#@@imgdir/test_t_reordering_b.png"))
+
+        s1.y = 0
+
+        snap = Graphics.snap_to_bitmap
+        assert_bitmap_equal(
+          snap, Bitmap.new("#@@imgdir/test_t_reordering_c.png"))
+      end
+    end
   end
 
   if RGSS >= 2
