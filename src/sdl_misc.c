@@ -252,7 +252,10 @@ void registerRenderable(struct Renderable *renderable) {
   registry[registry_size++] = renderable;
 }
 
-void unregisterRenderable(struct Renderable *renderable) {
+void disposeRenderable(struct Renderable *renderable) {
+  if(renderable->disposed) return;
+  renderable->disposed = true;
+
   size_t i;
   for(i = 0; i < registry_size; ++i) {
     if(registry[i] == renderable) break;

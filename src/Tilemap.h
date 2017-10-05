@@ -17,7 +17,7 @@ struct Tilemap {
   VALUE tileset, autotiles, priorities;
 #endif
   VALUE map_data, flash_data, viewport;
-  bool disposed, visible;
+  bool visible;
   int ox, oy;
   int autotile_tick;
 };

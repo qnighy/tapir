@@ -15,7 +15,7 @@ struct Window {
 #if RGSS == 3
   VALUE tone;
 #endif
-  bool disposed, visible, active, pause;
+  bool visible, active, pause;
 #if RGSS == 3
   bool arrows_visible;
 #endif

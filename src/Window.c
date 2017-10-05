@@ -216,7 +216,7 @@ static void window_mark(struct Window *ptr) {
 }
 
 static void window_free(struct Window *ptr) {
-  unregisterRenderable(&ptr->renderable);
+  disposeRenderable(&ptr->renderable);
   xfree(ptr);
 }
 
@@ -224,7 +224,7 @@ static VALUE window_alloc(VALUE klass) {
   struct Window *ptr = ALLOC(struct Window);
   ptr->renderable.prepare = prepareRenderWindow;
   ptr->renderable.render = renderWindow;
-  ptr->disposed = false;
+  ptr->renderable.disposed = false;
 
   ptr->windowskin = Qnil;
   ptr->contents = rb_bitmap_new(1, 1);
@@ -300,7 +300,6 @@ static VALUE rb_window_m_initialize(int argc, VALUE *argv, VALUE self) {
 static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
   struct Window *ptr = rb_window_data_mut(self);
   const struct Window *orig_ptr = rb_window_data(orig);
-  ptr->disposed = orig_ptr->disposed;
   ptr->windowskin = orig_ptr->windowskin;
   ptr->contents = orig_ptr->contents;
 #if RGSS == 1
@@ -339,13 +338,13 @@ static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
 
 static VALUE rb_window_m_dispose(VALUE self) {
   struct Window *ptr = rb_window_data_mut(self);
-  ptr->disposed = true;
+  disposeRenderable(&ptr->renderable);
   return Qnil;
 }
 
 static VALUE rb_window_m_disposed_p(VALUE self) {
   const struct Window *ptr = rb_window_data(self);
-  return ptr->disposed ? Qtrue : Qfalse;
+  return ptr->renderable.disposed ? Qtrue : Qfalse;
 }
 
 static VALUE rb_window_m_update(VALUE self) {
@@ -654,6 +653,7 @@ static VALUE rb_window_m_set_tone(VALUE self, VALUE newval) {
 static void prepareRenderWindow(struct Renderable *renderable, int t) {
   struct Window *ptr = (struct Window *)renderable;
   if(ptr->viewport != Qnil) WARN_UNIMPLEMENTED("Window#viewport");
+  if(!ptr->visible) return;
   struct RenderJob job;
   job.renderable = renderable;
   job.z = ptr->z;
@@ -678,7 +678,6 @@ static void renderWindow(
   int content_job_no = 1;
 #endif
   struct Window *ptr = (struct Window *)renderable;
-  if(ptr->disposed || !ptr->visible) return;
 #if RGSS >= 2
   int openness = ptr->openness;
 #else

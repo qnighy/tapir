@@ -188,7 +188,7 @@ static void sprite_mark(struct Sprite *ptr) {
 }
 
 static void sprite_free(struct Sprite *ptr) {
-  unregisterRenderable(&ptr->renderable);
+  disposeRenderable(&ptr->renderable);
   xfree(ptr);
 }
 
@@ -196,10 +196,10 @@ static VALUE sprite_alloc(VALUE klass) {
   struct Sprite *ptr = ALLOC(struct Sprite);
   ptr->renderable.prepare = prepareRenderSprite;
   ptr->renderable.render = renderSprite;
+  ptr->renderable.disposed = false;
   ptr->z = 0;
   ptr->viewport = Qnil;
   ptr->bitmap = Qnil;
-  ptr->disposed = false;
   ptr->src_rect = rb_rect_new2();
   ptr->visible = true;
   ptr->x = 0;
@@ -262,7 +262,6 @@ static VALUE rb_sprite_m_initialize_copy(VALUE self, VALUE orig) {
   rb_rect_set2(ptr->src_rect, orig_ptr->src_rect);
   rb_color_set2(ptr->color, orig_ptr->color);
   rb_tone_set2(ptr->tone, orig_ptr->tone);
-  ptr->disposed = orig_ptr->disposed;
   ptr->visible = orig_ptr->visible;
   ptr->mirror = orig_ptr->mirror;
   ptr->x = orig_ptr->x;
@@ -289,13 +288,13 @@ static VALUE rb_sprite_m_initialize_copy(VALUE self, VALUE orig) {
 
 static VALUE rb_sprite_m_dispose(VALUE self) {
   struct Sprite *ptr = rb_sprite_data_mut(self);
-  ptr->disposed = true;
+  disposeRenderable(&ptr->renderable);
   return Qnil;
 }
 
 static VALUE rb_sprite_m_disposed_p(VALUE self) {
   const struct Sprite *ptr = rb_sprite_data(self);
-  return ptr->disposed ? Qtrue : Qfalse;
+  return ptr->renderable.disposed ? Qtrue : Qfalse;
 }
 
 static VALUE rb_sprite_m_bitmap(VALUE self) {
@@ -575,6 +574,7 @@ static VALUE rb_sprite_m_set_tone(VALUE self, VALUE newval) {
 static void prepareRenderSprite(struct Renderable *renderable, int t) {
   struct Sprite *ptr = (struct Sprite *)renderable;
   if(ptr->viewport != Qnil) WARN_UNIMPLEMENTED("Sprite#viewport");
+  if(!ptr->visible) return;
   struct RenderJob job;
   job.renderable = renderable;
   job.z = ptr->z;
@@ -610,7 +610,6 @@ static void renderSprite(
   if(ptr->opacity != 255) WARN_UNIMPLEMENTED("Sprite#opacity");
   if(ptr->blend_type) WARN_UNIMPLEMENTED("Sprite#blend_type");
   if(ptr->angle != 0.0) WARN_UNIMPLEMENTED("Sprite#angle");
-  if(ptr->disposed || !ptr->visible) return;
   if(ptr->bitmap == Qnil) return;
   const struct Bitmap *bitmap_ptr = rb_bitmap_data(ptr->bitmap);
   SDL_Surface *surface = bitmap_ptr->surface;

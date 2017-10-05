@@ -1,6 +1,7 @@
 #ifndef SDL_MISC_H
 #define SDL_MISC_H
 
+#include <stdbool.h>
 #include <ruby.h>
 #include <SDL.h>
 
@@ -9,6 +10,7 @@ struct RenderJob;
 struct Renderable {
   void (*prepare)(struct Renderable *renderable, int t);
   void (*render)(struct Renderable *renderable, const struct RenderJob *job);
+  bool disposed;
 };
 
 struct RenderJob {
@@ -30,7 +32,7 @@ void renderSDL(void);
 void capturedRenderSDL(SDL_Surface *surface);
 
 void registerRenderable(struct Renderable *renderable);
-void unregisterRenderable(struct Renderable *renderable);
+void disposeRenderable(struct Renderable *renderable);
 
 void queueRenderJob(struct RenderJob job);
 

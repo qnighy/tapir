@@ -138,7 +138,7 @@ static void tilemap_mark(struct Tilemap *ptr) {
 }
 
 static void tilemap_free(struct Tilemap *ptr) {
-  unregisterRenderable(&ptr->renderable);
+  disposeRenderable(&ptr->renderable);
   xfree(ptr);
 }
 
@@ -146,7 +146,7 @@ static VALUE tilemap_alloc(VALUE klass) {
   struct Tilemap *ptr = ALLOC(struct Tilemap);
   ptr->renderable.prepare = prepareRenderTilemap;
   ptr->renderable.render = renderTilemap;
-  ptr->disposed = false;
+  ptr->renderable.disposed = false;
 #if RGSS >= 2
   ptr->bitmaps = rb_bitmaparray_new();
 #else
@@ -197,7 +197,6 @@ static VALUE rb_tilemap_m_initialize(int argc, VALUE *argv, VALUE self) {
 static VALUE rb_tilemap_m_initialize_copy(VALUE self, VALUE orig) {
   struct Tilemap *ptr = rb_tilemap_data_mut(self);
   const struct Tilemap *orig_ptr = rb_tilemap_data(orig);
-  ptr->disposed = orig_ptr->disposed;
 #if RGSS >= 2
   rb_bitmaparray_set2(ptr->bitmaps, orig_ptr->bitmaps);
 #else
@@ -221,13 +220,13 @@ static VALUE rb_tilemap_m_initialize_copy(VALUE self, VALUE orig) {
 
 static VALUE rb_tilemap_m_dispose(VALUE self) {
   struct Tilemap *ptr = rb_tilemap_data_mut(self);
-  ptr->disposed = true;
+  disposeRenderable(&ptr->renderable);
   return Qnil;
 }
 
 static VALUE rb_tilemap_m_disposed_p(VALUE self) {
   const struct Tilemap *ptr = rb_tilemap_data(self);
-  return ptr->disposed ? Qtrue : Qfalse;
+  return ptr->renderable.disposed ? Qtrue : Qfalse;
 }
 
 static VALUE rb_tilemap_m_update(VALUE self) {
@@ -360,6 +359,7 @@ static VALUE rb_tilemap_m_set_oy(VALUE self, VALUE newval) {
 static void prepareRenderTilemap(struct Renderable *renderable, int t) {
   struct Tilemap *ptr = (struct Tilemap *)renderable;
   if(ptr->viewport != Qnil) WARN_UNIMPLEMENTED("Tilemap#viewport");
+  if(!ptr->visible) return;
   struct RenderJob job;
   job.renderable = renderable;
   job.t = t;
@@ -420,7 +420,6 @@ static void prepareRenderTilemap(struct Renderable *renderable, int t) {
 static void renderTilemap(
     struct Renderable *renderable, const struct RenderJob *job) {
   struct Tilemap *ptr = (struct Tilemap *)renderable;
-  if(ptr->disposed || !ptr->visible) return;
 #if RGSS >= 2
   if(ptr->map_data == Qnil) return;
   const struct Table *map_data_ptr = rb_table_data(ptr->map_data);
