@@ -76,7 +76,9 @@ static VALUE rb_sprite_m_set_color(VALUE self, VALUE newval);
 static VALUE rb_sprite_m_tone(VALUE self);
 static VALUE rb_sprite_m_set_tone(VALUE self, VALUE newval);
 
-static void renderSprite(struct Renderable *renderable);
+static void prepareRenderSprite(struct Renderable *renderable, int t);
+static void renderSprite(
+    struct Renderable *renderable, const struct RenderJob *job);
 
 VALUE rb_cSprite;
 
@@ -178,7 +180,7 @@ struct Sprite *rb_sprite_data_mut(VALUE obj) {
 }
 
 static void sprite_mark(struct Sprite *ptr) {
-  rb_gc_mark(ptr->renderable.viewport);
+  rb_gc_mark(ptr->viewport);
   rb_gc_mark(ptr->bitmap);
   rb_gc_mark(ptr->src_rect);
   rb_gc_mark(ptr->color);
@@ -192,9 +194,10 @@ static void sprite_free(struct Sprite *ptr) {
 
 static VALUE sprite_alloc(VALUE klass) {
   struct Sprite *ptr = ALLOC(struct Sprite);
+  ptr->renderable.prepare = prepareRenderSprite;
   ptr->renderable.render = renderSprite;
-  ptr->renderable.z = 0;
-  ptr->renderable.viewport = Qnil;
+  ptr->z = 0;
+  ptr->viewport = Qnil;
   ptr->bitmap = Qnil;
   ptr->disposed = false;
   ptr->src_rect = rb_rect_new2();
@@ -240,7 +243,7 @@ static VALUE rb_sprite_m_initialize(int argc, VALUE *argv, VALUE self) {
       break;
     case 1:
       if(argv[0] != Qnil) rb_viewport_data(argv[0]);
-      ptr->renderable.viewport = argv[0];
+      ptr->viewport = argv[0];
       break;
     default:
       rb_raise(rb_eArgError,
@@ -253,8 +256,8 @@ static VALUE rb_sprite_m_initialize(int argc, VALUE *argv, VALUE self) {
 static VALUE rb_sprite_m_initialize_copy(VALUE self, VALUE orig) {
   struct Sprite *ptr = rb_sprite_data_mut(self);
   const struct Sprite *orig_ptr = rb_sprite_data(orig);
-  ptr->renderable.z = orig_ptr->renderable.z;
-  ptr->renderable.viewport = orig_ptr->renderable.viewport;
+  ptr->z = orig_ptr->z;
+  ptr->viewport = orig_ptr->viewport;
   ptr->bitmap = orig_ptr->bitmap;
   rb_rect_set2(ptr->src_rect, orig_ptr->src_rect);
   rb_color_set2(ptr->color, orig_ptr->color);
@@ -334,13 +337,13 @@ static VALUE rb_sprite_m_set_src_rect(VALUE self, VALUE newval) {
 #if RGSS >= 2
 static VALUE rb_sprite_m_viewport(VALUE self) {
   const struct Sprite *ptr = rb_sprite_data(self);
-  return ptr->renderable.viewport;
+  return ptr->viewport;
 }
 
 static VALUE rb_sprite_m_set_viewport(VALUE self, VALUE newval) {
   struct Sprite *ptr = rb_sprite_data_mut(self);
   if(newval != Qnil) rb_viewport_data(newval);
-  ptr->renderable.viewport = newval;
+  ptr->viewport = newval;
   return newval;
 }
 #endif
@@ -380,12 +383,12 @@ static VALUE rb_sprite_m_set_y(VALUE self, VALUE newval) {
 
 static VALUE rb_sprite_m_z(VALUE self) {
   const struct Sprite *ptr = rb_sprite_data(self);
-  return INT2NUM(ptr->renderable.z);
+  return INT2NUM(ptr->z);
 }
 
 static VALUE rb_sprite_m_set_z(VALUE self, VALUE newval) {
   struct Sprite *ptr = rb_sprite_data_mut(self);
-  ptr->renderable.z = NUM2INT(newval);
+  ptr->z = NUM2INT(newval);
   return newval;
 }
 
@@ -569,9 +572,24 @@ static VALUE rb_sprite_m_set_tone(VALUE self, VALUE newval) {
   return newval;
 }
 
-static void renderSprite(struct Renderable *renderable) {
+static void prepareRenderSprite(struct Renderable *renderable, int t) {
   struct Sprite *ptr = (struct Sprite *)renderable;
-  if(ptr->renderable.viewport != Qnil) WARN_UNIMPLEMENTED("Sprite#viewport");
+  if(ptr->viewport != Qnil) WARN_UNIMPLEMENTED("Sprite#viewport");
+  struct RenderJob job;
+  job.renderable = renderable;
+  job.z = ptr->z;
+  job.y = ptr->y;
+  job.aux[0] = 0;
+  job.aux[1] = 0;
+  job.aux[2] = 0;
+  job.t = t;
+  queueRenderJob(job);
+}
+
+static void renderSprite(
+    struct Renderable *renderable, const struct RenderJob *job) {
+  (void) job;
+  struct Sprite *ptr = (struct Sprite *)renderable;
   {
     const struct Color *color = rb_color_data(ptr->color);
     if(color->red || color->green || color->blue || color->alpha) {

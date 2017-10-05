@@ -4,10 +4,16 @@
 #include <ruby.h>
 #include <SDL.h>
 
+struct RenderJob;
+
 struct Renderable {
-  void (*render)(struct Renderable *renderable);
-  int z;
-  VALUE viewport;
+  void (*prepare)(struct Renderable *renderable, int t);
+  void (*render)(struct Renderable *renderable, const struct RenderJob *job);
+};
+
+struct RenderJob {
+  struct Renderable *renderable;
+  int z, y, t, aux[3];
 };
 
 extern int window_width;
@@ -25,5 +31,7 @@ void capturedRenderSDL(SDL_Surface *surface);
 
 void registerRenderable(struct Renderable *renderable);
 void unregisterRenderable(struct Renderable *renderable);
+
+void queueRenderJob(struct RenderJob job);
 
 #endif /* SDL_MISC_H */

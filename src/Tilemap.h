@@ -10,6 +10,7 @@ extern VALUE rb_cTilemap;
 void Init_Tilemap(void);
 
 struct Tilemap {
+  struct Renderable renderable;
 #if RGSS >= 2
   VALUE bitmaps, flags;
 #else

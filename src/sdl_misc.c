@@ -37,8 +37,12 @@ int window_height = 480;
 int window_brightness = 255;
 SDL_Window *window = NULL;
 SDL_GLContext glcontext = NULL;
+
 static size_t registry_size, registry_capacity;
 static struct Renderable **registry;
+
+static size_t jobqueue_size, jobqueue_capacity;
+static struct RenderJob *jobqueue;
 
 static GLuint transition_shader;
 
@@ -48,6 +52,9 @@ static void deinitTransition(void);
 void initSDL() {
   registry_capacity = 100;
   registry = malloc(sizeof(*registry) * registry_capacity);
+
+  jobqueue_capacity = 100;
+  jobqueue = malloc(sizeof(*jobqueue) * jobqueue_capacity);
 
   if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
     fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
@@ -124,15 +131,23 @@ void cleanupSDL() {
   TTF_Quit();
   IMG_Quit();
   SDL_Quit();
+  if(jobqueue) free(jobqueue);
   if(registry) free(registry);
 }
 
-static int compare_renderables(const void *o1, const void *o2) {
-  // TODO: use viewport, y and generated time.
-  struct Renderable *r1 = *((struct Renderable * const *)o1);
-  struct Renderable *r2 = *((struct Renderable * const *)o2);
-  if(r1->z < r2->z) return -1;
-  if(r1->z > r2->z) return 1;
+static int compare_jobs(const void *o1, const void *o2) {
+  const struct RenderJob *j1 = (const struct RenderJob *)o1;
+  const struct RenderJob *j2 = (const struct RenderJob *)o2;
+
+  if(j1->z < j2->z) return -1;
+  else if(j1->z > j2->z) return 1;
+
+  if(j1->y < j2->y) return -1;
+  else if(j1->y > j2->y) return 1;
+
+  if(j1->t < j2->t) return -1;
+  else if(j1->t > j2->t) return 1;
+
   return 0;
 }
 
@@ -165,14 +180,14 @@ void event_loop() {
 }
 
 static void renderScreen() {
-  qsort(registry, registry_size, sizeof(*registry), compare_renderables);
-  int last_z = INT_MIN;
-  for(size_t i = 0; i < registry_size; ++i) {
-    renderTilemaps(last_z, registry[i]->z);
-    last_z = registry[i]->z;
-    registry[i]->render(registry[i]);
+  jobqueue_size = 0;
+  for(size_t t = 0; t < registry_size; ++t) {
+    registry[t]->prepare(registry[t], t);
   }
-  renderTilemaps(last_z, INT_MAX);
+  qsort(jobqueue, jobqueue_size, sizeof(*jobqueue), compare_jobs);
+  for(size_t i = 0; i < jobqueue_size; ++i) {
+    jobqueue[i].renderable->render(jobqueue[i].renderable, &jobqueue[i]);
+  }
 }
 
 void renderSDL() {
@@ -243,8 +258,18 @@ void unregisterRenderable(struct Renderable *renderable) {
     if(registry[i] == renderable) break;
   }
   if(i == registry_size) return;
-  registry[i] = registry[registry_size - 1];
+  for(; i + 1 < registry_size; ++i) {
+    registry[i] = registry[i + 1];
+  }
   --registry_size;
+}
+
+void queueRenderJob(struct RenderJob job) {
+  if(jobqueue_size >= jobqueue_capacity) {
+    jobqueue_capacity = jobqueue_capacity + jobqueue_capacity / 2;
+    jobqueue = realloc(jobqueue, sizeof(*jobqueue) * jobqueue_capacity);
+  }
+  jobqueue[jobqueue_size++] = job;
 }
 
 static void initTransition(void) {

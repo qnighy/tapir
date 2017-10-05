@@ -90,7 +90,9 @@ static VALUE rb_window_m_tone(VALUE self);
 static VALUE rb_window_m_set_tone(VALUE self, VALUE newval);
 #endif
 
-static void renderWindow(struct Renderable *renderable);
+static void prepareRenderWindow(struct Renderable *renderable, int t);
+static void renderWindow(
+    struct Renderable *renderable, const struct RenderJob *job);
 
 VALUE rb_cWindow;
 
@@ -204,7 +206,7 @@ struct Window *rb_window_data_mut(VALUE obj) {
 }
 
 static void window_mark(struct Window *ptr) {
-  rb_gc_mark(ptr->renderable.viewport);
+  rb_gc_mark(ptr->viewport);
   rb_gc_mark(ptr->windowskin);
   rb_gc_mark(ptr->contents);
   rb_gc_mark(ptr->cursor_rect);
@@ -220,6 +222,7 @@ static void window_free(struct Window *ptr) {
 
 static VALUE window_alloc(VALUE klass) {
   struct Window *ptr = ALLOC(struct Window);
+  ptr->renderable.prepare = prepareRenderWindow;
   ptr->renderable.render = renderWindow;
   ptr->disposed = false;
 
@@ -229,7 +232,7 @@ static VALUE window_alloc(VALUE klass) {
   ptr->stretch = true;
 #endif
   ptr->cursor_rect = rb_rect_new2();
-  ptr->renderable.viewport = Qnil;
+  ptr->viewport = Qnil;
   ptr->active = true;
   ptr->visible = true;
 #if RGSS == 3
@@ -242,9 +245,9 @@ static VALUE window_alloc(VALUE klass) {
   ptr->height = 0;
   // TODO: In RGSS1, content Z and background Z differ.
 #if RGSS == 3
-  ptr->renderable.z = 100;
+  ptr->z = 100;
 #else
-  ptr->renderable.z = 0;
+  ptr->z = 0;
 #endif
   ptr->ox = 0;
   ptr->oy = 0;
@@ -304,7 +307,7 @@ static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
   ptr->stretch = orig_ptr->stretch;
 #endif
   rb_rect_set2(ptr->cursor_rect, orig_ptr->cursor_rect);
-  ptr->renderable.viewport = orig_ptr->renderable.viewport;
+  ptr->viewport = orig_ptr->viewport;
   ptr->active = orig_ptr->active;
   ptr->visible = orig_ptr->visible;
 #if RGSS == 3
@@ -315,7 +318,7 @@ static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
   ptr->y = orig_ptr->y;
   ptr->width = orig_ptr->width;
   ptr->height = orig_ptr->height;
-  ptr->renderable.z = orig_ptr->renderable.z;
+  ptr->z = orig_ptr->z;
   ptr->ox = orig_ptr->ox;
   ptr->oy = orig_ptr->oy;
 #if RGSS == 3
@@ -425,7 +428,7 @@ static VALUE rb_window_m_set_cursor_rect(VALUE self, VALUE newval) {
 
 static VALUE rb_window_m_viewport(VALUE self) {
   const struct Window *ptr = rb_window_data(self);
-  return ptr->renderable.viewport;
+  return ptr->viewport;
 }
 
 #if RGSS >= 2
@@ -433,7 +436,7 @@ static VALUE rb_window_m_set_viewport(VALUE self, VALUE newval) {
   WARN_UNIMPLEMENTED("Window#viewport");
   struct Window *ptr = rb_window_data_mut(self);
   if(newval != Qnil) rb_viewport_data(newval);
-  ptr->renderable.viewport = newval;
+  ptr->viewport = newval;
   return newval;
 }
 #endif
@@ -533,12 +536,12 @@ static VALUE rb_window_m_set_height(VALUE self, VALUE newval) {
 
 static VALUE rb_window_m_z(VALUE self) {
   const struct Window *ptr = rb_window_data(self);
-  return INT2NUM(ptr->renderable.z);
+  return INT2NUM(ptr->z);
 }
 
 static VALUE rb_window_m_set_z(VALUE self, VALUE newval) {
   struct Window *ptr = rb_window_data_mut(self);
-  ptr->renderable.z = NUM2INT(newval);
+  ptr->z = NUM2INT(newval);
   return newval;
 }
 
@@ -648,9 +651,33 @@ static VALUE rb_window_m_set_tone(VALUE self, VALUE newval) {
 }
 #endif
 
-static void renderWindow(struct Renderable *renderable) {
+static void prepareRenderWindow(struct Renderable *renderable, int t) {
   struct Window *ptr = (struct Window *)renderable;
-  if(ptr->renderable.viewport != Qnil) WARN_UNIMPLEMENTED("Window#viewport");
+  if(ptr->viewport != Qnil) WARN_UNIMPLEMENTED("Window#viewport");
+  struct RenderJob job;
+  job.renderable = renderable;
+  job.z = ptr->z;
+  job.y = ptr->y;
+  job.aux[0] = 0;
+  job.aux[1] = 0;
+  job.aux[2] = 0;
+  job.t = t;
+  queueRenderJob(job);
+#if RGSS == 1
+  job.z = ptr->z + 2;
+  job.aux[0] = 1;
+  queueRenderJob(job);
+#endif
+}
+
+static void renderWindow(
+    struct Renderable *renderable, const struct RenderJob *job) {
+#if RGSS >= 2
+  int content_job_no = 0;
+#else
+  int content_job_no = 1;
+#endif
+  struct Window *ptr = (struct Window *)renderable;
   if(ptr->disposed || !ptr->visible) return;
 #if RGSS >= 2
   int openness = ptr->openness;
@@ -665,7 +692,7 @@ static void renderWindow(struct Renderable *renderable) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  if(ptr->windowskin != Qnil) {
+  if(ptr->windowskin != Qnil && job->aux[0] == 0) {
     const struct Bitmap *skin_bitmap_ptr = rb_bitmap_data(ptr->windowskin);
     SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
     if(!skin_surface) return;
@@ -727,7 +754,8 @@ static void renderWindow(struct Renderable *renderable) {
   int padding_bottom = 16;
 #endif
 
-  if(ptr->contents != Qnil && openness == 255) {
+  if(ptr->contents != Qnil && openness == 255 &&
+      job->aux[0] == content_job_no) {
     const struct Bitmap *contents_bitmap_ptr = rb_bitmap_data(ptr->contents);
     SDL_Surface *contents_surface = contents_bitmap_ptr->surface;
     if(!contents_surface) return;
@@ -774,6 +802,7 @@ static void renderWindow(struct Renderable *renderable) {
   const struct Rect *cursor_rect_ptr = rb_rect_data(ptr->cursor_rect);
 
   if(ptr->windowskin != Qnil && openness == 255 &&
+      job->aux[0] == content_job_no &&
       cursor_rect_ptr->width > 0 && cursor_rect_ptr->height > 0) {
     const struct Bitmap *skin_bitmap_ptr = rb_bitmap_data(ptr->windowskin);
     SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
