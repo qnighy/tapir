@@ -33,6 +33,7 @@ void capturedRenderSDL(SDL_Surface *surface);
 
 void registerRenderable(struct Renderable *renderable);
 void disposeRenderable(struct Renderable *renderable);
+void disposeAll(void);
 
 void queueRenderJob(struct RenderJob job);
 

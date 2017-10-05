@@ -267,6 +267,14 @@ void disposeRenderable(struct Renderable *renderable) {
   --registry_size;
 }
 
+void disposeAll(void) {
+  // TODO: dispose all Bitmaps too
+  for(size_t i = 0; i < registry_size; ++i) {
+    registry[i]->disposed = true;
+  }
+  registry_size = 0;
+}
+
 void queueRenderJob(struct RenderJob job) {
   if(jobqueue_size >= jobqueue_capacity) {
     jobqueue_capacity = jobqueue_capacity + jobqueue_capacity / 2;

@@ -1,5 +1,7 @@
+#include <stdbool.h>
 #include <ruby.h>
 #include "main_rb.h"
+#include "sdl_misc.h"
 #include "RGSSReset.h"
 
 #if RGSS == 3
@@ -20,7 +22,15 @@ static void load_scripts(void);
 static VALUE rescue_reset(VALUE data, VALUE e);
 static VALUE load_scripts2(VALUE data);
 
+#if RGSS == 3
+static VALUE rb_rgss_main(VALUE self);
+static VALUE rb_rgss_main2(VALUE data);
+#endif
+
 VALUE main_rb(VALUE data) {
+#if RGSS == 3
+  rb_define_global_function("rgss_main", rb_rgss_main, 0);
+#endif
   return rb_rescue2(main_rb2, data, rescue_any, Qnil, rb_eException, NULL);
 }
 
@@ -1216,12 +1226,6 @@ static void load_libs() {
 #endif
       "\n"
 #if RGSS == 3
-      "def rgss_main\n"
-      "  yield\n"
-      "rescue RGSSReset\n"
-      "  GC.start\n"
-      "  retry\n"
-      "end\n"
       "def rgss_stop\n"
       "  loop { Graphics.update }\n"
       "end\n"
@@ -1242,13 +1246,21 @@ static void load_libs() {
 }
 
 static void load_scripts() {
-  rb_rescue2(load_scripts2, Qnil, rescue_reset, Qnil, rb_eRGSSReset, NULL);
+  bool retry = true;
+  while(retry) {
+    retry = false;
+    rb_rescue2(
+        load_scripts2, Qnil,
+        rescue_reset, (VALUE)&retry,
+        rb_eRGSSReset, NULL);
+  }
 }
 
 static VALUE rescue_reset(VALUE data, VALUE e) {
-  (void) data;
   (void) e;
-  rb_eval_string("retry");
+  disposeAll();
+  rb_gc_start();
+  *(int*)data = true;
   return Qnil;
 }
 
@@ -1267,3 +1279,22 @@ static VALUE load_scripts2(VALUE data) {
   );
   return Qnil;
 }
+
+#if RGSS == 3
+static VALUE rb_rgss_main(VALUE self) {
+  (void) self;
+  bool retry = true;
+  while(retry) {
+    retry = false;
+    rb_rescue2(
+        rb_rgss_main2, Qnil,
+        rescue_reset, (VALUE)&retry,
+        rb_eRGSSReset, NULL);
+  }
+  return Qnil;
+}
+static VALUE rb_rgss_main2(VALUE data) {
+  (void) data;
+  return rb_yield(Qnil);
+}
+#endif
