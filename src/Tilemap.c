@@ -524,7 +524,7 @@ static void renderTile(struct Tilemap *ptr, int tile_id, int x, int y) {
   int src_x, src_y;
 #if RGSS >= 2
   int bitmapid = -1;
-  if(0 <= tile_id && tile_id < 1024) {
+  if(0 < tile_id && tile_id < 1024) {
     // Tileset B, C, D, E
     bitmapid = 5 + ((tile_id>>8)&3);
     src_x = ((tile_id&7)|((tile_id>>4)&8)) * 32;
