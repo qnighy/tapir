@@ -148,10 +148,10 @@ static VALUE tilemap_alloc(VALUE klass) {
   ptr->renderable.render = renderTilemap;
   ptr->renderable.disposed = false;
 #if RGSS >= 2
-  ptr->bitmaps = rb_bitmaparray_new();
+  ptr->bitmaps = Qnil;
 #else
   ptr->tileset = Qnil;
-  ptr->autotiles = rb_bitmaparray_new();
+  ptr->autotiles = Qnil;
 #endif
   ptr->map_data = Qnil;
   ptr->flash_data = Qnil;
@@ -165,8 +165,13 @@ static VALUE tilemap_alloc(VALUE klass) {
   ptr->ox = 0;
   ptr->oy = 0;
   ptr->autotile_tick = 0;
-  registerRenderable(&ptr->renderable);
   VALUE ret = Data_Wrap_Struct(klass, tilemap_mark, tilemap_free, ptr);
+#if RGSS >= 2
+  ptr->bitmaps = rb_bitmaparray_new();
+#else
+  ptr->autotiles = rb_bitmaparray_new();
+#endif
+  registerRenderable(&ptr->renderable);
   return ret;
 }
 

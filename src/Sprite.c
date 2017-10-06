@@ -200,7 +200,7 @@ static VALUE sprite_alloc(VALUE klass) {
   ptr->z = 0;
   ptr->viewport = Qnil;
   ptr->bitmap = Qnil;
-  ptr->src_rect = rb_rect_new2();
+  ptr->src_rect = Qnil;
   ptr->visible = true;
   ptr->x = 0;
   ptr->y = 0;
@@ -222,10 +222,13 @@ static VALUE sprite_alloc(VALUE klass) {
 #endif
   ptr->opacity = 255;
   ptr->blend_type = 0;
+  ptr->color = Qnil;
+  ptr->tone = Qnil;
+  VALUE ret = Data_Wrap_Struct(klass, sprite_mark, sprite_free, ptr);
+  ptr->src_rect = rb_rect_new2();
   ptr->color = rb_color_new2();
   ptr->tone = rb_tone_new2();
   registerRenderable(&ptr->renderable);
-  VALUE ret = Data_Wrap_Struct(klass, sprite_mark, sprite_free, ptr);
   return ret;
 }
 

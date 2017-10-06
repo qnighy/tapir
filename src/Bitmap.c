@@ -160,8 +160,9 @@ static VALUE bitmap_alloc(VALUE klass) {
   ptr->surface = NULL;
   ptr->texture_id = 0;
   ptr->texture_invalidated = true;
-  ptr->font = rb_font_new();
+  ptr->font = Qnil;
   VALUE ret = Data_Wrap_Struct(klass, bitmap_mark, bitmap_free, ptr);
+  ptr->font = rb_font_new();
   return ret;
 }
 

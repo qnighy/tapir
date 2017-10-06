@@ -95,15 +95,18 @@ static void viewport_free(struct Viewport *ptr) {
 
 static VALUE viewport_alloc(VALUE klass) {
   struct Viewport *ptr = ALLOC(struct Viewport);
-  ptr->rect = rb_rect_new2();
-  ptr->color = rb_color_new2();
-  ptr->tone = rb_tone_new2();
+  ptr->rect = Qnil;
+  ptr->color = Qnil;
+  ptr->tone = Qnil;
   ptr->disposed = false;
   ptr->visible = true;
   ptr->ox = 0;
   ptr->oy = 0;
   ptr->z = 0;
   VALUE ret = Data_Wrap_Struct(klass, viewport_mark, viewport_free, ptr);
+  ptr->rect = rb_rect_new2();
+  ptr->color = rb_color_new2();
+  ptr->tone = rb_tone_new2();
   return ret;
 }
 

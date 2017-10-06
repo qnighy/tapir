@@ -227,11 +227,11 @@ static VALUE window_alloc(VALUE klass) {
   ptr->renderable.disposed = false;
 
   ptr->windowskin = Qnil;
-  ptr->contents = rb_bitmap_new(1, 1);
+  ptr->contents = Qnil;
 #if RGSS == 1
   ptr->stretch = true;
 #endif
-  ptr->cursor_rect = rb_rect_new2();
+  ptr->cursor_rect = Qnil;
   ptr->viewport = Qnil;
   ptr->active = true;
   ptr->visible = true;
@@ -266,11 +266,16 @@ static VALUE window_alloc(VALUE klass) {
   ptr->openness = 255;
 #endif
 #if RGSS == 3
-  ptr->tone = rb_tone_new2();
+  ptr->tone = Qnil;
 #endif
 
-  registerRenderable(&ptr->renderable);
   VALUE ret = Data_Wrap_Struct(klass, window_mark, window_free, ptr);
+  ptr->contents = rb_bitmap_new(1, 1);
+  ptr->cursor_rect = rb_rect_new2();
+#if RGSS == 3
+  ptr->tone = rb_tone_new2();
+#endif
+  registerRenderable(&ptr->renderable);
   return ret;
 }
 

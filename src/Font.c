@@ -187,12 +187,16 @@ static VALUE font_alloc(VALUE klass) {
 #if RGSS >= 2
   ptr->shadow = false;
 #endif
+  ptr->color = Qnil;
+#if RGSS == 3
+  ptr->out_color = Qnil;
+#endif
+  ptr->cache = NULL;
+  VALUE ret = Data_Wrap_Struct(klass, font_mark, font_free, ptr);
   ptr->color = rb_color_new2();
 #if RGSS == 3
   ptr->out_color = rb_color_new2();
 #endif
-  ptr->cache = NULL;
-  VALUE ret = Data_Wrap_Struct(klass, font_mark, font_free, ptr);
   return ret;
 }
 

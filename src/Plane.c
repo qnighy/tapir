@@ -143,10 +143,12 @@ static VALUE plane_alloc(VALUE klass) {
   ptr->zoom_y = 1.0;
   ptr->opacity = 255;
   ptr->blend_type = 0;
+  ptr->color = Qnil;
+  ptr->tone = Qnil;
+  VALUE ret = Data_Wrap_Struct(klass, plane_mark, plane_free, ptr);
   ptr->color = rb_color_new2();
   ptr->tone = rb_tone_new2();
   registerRenderable(&ptr->renderable);
-  VALUE ret = Data_Wrap_Struct(klass, plane_mark, plane_free, ptr);
   return ret;
 }
 
