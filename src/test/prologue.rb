@@ -130,7 +130,7 @@ module RGSSTest
 
   def assert_bitmap_equal(expected, actual, message = nil)
     comparison = compare_bitmap(expected, actual)
-    unless comparison < 1e-4
+    unless comparison < 1e-3
       message = \
         "#{expected.inspect} != #{actual.inspect} " +
         "(difference: #{comparison})" if message.nil?
