@@ -7,6 +7,7 @@
 #include "gl_misc.h"
 #include "sdl_misc.h"
 #include "Sprite.h"
+#include "Plane.h"
 #include "Window.h"
 #include "Input.h"
 #include "Audio.h"
@@ -115,11 +116,13 @@ void initSDL() {
   initSpriteSDL();
   initWindowSDL();
   initTilemapSDL();
+  initPlaneSDL();
   initAudioSDL();
 }
 
 void cleanupSDL() {
   deinitAudioSDL();
+  deinitPlaneSDL();
   deinitTilemapSDL();
   deinitWindowSDL();
   deinitSpriteSDL();

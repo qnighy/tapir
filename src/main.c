@@ -15,6 +15,7 @@
 #include "Font.h"
 #include "Graphics.h"
 #include "Input.h"
+#include "Plane.h"
 #include "RGSSError.h"
 #include "RGSSReset.h"
 #include "Rect.h"
@@ -171,6 +172,7 @@ static void Init_RGSS(void) {
   Init_Window();
   Init_Tilemap();
   Init_BitmapArray();
+  Init_Plane();
   Init_Graphics();
   Init_Input();
   Init_Audio();
