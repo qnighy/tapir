@@ -657,7 +657,7 @@ static void prepareRenderWindow(struct Renderable *renderable, int t) {
   struct RenderJob job;
   job.renderable = renderable;
   job.z = ptr->z;
-  job.y = ptr->y;
+  job.y = 0;
   job.aux[0] = 0;
   job.aux[1] = 0;
   job.aux[2] = 0;
