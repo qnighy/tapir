@@ -1235,7 +1235,7 @@ static VALUE rescue_reset(VALUE data, VALUE e) {
   (void) e;
   disposeAll();
   rb_gc_start();
-  *(int*)data = true;
+  *(bool*)data = true;
   return Qnil;
 }
 
