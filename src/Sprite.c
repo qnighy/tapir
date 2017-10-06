@@ -617,7 +617,7 @@ static void renderSprite(
   const struct Rect *src_rect = rb_rect_data(ptr->src_rect);
 
   glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
   glUseProgram(shader);
   glUniform1i(glGetUniformLocation(shader, "tex"), 0);
@@ -687,6 +687,8 @@ void initSpriteSDL() {
     "    } else {\n"
     "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
     "    }\n"
+    "    /* premultiplication */\n"
+    "    gl_FragColor.rgb *= gl_FragColor.a;\n"
     "}\n";
 
   shader = compileShaders(vsh_source, fsh_source);

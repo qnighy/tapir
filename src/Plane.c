@@ -377,9 +377,6 @@ static void renderPlane(
   SDL_Surface *surface = bitmap_ptr->surface;
   if(!surface) return;
 
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
   glUseProgram(shader);
   glUniform1i(glGetUniformLocation(shader, "tex"), 0);
   glUniform2f(glGetUniformLocation(shader, "resolution"),
@@ -433,6 +430,8 @@ void initPlaneSDL() {
     "    coord = mod(coord, 1.0);\n"
     "    vec4 color = texture2D(tex, coord);\n"
     "    gl_FragColor = color;\n"
+    "    /* premultiplication */\n"
+    "    gl_FragColor.rgb *= gl_FragColor.a;\n"
     "}\n";
 
   shader = compileShaders(vsh_source, fsh_source);

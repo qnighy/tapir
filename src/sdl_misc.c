@@ -205,7 +205,7 @@ void renderSDL() {
     // transition
 
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     glUseProgram(transition_shader);
     glUniform1f(glGetUniformLocation(transition_shader, "brightness"),
@@ -305,6 +305,8 @@ static void initTransition(void) {
     "\n"
     "void main(void) {\n"
     "    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0 - brightness);\n"
+    "    /* premultiplication */\n"
+    "    gl_FragColor.rgb *= gl_FragColor.a;\n"
     "}\n";
 
   transition_shader = compileShaders(vsh_source, fsh_source);

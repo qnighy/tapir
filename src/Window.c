@@ -689,7 +689,7 @@ static void renderWindow(
   int open_y = ptr->y + (ptr->height - open_height) / 2;
 
   glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
   if(ptr->windowskin != Qnil && job->aux[0] == 0) {
     const struct Bitmap *skin_bitmap_ptr = rb_bitmap_data(ptr->windowskin);
@@ -874,6 +874,8 @@ void initWindowSDL() {
 #endif
     "    color.a *= opacity;\n"
     "    gl_FragColor = color;\n"
+    "    /* premultiplication */\n"
+    "    gl_FragColor.rgb *= gl_FragColor.a;\n"
     "}\n";
 
   shader1 = compileShaders(vsh1_source, fsh1_source);
@@ -910,6 +912,8 @@ void initWindowSDL() {
 #endif
     "    color.a *= opacity;\n"
     "    gl_FragColor = color;\n"
+    "    /* premultiplication */\n"
+    "    gl_FragColor.rgb *= gl_FragColor.a;\n"
     "}\n";
 
   shader2 = compileShaders(vsh2_source, fsh2_source);
@@ -974,6 +978,8 @@ void initWindowSDL() {
     "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
     "    }\n"
     "    gl_FragColor.a *= opacity;\n"
+    "    /* premultiplication */\n"
+    "    gl_FragColor.rgb *= gl_FragColor.a;\n"
     "}\n";
 
   shader3 = compileShaders(vsh3_source, fsh3_source);
@@ -1004,6 +1010,8 @@ void initWindowSDL() {
     "    vec4 color = texture2D(windowskin, vec2(gl_TexCoord[0].x, gl_TexCoord[0].y));\n"
     "    color.a *= opacity;\n"
     "    gl_FragColor = color;\n"
+    "    /* premultiplication */\n"
+    "    gl_FragColor.rgb *= gl_FragColor.a;\n"
     "}\n";
 
   shader4 = compileShaders(vsh4_source, fsh4_source);
@@ -1058,6 +1066,8 @@ void initWindowSDL() {
 #endif
     "    gl_FragColor = texture2D(windowskin, src_coord);\n"
     "    gl_FragColor.a *= opacity;\n"
+    "    /* premultiplication */\n"
+    "    gl_FragColor.rgb *= gl_FragColor.a;\n"
     "}\n";
 
   cursor_shader = compileShaders(cursor_vsh_source, cursor_fsh_source);

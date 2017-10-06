@@ -629,6 +629,9 @@ static void renderTile(struct Tilemap *ptr, int tile_id, int x, int y) {
   SDL_Surface *tileset_surface = tileset_ptr->surface;
   if(!tileset_surface) return;
 
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
   glUseProgram(shader);
   glUniform1i(glGetUniformLocation(shader, "tex"), 0);
   glUniform2f(glGetUniformLocation(shader, "resolution"),
@@ -702,6 +705,8 @@ void initTilemapSDL() {
     "void main(void) {\n"
     "    vec4 color = texture2D(windowskin, vec2(gl_TexCoord[0].x, gl_TexCoord[0].y));\n"
     "    gl_FragColor = color;\n"
+    "    /* premultiplication */\n"
+    "    gl_FragColor.rgb *= gl_FragColor.a;\n"
     "}\n";
 
   shader = compileShaders(vsh_source, fsh_source);
