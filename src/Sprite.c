@@ -610,7 +610,6 @@ static void renderSprite(
   if(ptr->wave_amp) WARN_UNIMPLEMENTED("Sprite#wave_amp");
 #endif
   if(ptr->bush_depth) WARN_UNIMPLEMENTED("Sprite#bush_depth");
-  if(ptr->opacity != 255) WARN_UNIMPLEMENTED("Sprite#opacity");
   if(ptr->blend_type) WARN_UNIMPLEMENTED("Sprite#blend_type");
   if(ptr->angle != 0.0) WARN_UNIMPLEMENTED("Sprite#angle");
   if(ptr->bitmap == Qnil) return;
@@ -638,6 +637,8 @@ static void renderSprite(
       ptr->ox + src_rect->x, ptr->oy + src_rect->y);
   glUniform2f(glGetUniformLocation(shader, "zoom"),
       ptr->zoom_x, ptr->zoom_y);
+  glUniform1f(glGetUniformLocation(shader, "opacity"),
+      ptr->opacity / 255.0);
 
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture((struct Bitmap *)bitmap_ptr);
@@ -675,6 +676,7 @@ void initSpriteSDL() {
     "uniform vec2 src_bottomright;\n"
     "uniform vec2 src_size;\n"
     "uniform vec2 zoom;\n"
+    "uniform float opacity;\n"
     // "uniform float angle;\n"
     // "uniform vec4 sprite_color;\n"
     // "uniform vec4 sprite_tone;\n"
@@ -690,6 +692,7 @@ void initSpriteSDL() {
     "    } else {\n"
     "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
     "    }\n"
+    "    gl_FragColor.a *= opacity;\n"
     "    /* premultiplication */\n"
     "    gl_FragColor.rgb *= gl_FragColor.a;\n"
     "}\n";
