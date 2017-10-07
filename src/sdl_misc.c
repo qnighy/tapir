@@ -13,6 +13,7 @@
 #include "Audio.h"
 #include "RGSSReset.h"
 #include "Tilemap.h"
+#include "Viewport.h"
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 #define RMASK 0xff000000
@@ -42,8 +43,7 @@ SDL_GLContext glcontext = NULL;
 static size_t registry_size, registry_capacity;
 static struct Renderable **registry;
 
-static size_t jobqueue_size, jobqueue_capacity;
-static struct RenderJob *jobqueue;
+static struct RenderQueue main_queue;
 
 static GLuint transition_shader;
 
@@ -54,8 +54,7 @@ void initSDL() {
   registry_capacity = 100;
   registry = malloc(sizeof(*registry) * registry_capacity);
 
-  jobqueue_capacity = 100;
-  jobqueue = malloc(sizeof(*jobqueue) * jobqueue_capacity);
+  initRenderQueue(&main_queue);
 
   if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
     fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
@@ -134,7 +133,7 @@ void cleanupSDL() {
   TTF_Quit();
   IMG_Quit();
   SDL_Quit();
-  if(jobqueue) free(jobqueue);
+  deinitRenderQueue(&main_queue);
   if(registry) free(registry);
 }
 
@@ -183,14 +182,14 @@ void event_loop() {
 }
 
 static void renderScreen() {
-  jobqueue_size = 0;
+  clearRenderQueue(&main_queue);
+  for(size_t t = 0; t < registry_size; ++t) {
+    if(registry[t]->clear) registry[t]->clear(registry[t]);
+  }
   for(size_t t = 0; t < registry_size; ++t) {
     registry[t]->prepare(registry[t], t);
   }
-  qsort(jobqueue, jobqueue_size, sizeof(*jobqueue), compare_jobs);
-  for(size_t i = 0; i < jobqueue_size; ++i) {
-    jobqueue[i].renderable->render(jobqueue[i].renderable, &jobqueue[i]);
-  }
+  renderQueue(&main_queue);
 }
 
 void renderSDL() {
@@ -278,12 +277,38 @@ void disposeAll(void) {
   registry_size = 0;
 }
 
-void queueRenderJob(struct RenderJob job) {
-  if(jobqueue_size >= jobqueue_capacity) {
-    jobqueue_capacity = jobqueue_capacity + jobqueue_capacity / 2;
-    jobqueue = realloc(jobqueue, sizeof(*jobqueue) * jobqueue_capacity);
+void initRenderQueue(struct RenderQueue *queue) {
+  queue->capacity = 100;
+  queue->queue = malloc(sizeof(*queue->queue) * queue->capacity);
+}
+
+void clearRenderQueue(struct RenderQueue *queue) {
+  queue->size = 0;
+}
+
+void renderQueue(struct RenderQueue *queue) {
+  qsort(queue->queue, queue->size, sizeof(*queue->queue), compare_jobs);
+  for(size_t i = 0; i < queue->size; ++i) {
+    struct RenderJob *job = &queue->queue[i];
+    job->renderable->render(job->renderable, job);
   }
-  jobqueue[jobqueue_size++] = job;
+}
+
+void deinitRenderQueue(struct RenderQueue *queue) {
+  if(queue->queue) free(queue->queue);
+}
+
+void queueRenderJob(VALUE viewport, struct RenderJob job) {
+  struct RenderQueue *queue = &main_queue;
+  if(viewport != Qnil) {
+    queue = &((struct Viewport *)rb_viewport_data(viewport))->viewport_queue;
+  }
+  if(queue->size >= queue->capacity) {
+    queue->capacity = queue->capacity + queue->capacity / 2;
+    queue->queue = realloc(
+        queue->queue, sizeof(*queue->queue) * queue->capacity);
+  }
+  queue->queue[queue->size++] = job;
 }
 
 static void initTransition(void) {

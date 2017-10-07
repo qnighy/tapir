@@ -130,6 +130,7 @@ static void plane_free(struct Plane *ptr) {
 
 static VALUE plane_alloc(VALUE klass) {
   struct Plane *ptr = ALLOC(struct Plane);
+  ptr->renderable.clear = NULL;
   ptr->renderable.prepare = prepareRenderPlane;
   ptr->renderable.render = renderPlane;
   ptr->renderable.disposed = false;
@@ -343,7 +344,6 @@ static VALUE rb_plane_m_set_tone(VALUE self, VALUE newval) {
 
 static void prepareRenderPlane(struct Renderable *renderable, int t) {
   struct Plane *ptr = (struct Plane *)renderable;
-  if(ptr->viewport != Qnil) WARN_UNIMPLEMENTED("Plane#viewport");
   if(!ptr->visible) return;
   struct RenderJob job;
   job.renderable = renderable;
@@ -353,7 +353,7 @@ static void prepareRenderPlane(struct Renderable *renderable, int t) {
   job.aux[1] = 0;
   job.aux[2] = 0;
   job.t = t;
-  queueRenderJob(job);
+  queueRenderJob(ptr->viewport, job);
 }
 
 static void renderPlane(

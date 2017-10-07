@@ -222,6 +222,7 @@ static void window_free(struct Window *ptr) {
 
 static VALUE window_alloc(VALUE klass) {
   struct Window *ptr = ALLOC(struct Window);
+  ptr->renderable.clear = NULL;
   ptr->renderable.prepare = prepareRenderWindow;
   ptr->renderable.render = renderWindow;
   ptr->renderable.disposed = false;
@@ -437,7 +438,6 @@ static VALUE rb_window_m_viewport(VALUE self) {
 
 #if RGSS >= 2
 static VALUE rb_window_m_set_viewport(VALUE self, VALUE newval) {
-  WARN_UNIMPLEMENTED("Window#viewport");
   struct Window *ptr = rb_window_data_mut(self);
   if(newval != Qnil) rb_viewport_data(newval);
   ptr->viewport = newval;
@@ -657,7 +657,6 @@ static VALUE rb_window_m_set_tone(VALUE self, VALUE newval) {
 
 static void prepareRenderWindow(struct Renderable *renderable, int t) {
   struct Window *ptr = (struct Window *)renderable;
-  if(ptr->viewport != Qnil) WARN_UNIMPLEMENTED("Window#viewport");
   if(!ptr->visible) return;
   struct RenderJob job;
   job.renderable = renderable;
@@ -667,11 +666,11 @@ static void prepareRenderWindow(struct Renderable *renderable, int t) {
   job.aux[1] = 0;
   job.aux[2] = 0;
   job.t = t;
-  queueRenderJob(job);
+  queueRenderJob(ptr->viewport, job);
 #if RGSS == 1
   job.z = ptr->z + 2;
   job.aux[0] = 1;
-  queueRenderJob(job);
+  queueRenderJob(ptr->viewport, job);
 #endif
 }
 

@@ -194,6 +194,7 @@ static void sprite_free(struct Sprite *ptr) {
 
 static VALUE sprite_alloc(VALUE klass) {
   struct Sprite *ptr = ALLOC(struct Sprite);
+  ptr->renderable.clear = NULL;
   ptr->renderable.prepare = prepareRenderSprite;
   ptr->renderable.render = renderSprite;
   ptr->renderable.disposed = false;
@@ -576,7 +577,6 @@ static VALUE rb_sprite_m_set_tone(VALUE self, VALUE newval) {
 
 static void prepareRenderSprite(struct Renderable *renderable, int t) {
   struct Sprite *ptr = (struct Sprite *)renderable;
-  if(ptr->viewport != Qnil) WARN_UNIMPLEMENTED("Sprite#viewport");
   if(!ptr->visible) return;
   struct RenderJob job;
   job.renderable = renderable;
@@ -586,7 +586,7 @@ static void prepareRenderSprite(struct Renderable *renderable, int t) {
   job.aux[1] = 0;
   job.aux[2] = 0;
   job.t = t;
-  queueRenderJob(job);
+  queueRenderJob(ptr->viewport, job);
 }
 
 static void renderSprite(

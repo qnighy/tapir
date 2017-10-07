@@ -3,13 +3,16 @@
 
 #include <stdbool.h>
 #include <ruby.h>
+#include "sdl_misc.h"
 
 extern VALUE rb_cViewport;
 void Init_Viewport(void);
 
 struct Viewport {
+  struct Renderable renderable;
+  struct RenderQueue viewport_queue;
   VALUE rect, color, tone;
-  bool disposed, visible;
+  bool visible;
   int ox, oy, z;
 };
 

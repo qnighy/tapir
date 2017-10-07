@@ -8,6 +8,7 @@
 struct RenderJob;
 
 struct Renderable {
+  void (*clear)(struct Renderable *renderable);
   void (*prepare)(struct Renderable *renderable, int t);
   void (*render)(struct Renderable *renderable, const struct RenderJob *job);
   bool disposed;
@@ -16,6 +17,11 @@ struct Renderable {
 struct RenderJob {
   struct Renderable *renderable;
   int z, y, t, aux[3];
+};
+
+struct RenderQueue {
+  size_t size, capacity;
+  struct RenderJob *queue;
 };
 
 extern int window_width;
@@ -35,6 +41,10 @@ void registerRenderable(struct Renderable *renderable);
 void disposeRenderable(struct Renderable *renderable);
 void disposeAll(void);
 
-void queueRenderJob(struct RenderJob job);
+void initRenderQueue(struct RenderQueue *queue);
+void clearRenderQueue(struct RenderQueue *queue);
+void renderQueue(struct RenderQueue *queue);
+void queueRenderJob(VALUE viewport, struct RenderJob job);
+void deinitRenderQueue(struct RenderQueue *queue);
 
 #endif /* SDL_MISC_H */

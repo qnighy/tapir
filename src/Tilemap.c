@@ -144,6 +144,7 @@ static void tilemap_free(struct Tilemap *ptr) {
 
 static VALUE tilemap_alloc(VALUE klass) {
   struct Tilemap *ptr = ALLOC(struct Tilemap);
+  ptr->renderable.clear = NULL;
   ptr->renderable.prepare = prepareRenderTilemap;
   ptr->renderable.render = renderTilemap;
   ptr->renderable.disposed = false;
@@ -363,7 +364,6 @@ static VALUE rb_tilemap_m_set_oy(VALUE self, VALUE newval) {
 
 static void prepareRenderTilemap(struct Renderable *renderable, int t) {
   struct Tilemap *ptr = (struct Tilemap *)renderable;
-  if(ptr->viewport != Qnil) WARN_UNIMPLEMENTED("Tilemap#viewport");
   if(!ptr->visible) return;
   struct RenderJob job;
   job.renderable = renderable;
@@ -374,11 +374,11 @@ static void prepareRenderTilemap(struct Renderable *renderable, int t) {
   job.aux[0] = 0;
   job.aux[1] = 0;
   job.aux[2] = 0;
-  queueRenderJob(job);
+  queueRenderJob(ptr->viewport, job);
   job.z = 200;
   job.y = 0;
   job.aux[0] = 1;
-  queueRenderJob(job);
+  queueRenderJob(ptr->viewport, job);
 #else
   if(ptr->map_data == Qnil) return;
   const struct Table *map_data_ptr = rb_table_data(ptr->map_data);
@@ -416,7 +416,7 @@ static void prepareRenderTilemap(struct Renderable *renderable, int t) {
         job.aux[0] = xii;
         job.aux[1] = yii;
         job.aux[2] = zi;
-        queueRenderJob(job);
+        queueRenderJob(ptr->viewport, job);
       }
     }
   }

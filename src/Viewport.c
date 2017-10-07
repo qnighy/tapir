@@ -1,3 +1,6 @@
+#define GL_GLEXT_PROTOTYPES
+#include <SDL.h>
+#include <SDL_opengl.h>
 #include "Viewport.h"
 #include "Rect.h"
 #include "Tone.h"
@@ -26,6 +29,11 @@ static VALUE rb_viewport_m_color(VALUE self);
 static VALUE rb_viewport_m_set_color(VALUE self, VALUE newval);
 static VALUE rb_viewport_m_tone(VALUE self);
 static VALUE rb_viewport_m_set_tone(VALUE self, VALUE newval);
+
+static void clearViewportQueue(struct Renderable *renderable);
+static void prepareRenderViewport(struct Renderable *renderable, int t);
+static void renderViewport(
+    struct Renderable *renderable, const struct RenderJob *job);
 
 VALUE rb_cViewport;
 
@@ -90,15 +98,22 @@ static void viewport_mark(struct Viewport *ptr) {
 }
 
 static void viewport_free(struct Viewport *ptr) {
+  disposeRenderable(&ptr->renderable);
+  deinitRenderQueue(&ptr->viewport_queue);
   xfree(ptr);
 }
 
 static VALUE viewport_alloc(VALUE klass) {
   struct Viewport *ptr = ALLOC(struct Viewport);
+  ptr->renderable.clear = clearViewportQueue;
+  ptr->renderable.prepare = prepareRenderViewport;
+  ptr->renderable.render = renderViewport;
+  ptr->renderable.disposed = false;
+  initRenderQueue(&ptr->viewport_queue);
+
   ptr->rect = Qnil;
   ptr->color = Qnil;
   ptr->tone = Qnil;
-  ptr->disposed = false;
   ptr->visible = true;
   ptr->ox = 0;
   ptr->oy = 0;
@@ -107,6 +122,7 @@ static VALUE viewport_alloc(VALUE klass) {
   ptr->rect = rb_rect_new2();
   ptr->color = rb_color_new2();
   ptr->tone = rb_tone_new2();
+  registerRenderable(&ptr->renderable);
   return ret;
 }
 
@@ -131,6 +147,7 @@ static VALUE rb_viewport_m_initialize(int argc, VALUE *argv, VALUE self) {
       break;
 #if RGSS == 3
     case 0:
+      rb_rect_set(ptr->rect, 0, 0, window_width, window_height);
       break;
 #endif
     default:
@@ -152,7 +169,6 @@ static VALUE rb_viewport_m_initialize_copy(VALUE self, VALUE orig) {
   rb_rect_set2(ptr->rect, orig_ptr->rect);
   rb_color_set2(ptr->color, orig_ptr->color);
   rb_tone_set2(ptr->tone, orig_ptr->tone);
-  ptr->disposed = orig_ptr->disposed;
   ptr->visible = orig_ptr->visible;
   ptr->ox = orig_ptr->ox;
   ptr->oy = orig_ptr->oy;
@@ -162,13 +178,13 @@ static VALUE rb_viewport_m_initialize_copy(VALUE self, VALUE orig) {
 
 static VALUE rb_viewport_m_dispose(VALUE self) {
   struct Viewport *ptr = rb_viewport_data_mut(self);
-  ptr->disposed = true;
+  disposeRenderable(&ptr->renderable);
   return Qnil;
 }
 
 static VALUE rb_viewport_m_disposed_p(VALUE self) {
   const struct Viewport *ptr = rb_viewport_data(self);
-  return ptr->disposed ? Qtrue : Qfalse;
+  return ptr->renderable.disposed ? Qtrue : Qfalse;
 }
 
 static VALUE rb_viewport_m_rect(VALUE self) {
@@ -246,4 +262,53 @@ static VALUE rb_viewport_m_set_tone(VALUE self, VALUE newval) {
   struct Viewport *ptr = rb_viewport_data_mut(self);
   rb_tone_set2(ptr->tone, newval);
   return newval;
+}
+
+static void clearViewportQueue(struct Renderable *renderable) {
+  struct Viewport *ptr = (struct Viewport *)renderable;
+  clearRenderQueue(&ptr->viewport_queue);
+}
+
+
+static void prepareRenderViewport(struct Renderable *renderable, int t) {
+  struct Viewport *ptr = (struct Viewport *)renderable;
+  if(!ptr->visible) return;
+  struct RenderJob job;
+  job.renderable = renderable;
+  job.z = ptr->z;
+  job.y = 0;
+  job.aux[0] = 0;
+  job.aux[1] = 0;
+  job.aux[2] = 0;
+  job.t = t;
+  queueRenderJob(Qnil, job);
+}
+
+static void renderViewport(
+    struct Renderable *renderable, const struct RenderJob *job) {
+  (void) job;
+
+  struct Viewport *ptr = (struct Viewport *)renderable;
+  {
+    const struct Color *color = rb_color_data(ptr->color);
+    if(color->red || color->green || color->blue || color->alpha) {
+      WARN_UNIMPLEMENTED("Viewport#color");
+    }
+  }
+  {
+    const struct Tone *tone = rb_tone_data(ptr->tone);
+    if(tone->red || tone->green || tone->blue || tone->gray) {
+      WARN_UNIMPLEMENTED("Viewport#tone");
+    }
+  }
+  {
+    const struct Rect *rect = rb_rect_data(ptr->rect);
+    if(rect->x != 0 || rect->width != window_width ||
+        rect->y != 0 || rect->height != window_height) {
+      WARN_UNIMPLEMENTED("Viewport#rect");
+    }
+  }
+  if(ptr->ox != 0) WARN_UNIMPLEMENTED("Viewport#ox");
+  if(ptr->oy != 0) WARN_UNIMPLEMENTED("Viewport#oy");
+  renderQueue(&ptr->viewport_queue);
 }
