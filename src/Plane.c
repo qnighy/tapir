@@ -372,7 +372,7 @@ static void renderPlane(
       WARN_UNIMPLEMENTED("Plane#tone");
     }
   }
-  if(ptr->opacity != 255) WARN_UNIMPLEMENTED("Plane#opacity");
+  if(ptr->opacity == 0) return;
   if(ptr->blend_type) WARN_UNIMPLEMENTED("Plane#blend_type");
   if(ptr->bitmap == Qnil) return;
   const struct Bitmap *bitmap_ptr = rb_bitmap_data(ptr->bitmap);
@@ -389,6 +389,8 @@ static void renderPlane(
       ptr->ox, ptr->oy);
   glUniform2f(glGetUniformLocation(shader, "zoom"),
       ptr->zoom_x, ptr->zoom_y);
+  glUniform1f(glGetUniformLocation(shader, "opacity"),
+      ptr->opacity / 255.0);
 
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture((struct Bitmap *)bitmap_ptr);
@@ -423,6 +425,7 @@ void initPlaneSDL() {
     "uniform vec2 src_translate;\n"
     "uniform vec2 src_size;\n"
     "uniform vec2 zoom;\n"
+    "uniform float opacity;\n"
     "\n"
     "void main(void) {\n"
     "    vec2 coord = vec2(gl_FragCoord.x, resolution.y - gl_FragCoord.y);\n"
@@ -431,6 +434,7 @@ void initPlaneSDL() {
     "    coord = vec2(coord.x / src_size.x, coord.y / src_size.y);\n"
     "    coord = mod(coord, 1.0);\n"
     "    vec4 color = texture2D(tex, coord);\n"
+    "    color.a *= opacity;\n"
     "    gl_FragColor = color;\n"
     "    /* premultiplication */\n"
     "    gl_FragColor.rgb *= gl_FragColor.a;\n"
