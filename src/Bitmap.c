@@ -184,7 +184,7 @@ static VALUE rb_bitmap_m_initialize(int argc, VALUE *argv, VALUE self) {
       SDL_RWops *file = NULL;
       for(int i = 0; i < 4; ++i) {
         const char * const extensions[] = {"", ".png", ".jpg", ".bmp"};
-        VALUE filename = rb_str_dup(argv[0]);
+        VALUE filename = rb_str_new(RSTRING_PTR(argv[0]), RSTRING_LEN(argv[0]));
         rb_str_cat2(filename, extensions[i]);
         file = openres(filename, true);
         if(file) break;

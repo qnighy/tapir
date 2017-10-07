@@ -102,7 +102,7 @@ static VALUE rb_audio_s_bgm_play(int argc, VALUE *argv, VALUE klass) {
   for(int i = 0; i < 6; ++i) {
     const char * const extensions[] = {
       "", ".ogg", ".wma", ".mp3", ".wav", ".mid"};
-    filename = rb_obj_dup(argv[0]);
+    filename = rb_str_new(RSTRING_PTR(argv[0]), RSTRING_LEN(argv[0]));
     rb_str_cat2(filename, extensions[i]);
     file = openres(filename, false);
     if(file) break;
