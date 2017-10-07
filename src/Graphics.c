@@ -15,6 +15,8 @@ static int frame_rate = 40;
 static long frame_count = 0;
 static int performance_frame_count = 0;
 static Uint32 performance_last_ticks = 0;
+static int contiguous_skip_count = 0;
+static bool reset_frame = true;
 static double cap_debt = 0.0;
 static Uint32 cap_last_ticks = 0;
 
@@ -97,9 +99,24 @@ static VALUE rb_graphics_s_update(VALUE klass) {
 
   event_loop();
 
+  if(reset_frame) {
+    // Reset frame counter;
+    cap_debt = 0.0;
+    cap_last_ticks = SDL_GetTicks();
+    reset_frame = false;
+  }
+
+  // Cap too large debt.
+  if(cap_debt > 1000.0) cap_debt = 1000.0;
+  if(cap_debt < -1000.0) cap_debt = -1000.0;
+
   // If debt is too large, skip this frame.
-  if(cap_debt < 1000.0 / frame_rate) {
+  // However, we forcibly render frame sometimes.
+  if(cap_debt < 1000.0 / frame_rate || contiguous_skip_count > 5) {
     renderSDL();
+    contiguous_skip_count = 0;
+  } else {
+    ++contiguous_skip_count;
   }
 
   Uint32 current_ticks = SDL_GetTicks();
@@ -109,8 +126,6 @@ static VALUE rb_graphics_s_update(VALUE klass) {
   cap_debt -= 1000.0 / frame_rate;
   if(cap_debt < 0.0) {
     SDL_Delay(-cap_debt);
-  } else {
-    cap_debt *= 0.999;
   }
 
 
@@ -199,7 +214,7 @@ static VALUE rb_graphics_s_snap_to_bitmap(VALUE klass) {
 
 static VALUE rb_graphics_s_frame_reset(VALUE klass) {
   (void) klass;
-  cap_debt = 0.0;
+  reset_frame = true;
   return Qnil;
 }
 
