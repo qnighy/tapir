@@ -303,12 +303,16 @@ static void renderViewport(
   }
   {
     const struct Rect *rect = rb_rect_data(ptr->rect);
-    if(rect->x != 0 || rect->width != window_width ||
-        rect->y != 0 || rect->height != window_height) {
-      WARN_UNIMPLEMENTED("Viewport#rect");
-    }
+    if(rect->width < 0 || rect->height < 0) return;
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(
+        rect->x, window_height - (rect->y + rect->height),
+        rect->width, rect->height);
   }
   if(ptr->ox != 0) WARN_UNIMPLEMENTED("Viewport#ox");
   if(ptr->oy != 0) WARN_UNIMPLEMENTED("Viewport#oy");
   renderQueue(&ptr->viewport_queue);
+
+  glDisable(GL_SCISSOR_TEST);
+  glScissor(0, 0, window_width, window_height);
 }
