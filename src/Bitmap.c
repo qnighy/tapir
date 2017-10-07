@@ -546,6 +546,11 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
 #endif
   const char *cstr = StringValueCStr(str);
 
+  if(cstr[0] == '\0') {
+    // cstr == "": return early to avoid SDL error.
+    return Qnil;
+  }
+
   const struct Font *font_ptr = rb_font_data(ptr->font);
   TTF_Font *sdl_font = rb_font_to_sdl(ptr->font);
 
@@ -557,6 +562,11 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
     font_color_ptr->alpha
   };
   SDL_Surface *fg_rendered = TTF_RenderUTF8_Blended(sdl_font, cstr, fg_color);
+  if(!fg_rendered) {
+    fprintf(stderr, "Error rendering text: %s\n", SDL_GetError());
+    fprintf(stderr, "cstr = %s\n", cstr);
+    return Qnil;
+  }
   SDL_SetSurfaceBlendMode(fg_rendered, SDL_BLENDMODE_BLEND);
   int fg_width = fg_rendered->w;
   int fg_height = fg_rendered->h;
@@ -581,6 +591,11 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
     };
     SDL_Surface *out_rendered =
       TTF_RenderUTF8_Blended(sdl_font, cstr, out_color);
+    if(!out_rendered) {
+      fprintf(stderr, "Error rendering text outline: %s\n", SDL_GetError());
+      SDL_FreeSurface(fg_rendered);
+      return Qnil;
+    }
     SDL_SetSurfaceBlendMode(out_rendered, SDL_BLENDMODE_BLEND);
     int out_width = out_rendered->w;
     int out_height = out_rendered->h;
@@ -605,6 +620,11 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
     SDL_Color shadow_color = { 0, 0, 0, 255 };
     SDL_Surface *shadow_rendered =
       TTF_RenderUTF8_Blended(sdl_font, cstr, shadow_color);
+    if(!shadow_rendered) {
+      fprintf(stderr, "Error rendering text shadow: %s\n", SDL_GetError());
+      SDL_FreeSurface(fg_rendered);
+      return Qnil;
+    }
     SDL_SetSurfaceBlendMode(shadow_rendered, SDL_BLENDMODE_BLEND);
     SDL_Rect shadow_rect = rect;
     ++shadow_rect.x;
