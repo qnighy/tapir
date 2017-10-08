@@ -49,11 +49,15 @@ all: $(EXEC)
 clean:
 	$(RM) $(EXEC) $(OBJS)
 
-test:
+test: all
 	mkdir -p test
 	cd test; ruby ../../src/test/test.rb $(RGSS) ../$(EXEC)
 
-.PHONY: all clean test
+test-rgss:
+	mkdir -p test
+	cd test; ruby ../../src/test/test.rb $(RGSS) ./Game
+
+.PHONY: all clean test test-rgss
 
 $(EXEC): $(OBJS)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LDLIBS)
