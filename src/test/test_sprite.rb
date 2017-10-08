@@ -436,6 +436,46 @@ module RGSSTest
         assert_equal(s1.wave_phase, 41.0)
       end
     end
+
+    def test_blend_type_1
+      cleaned do
+        s1 = register(Sprite.new)
+        s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
+        s1.z = -10
+
+        s2 = register(Sprite.new)
+        s2.bitmap = Bitmap.new("#@@imgdir/grad_rgba_256x256.png")
+
+        s2.x = 50
+        s2.y = -50
+
+        s2.blend_type = 1
+
+        snap = Graphics.snap_to_bitmap
+        assert_bitmap_equal(
+          snap, Bitmap.new("#@@imgdir/test_sprite_blend_type_1.png"))
+      end
+    end
+
+    def test_blend_type_2
+      cleaned do
+        s1 = register(Sprite.new)
+        s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
+        s1.z = -10
+
+        s2 = register(Sprite.new)
+        s2.bitmap = Bitmap.new("#@@imgdir/grad_rgba_256x256.png")
+
+        s2.x = 50
+        s2.y = -50
+
+        s2.blend_type = 2
+
+        snap = Graphics.snap_to_bitmap
+        assert_bitmap_equal(
+          snap, Bitmap.new("#@@imgdir/test_sprite_blend_type_2.png"))
+      end
+    end
   end
 
   if RGSS >= 2
