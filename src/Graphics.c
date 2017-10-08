@@ -141,6 +141,13 @@ static VALUE rb_graphics_s_update(VALUE klass) {
 
   frame_count++;
 
+  // Wait until the window gets focused
+  while((SDL_GetWindowFlags(window) & SDL_WINDOW_INPUT_FOCUS) == 0) {
+    SDL_WaitEventTimeout(NULL, 1000);
+    event_loop();
+    cap_last_ticks = current_ticks = SDL_GetTicks();
+  }
+
   return Qnil;
 }
 
