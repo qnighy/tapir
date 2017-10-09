@@ -935,10 +935,247 @@ module RGSSTest
     end
   end
 
+  class TestRPGUsableItemDamage
+    include RGSSTest
+
+    @@klass = RPG::UsableItem::Damage if RGSS == 3
+
+    def test_superclass
+      assert_equal(@@klass.superclass, Object)
+    end
+
+    def test_constants
+      assert_symset_equal(@@klass.constants, [])
+    end
+
+    def test_class_variables
+      assert_symset_equal(@@klass.class_variables, [])
+    end
+
+    def test_class_methods
+      assert_symset_equal(@@klass.methods - Object.methods, [])
+    end
+
+    def test_instance_methods
+      assert_symset_equal(owned_instance_methods(@@klass), [
+        :critical, :critical=, :drain?, :element_id, :element_id=, :eval,
+        :formula, :formula=, :none?, :recover?, :sign, :to_hp?, :to_mp?, :type,
+        :type=, :variance, :variance=])
+    end
+
+    def test_instance_variables
+      obj = @@klass.new
+      assert_symset_equal(obj.instance_variables, [
+        :@critical, :@element_id, :@formula, :@type, :@variance])
+    end
+
+    def test_new
+      obj = @@klass.new
+      assert_equal(obj.critical, false)
+      assert_equal(obj.element_id, 0)
+      assert_equal(obj.formula, "0")
+      assert_equal(obj.type, 0)
+      assert_equal(obj.variance, 20)
+
+      assert_raise(ArgumentError) { @@klass.new(:hoge) }
+    end
+
+    def test_drain_p
+      obj = @@klass.new
+      assert_equal((0..6).select {|x| obj.type = x; obj.drain? }, [5, 6])
+    end
+
+    def test_none_p
+      obj = @@klass.new
+      assert_equal((0..6).select {|x| obj.type = x; obj.none? }, [0])
+    end
+
+    def test_recover_p
+      obj = @@klass.new
+      assert_equal((0..6).select {|x| obj.type = x; obj.recover? }, [3, 4])
+    end
+
+    def test_sign
+      obj = @@klass.new
+      assert_equal(
+        (0..6).map {|x| obj.type = x; obj.sign },
+        [1, 1, 1, -1, -1, 1, 1])
+    end
+
+    def test_to_hp_p
+      obj = @@klass.new
+      assert_equal((0..6).select {|x| obj.type = x; obj.to_hp? }, [1, 3, 5])
+    end
+
+    def test_to_mp_p
+      obj = @@klass.new
+      assert_equal((0..6).select {|x| obj.type = x; obj.to_mp? }, [2, 4, 6])
+    end
+
+    def test_eval_const_1
+      obj = @@klass.new
+      obj.formula = "135 + 256 * 3"
+      obj.type = 0
+      assert_equal(obj.eval(nil, nil, nil), 903)
+    end
+
+    def test_eval_const_2
+      obj = @@klass.new
+      obj.formula = "3 + 3"
+      obj.type = 3
+      assert_equal(obj.eval(nil, nil, nil), -6)
+    end
+
+    def test_eval_const_3
+      obj = @@klass.new
+      obj.formula = "2 - 4"
+      obj.type = 5
+      assert_equal(obj.eval(nil, nil, nil), 0)
+    end
+
+    def test_eval_const_4
+      obj = @@klass.new
+      obj.formula = "-6"
+      obj.type = 4
+      assert_equal(obj.eval(nil, nil, nil), 0)
+    end
+
+    def test_eval_a_1
+      obj = @@klass.new
+      obj.formula = "a + 2"
+      obj.type = 4
+      assert_equal(obj.eval(100, 200, 300), -102)
+    end
+
+    def test_eval_a_2
+      obj = @@klass.new
+      obj.formula = "a * 5 + 2"
+      obj.type = 2
+      assert_equal(obj.eval(100, 200, 300), 502)
+    end
+
+    def test_eval_b_1
+      obj = @@klass.new
+      obj.formula = "b - 30"
+      obj.type = 1
+      assert_equal(obj.eval(100, 200, 300), 170)
+    end
+
+    def test_eval_b_2
+      obj = @@klass.new
+      obj.formula = "b - 230"
+      obj.type = 6
+      assert_equal(obj.eval(100, 200, 300), 0)
+    end
+
+    def test_eval_v_1
+      obj = @@klass.new
+      obj.formula = "v"
+      obj.type = 4
+      assert_equal(obj.eval(100, 200, 300), -300)
+    end
+
+    def test_eval_rescue_1
+      obj = @@klass.new
+      obj.formula = "0 / 0"
+      obj.type = 1
+      assert_equal(obj.eval(100, 200, 300), 0)
+    end
+
+    def test_eval_rescue_2
+      obj = @@klass.new
+      obj.formula = "150"
+      obj.type = t = Object.new
+      def t.==(x)
+        raise "foo"
+      end
+      assert_equal(obj.eval(100, 200, 300), 0)
+    end
+
+    def test_eval_self_1
+      obj = @@klass.new
+      obj.formula = "self == Kernel ? 277 : 0"
+      obj.type = 0
+      assert_equal(obj.eval(100, 200, 300), 277)
+    end
+  end
+
+  class TestRPGUsableItemEffect
+    include RGSSTest
+
+    @@klass = RPG::UsableItem::Effect if RGSS == 3
+
+    def test_superclass
+      assert_equal(@@klass.superclass, Object)
+    end
+
+    def test_constants
+      assert_symset_equal(@@klass.constants, [])
+    end
+
+    def test_class_variables
+      assert_symset_equal(@@klass.class_variables, [])
+    end
+
+    def test_class_methods
+      assert_symset_equal(@@klass.methods - Object.methods, [])
+    end
+
+    def test_instance_methods
+      assert_symset_equal(owned_instance_methods(@@klass), [
+        :code, :code=, :data_id, :data_id=, :value1, :value1=, :value2,
+        :value2=])
+    end
+
+    def test_instance_variables
+      obj = @@klass.new
+      assert_symset_equal(obj.instance_variables, [
+        :@code, :@data_id, :@value1, :@value2])
+    end
+
+    def test_new
+      obj = @@klass.new
+      assert_equal(obj.code, 0)
+      assert_equal(obj.data_id, 0)
+      assert_equal(obj.value1, 0)
+      assert_equal(obj.value2, 0)
+
+      obj = @@klass.new(:hoge)
+      assert_equal(obj.code, :hoge)
+      assert_equal(obj.data_id, 0)
+      assert_equal(obj.value1, 0)
+      assert_equal(obj.value2, 0)
+
+      obj = @@klass.new(:hoge, :fuga)
+      assert_equal(obj.code, :hoge)
+      assert_equal(obj.data_id, :fuga)
+      assert_equal(obj.value1, 0)
+      assert_equal(obj.value2, 0)
+
+      obj = @@klass.new(:hoge, :fuga, :piyo)
+      assert_equal(obj.code, :hoge)
+      assert_equal(obj.data_id, :fuga)
+      assert_equal(obj.value1, :piyo)
+      assert_equal(obj.value2, 0)
+
+      obj = @@klass.new(:hoge, :fuga, :piyo, :quux)
+      assert_equal(obj.code, :hoge)
+      assert_equal(obj.data_id, :fuga)
+      assert_equal(obj.value1, :piyo)
+      assert_equal(obj.value2, :quux)
+
+      assert_raise(ArgumentError) {
+        @@klass.new(:hoge, :fuga, :piyo, :quux, :quuux)
+      }
+    end
+  end
+
   run_test(TestRPGBaseItem) if RGSS >= 2
   run_test(TestRPGBaseItemFeature) if RGSS == 3
   run_test(TestRPGActor)
   run_test(TestRPGClass)
   run_test(TestRPGClassLearning)
   run_test(TestRPGUsableItem) if RGSS >= 2
+  run_test(TestRPGUsableItemDamage) if RGSS == 3
+  run_test(TestRPGUsableItemEffect) if RGSS == 3
 end
