@@ -327,7 +327,23 @@ static void load_libs() {
       "      attr_accessor :always_on_top\n"
 #endif
       "      def initialize\n"
-      "        warn_unimplemented(\"RPG::Event::Page.new\")\n"
+      "        @condition = RPG::Event::Page::Condition.new\n"
+      "        @direction_fix = false\n"
+      "        @graphic = RPG::Event::Page::Graphic.new\n"
+      "        @list = [RPG::EventCommand.new]\n"
+      "        @move_frequency = 3\n"
+      "        @move_route = RPG::MoveRoute.new\n"
+      "        @move_speed = 3\n"
+      "        @move_type = 0\n"
+      "        @step_anime = false\n"
+      "        @through = false\n"
+      "        @trigger = 0\n"
+      "        @walk_anime = true\n"
+#if RGSS >= 2
+      "        @priority_type = 0\n"
+#elif RGSS == 1
+      "        @always_on_top = false\n"
+#endif
       "      end\n"
       "      class Condition\n"
       "        attr_accessor :self_switch_ch, :self_switch_valid, :switch1_id, :switch1_valid, :switch2_id, :switch2_valid, :variable_id, :variable_valid, :variable_value\n"
@@ -335,26 +351,52 @@ static void load_libs() {
       "        attr_accessor :actor_id, :actor_valid, :item_id, :item_valid\n"
 #endif
       "        def initialize\n"
-      "          warn_unimplemented(\"RPG::Event::Page::Condition.new\")\n"
+      "          @self_switch_ch = \"A\"\n"
+      "          @self_switch_valid = false\n"
+      "          @switch1_id = 1\n"
+      "          @switch1_valid = false\n"
+      "          @switch2_id = 1\n"
+      "          @switch2_valid = false\n"
+      "          @variable_id = 1\n"
+      "          @variable_valid = false\n"
+      "          @variable_value = 0\n"
+#if RGSS >= 2
+      "          @actor_id = 1\n"
+      "          @actor_valid = false\n"
+      "          @item_id = 1\n"
+      "          @item_valid = false\n"
+#endif
       "        end\n"
       "      end\n"
       "      class Graphic\n"
       "        attr_accessor :character_name, :direction, :pattern, :tile_id\n"
 #if RGSS >= 2
       "        attr_accessor :character_index\n"
-#elif RGSS == 1
-      "        attr_accessor :blend_type, :character_hue, :character_name, :opacity, :tile_id\n"
+#else
+      "        attr_accessor :blend_type, :character_hue, :opacity\n"
 #endif
       "        def initialize\n"
-      "          warn_unimplemented(\"RPG::Event::Page::Graphic.new\")\n"
+      "          @character_name = \"\"\n"
+      "          @direction = 2\n"
+      "          @pattern = 0\n"
+      "          @tile_id = 0\n"
+#if RGSS >= 2
+      "          @character_index = 0\n"
+#else
+      "          @blend_type = 0\n"
+      "          @character_hue = 0\n"
+      "          @opacity = 255\n"
+#endif
       "        end\n"
       "      end\n"
       "    end\n"
       "  end\n"
       "  class EventCommand\n"
       "    attr_accessor :code, :indent, :parameters\n"
-      "    def initialize\n"
-      "      warn_unimplemented(\"RPG::EventCommand.new\")\n"
+      "    def initialize(code = 0, indent = 0, parameters = [])\n"
+      "      @code = code\n"
+      "      @indent = indent\n"
+      "      @parameters = parameters\n"
       "    end\n"
       "  end\n"
       "  class MoveRoute\n"
@@ -363,13 +405,19 @@ static void load_libs() {
       "    attr_accessor :wait\n"
 #endif
       "    def initialize\n"
-      "      warn_unimplemented(\"RPG::MoveRoute.new\")\n"
+      "      @list = [RPG::MoveCommand.new]\n"
+      "      @repeat = true\n"
+      "      @skippable = false\n"
+#if RGSS >= 2
+      "      @wait = false\n"
+#endif
       "    end\n"
       "  end\n"
       "  class MoveCommand\n"
       "    attr_accessor :code, :parameters\n"
-      "    def initialize\n"
-      "      warn_unimplemented(\"RPG::MoveCommand.new\")\n"
+      "    def initialize(code = 0, parameters = [])\n"
+      "      @code = code\n"
+      "      @parameters = parameters\n"
       "    end\n"
       "  end\n"
 #if RGSS >= 2
