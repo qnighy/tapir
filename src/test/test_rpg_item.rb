@@ -1346,6 +1346,187 @@ module RGSSTest
     end
   end
 
+  class TestRPGItem
+    include RGSSTest
+
+    @@klass = RPG::Item
+
+    def test_superclass
+      if RGSS >= 2
+        assert_equal(@@klass.superclass, RPG::UsableItem)
+      else
+        assert_equal(@@klass.superclass, Object)
+      end
+    end
+
+    def test_constants
+      if RGSS == 3
+        assert_symset_equal(@@klass.constants, [:Damage, :Effect, :Feature])
+        assert_equal(@@klass::Damage, RPG::UsableItem::Damage)
+        assert_equal(@@klass::Effect, RPG::UsableItem::Effect)
+        assert_equal(@@klass::Feature, RPG::BaseItem::Feature)
+      else
+        assert_symset_equal(@@klass.constants, [])
+      end
+    end
+
+    def test_class_variables
+      assert_symset_equal(@@klass.class_variables, [])
+    end
+
+    def test_class_methods
+      assert_symset_equal(@@klass.methods - Object.methods, [])
+    end
+
+    def test_instance_methods
+      if RGSS == 3
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :consumable, :consumable=, :itype_id, :itype_id=, :key_item?, :price,
+          :price=])
+      elsif RGSS == 2
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :consumable, :consumable=, :hp_recovery, :hp_recovery=,
+          :hp_recovery_rate, :hp_recovery_rate=, :mp_recovery, :mp_recovery=,
+          :mp_recovery_rate, :mp_recovery_rate=, :parameter_points,
+          :parameter_points=, :parameter_type, :parameter_type=, :price,
+          :price=])
+      else
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :animation1_id, :animation1_id=, :animation2_id, :animation2_id=,
+          :common_event_id, :common_event_id=, :consumable, :consumable=,
+          :description, :description=, :element_set, :element_set=, :hit,
+          :hit=, :icon_name, :icon_name=, :id, :id=, :mdef_f, :mdef_f=,
+          :menu_se, :menu_se=, :minus_state_set, :minus_state_set=, :name,
+          :name=, :occasion, :occasion=, :parameter_points, :parameter_points=,
+          :parameter_type, :parameter_type=, :pdef_f, :pdef_f=,
+          :plus_state_set, :plus_state_set=, :price, :price=, :recover_hp,
+          :recover_hp=, :recover_hp_rate, :recover_hp_rate=, :recover_sp,
+          :recover_sp=, :recover_sp_rate, :recover_sp_rate=, :scope, :scope=,
+          :variance, :variance=])
+      end
+    end
+
+    def test_instance_variables
+      obj = @@klass.new
+      if RGSS == 3
+        assert_symset_equal(obj.instance_variables, [
+          :@animation_id, :@consumable, :@damage, :@description, :@effects,
+          :@features, :@hit_type, :@icon_index, :@id, :@itype_id, :@name,
+          :@note, :@occasion, :@price, :@repeats, :@scope, :@speed,
+          :@success_rate, :@tp_gain])
+      elsif RGSS == 2
+        assert_symset_equal(obj.instance_variables, [
+          :@absorb_damage, :@animation_id, :@atk_f, :@base_damage,
+          :@common_event_id, :@consumable, :@damage_to_mp, :@description,
+          :@element_set, :@hp_recovery, :@hp_recovery_rate, :@icon_index, :@id,
+          :@ignore_defense, :@minus_state_set, :@mp_recovery,
+          :@mp_recovery_rate, :@name, :@note, :@occasion, :@parameter_points,
+          :@parameter_type, :@physical_attack, :@plus_state_set, :@price,
+          :@scope, :@speed, :@spi_f, :@variance])
+      else
+        assert_symset_equal(obj.instance_variables, [
+          :@animation1_id, :@animation2_id, :@common_event_id, :@consumable,
+          :@description, :@element_set, :@hit, :@icon_name, :@id, :@mdef_f,
+          :@menu_se, :@minus_state_set, :@name, :@occasion, :@parameter_points,
+          :@parameter_type, :@pdef_f, :@plus_state_set, :@price, :@recover_hp,
+          :@recover_hp_rate, :@recover_sp, :@recover_sp_rate, :@scope,
+          :@variance])
+      end
+    end
+
+    def test_new
+      obj = @@klass.new
+
+      assert_raise(ArgumentError) { @@klass.new(:hoge) }
+
+      if RGSS == 3
+        assert_equal(obj.animation_id, 0)
+        assert_equal(obj.consumable, true)
+        assert_equal(obj.damage.class, RPG::UsableItem::Damage)
+        assert_equal(obj.damage.critical, false)
+        assert_equal(obj.damage.element_id, 0)
+        assert_equal(obj.damage.formula, "0")
+        assert_equal(obj.damage.type, 0)
+        assert_equal(obj.damage.variance, 20)
+        assert_equal(obj.description, "")
+        assert_equal(obj.effects, [])
+        assert_equal(obj.features, [])
+        assert_equal(obj.hit_type, 0)
+        assert_equal(obj.icon_index, 0)
+        assert_equal(obj.id, 0)
+        assert_equal(obj.itype_id, 1)
+        assert_equal(obj.name, "")
+        assert_equal(obj.note, "")
+        assert_equal(obj.occasion, 0)
+        assert_equal(obj.price, 0)
+        assert_equal(obj.repeats, 1)
+        assert_equal(obj.scope, 7)
+        assert_equal(obj.speed, 0)
+        assert_equal(obj.success_rate, 100)
+        assert_equal(obj.tp_gain, 0)
+      elsif RGSS == 2
+        assert_equal(obj.absorb_damage, false)
+        assert_equal(obj.animation_id, 0)
+        assert_equal(obj.atk_f, 0)
+        assert_equal(obj.base_damage, 0)
+        assert_equal(obj.common_event_id, 0)
+        assert_equal(obj.consumable, true)
+        assert_equal(obj.damage_to_mp, false)
+        assert_equal(obj.description, "")
+        assert_equal(obj.element_set, [])
+        assert_equal(obj.hp_recovery, 0)
+        assert_equal(obj.hp_recovery_rate, 0)
+        assert_equal(obj.icon_index, 0)
+        assert_equal(obj.id, 0)
+        assert_equal(obj.ignore_defense, false)
+        assert_equal(obj.minus_state_set, [])
+        assert_equal(obj.mp_recovery, 0)
+        assert_equal(obj.mp_recovery_rate, 0)
+        assert_equal(obj.name, "")
+        assert_equal(obj.note, "")
+        assert_equal(obj.occasion, 0)
+        assert_equal(obj.parameter_points, 0)
+        assert_equal(obj.parameter_type, 0)
+        assert_equal(obj.physical_attack, false)
+        assert_equal(obj.plus_state_set, [])
+        assert_equal(obj.price, 0)
+        assert_equal(obj.scope, 7)
+        assert_equal(obj.speed, 0)
+        assert_equal(obj.spi_f, 0)
+        assert_equal(obj.variance, 20)
+      else
+        assert_equal(obj.animation1_id, 0)
+        assert_equal(obj.animation2_id, 0)
+        assert_equal(obj.common_event_id, 0)
+        assert_equal(obj.consumable, true)
+        assert_equal(obj.description, "")
+        assert_equal(obj.element_set, [])
+        assert_equal(obj.hit, 100)
+        assert_equal(obj.icon_name, "")
+        assert_equal(obj.id, 0)
+        assert_equal(obj.mdef_f, 0)
+        assert_equal(obj.menu_se.class, RPG::AudioFile)
+        assert_equal(obj.menu_se.name, "")
+        assert_equal(obj.menu_se.pitch, 100)
+        assert_equal(obj.menu_se.volume, 80)
+        assert_equal(obj.minus_state_set, [])
+        assert_equal(obj.name, "")
+        assert_equal(obj.occasion, 0)
+        assert_equal(obj.parameter_points, 0)
+        assert_equal(obj.parameter_type, 0)
+        assert_equal(obj.pdef_f, 0)
+        assert_equal(obj.plus_state_set, [])
+        assert_equal(obj.price, 0)
+        assert_equal(obj.recover_hp, 0)
+        assert_equal(obj.recover_hp_rate, 0)
+        assert_equal(obj.recover_sp, 0)
+        assert_equal(obj.recover_sp_rate, 0)
+        assert_equal(obj.scope, 0)
+        assert_equal(obj.variance, 0)
+      end
+    end
+  end
+
   run_test(TestRPGBaseItem) if RGSS >= 2
   run_test(TestRPGBaseItemFeature) if RGSS == 3
   run_test(TestRPGActor)
@@ -1355,4 +1536,5 @@ module RGSSTest
   run_test(TestRPGUsableItemDamage) if RGSS == 3
   run_test(TestRPGUsableItemEffect) if RGSS == 3
   run_test(TestRPGSkill)
+  run_test(TestRPGItem)
 end
