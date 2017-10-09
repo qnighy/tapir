@@ -621,6 +621,15 @@ static void renderSprite(
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
+  int src_left = src_rect->x;
+  int src_top = src_rect->y;
+  int src_right = src_rect->x + src_rect->width;
+  int src_bottom = src_rect->y + src_rect->height;
+  if(src_left < 0) src_left = 0;
+  if(src_top < 0) src_top = 0;
+  if(src_right > surface->w) src_right = surface->w;
+  if(src_bottom > surface->h) src_bottom = surface->h;
+
   glUseProgram(shader);
   glUniform1i(glGetUniformLocation(shader, "tex"), 0);
   glUniform2f(glGetUniformLocation(shader, "dst_size"),
@@ -628,9 +637,9 @@ static void renderSprite(
   glUniform2f(glGetUniformLocation(shader, "src_size"),
       surface->w, surface->h);
   glUniform2f(glGetUniformLocation(shader, "src_topleft"),
-      src_rect->x, src_rect->y);
+      src_left, src_top);
   glUniform2f(glGetUniformLocation(shader, "src_bottomright"),
-      src_rect->x + src_rect->width, src_rect->y + src_rect->height);
+      src_right, src_bottom);
   glUniform2f(glGetUniformLocation(shader, "dst_translate"),
       ptr->x, ptr->y);
   glUniform2f(glGetUniformLocation(shader, "src_translate"),
