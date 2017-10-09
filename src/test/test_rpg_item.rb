@@ -686,9 +686,259 @@ module RGSSTest
     end
   end
 
+  class TestRPGUsableItem
+    include RGSSTest
+
+    @@klass = RPG::UsableItem if RGSS >= 2
+
+    def test_superclass
+      assert_equal(@@klass.superclass, RPG::BaseItem)
+    end
+
+    def test_constants
+      if RGSS == 3
+        assert_symset_equal(@@klass.constants, [:Damage, :Effect, :Feature])
+        assert_equal(@@klass::Feature, RPG::BaseItem::Feature)
+      else
+        assert_symset_equal(@@klass.constants, [])
+      end
+    end
+
+    def test_class_variables
+      assert_symset_equal(@@klass.class_variables, [])
+    end
+
+    def test_class_methods
+      assert_symset_equal(@@klass.methods - Object.methods, [])
+    end
+
+    def test_instance_methods
+      if RGSS == 3
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :animation_id, :animation_id=, :battle_ok?, :certain?, :damage,
+          :damage=, :effects, :effects=, :for_all?, :for_dead_friend?,
+          :for_friend?, :for_one?, :for_opponent?, :for_random?, :for_user?,
+          :hit_type, :hit_type=, :magical?, :menu_ok?, :need_selection?,
+          :number_of_targets, :occasion, :occasion=, :physical?, :repeats,
+          :repeats=, :scope, :scope=, :speed, :speed=, :success_rate,
+          :success_rate=, :tp_gain, :tp_gain=])
+      else
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :absorb_damage, :absorb_damage=, :animation_id, :animation_id=,
+          :atk_f, :atk_f=, :base_damage, :base_damage=, :battle_ok?,
+          :common_event_id, :common_event_id=, :damage_to_mp, :damage_to_mp=,
+          :dual?, :element_set, :element_set=, :for_all?, :for_dead_friend?,
+          :for_friend?, :for_one?, :for_opponent?, :for_random?, :for_three?,
+          :for_two?, :for_user?, :ignore_defense, :ignore_defense=, :menu_ok?,
+          :minus_state_set, :minus_state_set=, :need_selection?, :occasion,
+          :occasion=, :physical_attack, :physical_attack=, :plus_state_set,
+          :plus_state_set=, :scope, :scope=, :speed, :speed=, :spi_f, :spi_f=,
+          :variance, :variance=])
+      end
+    end
+
+    def test_instance_variables
+      obj = @@klass.new
+      if RGSS == 3
+        assert_symset_equal(obj.instance_variables, [
+          :@animation_id, :@damage, :@description, :@effects, :@features,
+          :@hit_type, :@icon_index, :@id, :@name, :@note, :@occasion,
+          :@repeats, :@scope, :@speed, :@success_rate, :@tp_gain])
+      else
+        assert_symset_equal(obj.instance_variables, [
+          :@absorb_damage, :@animation_id, :@atk_f, :@base_damage,
+          :@common_event_id, :@damage_to_mp, :@description, :@element_set,
+          :@icon_index, :@id, :@ignore_defense, :@minus_state_set, :@name,
+          :@note, :@occasion, :@physical_attack, :@plus_state_set, :@scope,
+          :@speed, :@spi_f, :@variance])
+      end
+    end
+
+    def test_new
+      obj = @@klass.new
+
+      assert_raise(ArgumentError) { @@klass.new(:hoge) }
+
+      if RGSS == 3
+        assert_equal(obj.animation_id, 0)
+        assert_equal(obj.damage.class, RPG::UsableItem::Damage)
+        assert_equal(obj.damage.type, 0)
+        assert_equal(obj.damage.element_id, 0)
+        assert_equal(obj.damage.formula, "0")
+        assert_equal(obj.damage.variance, 20)
+        assert_equal(obj.damage.critical, false)
+        assert_equal(obj.description, "")
+        assert_equal(obj.effects, [])
+        assert_equal(obj.features, [])
+        assert_equal(obj.hit_type, 0)
+        assert_equal(obj.icon_index, 0)
+        assert_equal(obj.id, 0)
+        assert_equal(obj.name, "")
+        assert_equal(obj.note, "")
+        assert_equal(obj.occasion, 0)
+        assert_equal(obj.repeats, 1)
+        assert_equal(obj.scope, 0)
+        assert_equal(obj.speed, 0)
+        assert_equal(obj.success_rate, 100)
+        assert_equal(obj.tp_gain, 0)
+      else
+        assert_equal(obj.absorb_damage, false)
+        assert_equal(obj.animation_id, 0)
+        assert_equal(obj.atk_f, 0)
+        assert_equal(obj.base_damage, 0)
+        assert_equal(obj.common_event_id, 0)
+        assert_equal(obj.damage_to_mp, false)
+        assert_equal(obj.description, "")
+        assert_equal(obj.element_set, [])
+        assert_equal(obj.icon_index, 0)
+        assert_equal(obj.id, 0)
+        assert_equal(obj.ignore_defense, false)
+        assert_equal(obj.minus_state_set, [])
+        assert_equal(obj.name, "")
+        assert_equal(obj.note, "")
+        assert_equal(obj.occasion, 0)
+        assert_equal(obj.physical_attack, false)
+        assert_equal(obj.plus_state_set, [])
+        assert_equal(obj.scope, 0)
+        assert_equal(obj.speed, 0)
+        assert_equal(obj.spi_f, 0)
+        assert_equal(obj.variance, 20)
+      end
+    end
+
+    def test_battle_ok_p
+      obj = @@klass.new
+      assert_equal(
+        (0..3).select {|x| obj.occasion = x; obj.battle_ok? },
+        [0, 1])
+    end
+
+    def test_certain_p
+      RGSS == 3 or return
+      obj = @@klass.new
+      assert_equal((0..2).select {|x| obj.hit_type = x; obj.certain? }, [0])
+    end
+
+    def test_dual_p
+      RGSS == 2 or return
+      obj = @@klass.new
+      assert_equal((0..11).select {|x| obj.scope = x; obj.dual? }, [3])
+    end
+
+    def test_for_all_p
+      obj = @@klass.new
+      assert_equal(
+        (0..11).select {|x| obj.scope = x; obj.for_all? },
+        [2, 8, 10])
+    end
+
+    def test_for_dead_friend_p
+      obj = @@klass.new
+      assert_equal(
+        (0..11).select {|x| obj.scope = x; obj.for_dead_friend? },
+        [9, 10])
+    end
+
+    def test_for_friend_p
+      obj = @@klass.new
+      assert_equal(
+        (0..11).select {|x| obj.scope = x; obj.for_friend? },
+        [7, 8, 9, 10, 11])
+    end
+
+    def test_for_one_p
+      obj = @@klass.new
+      if RGSS == 3
+        assert_equal(
+          (0..11).select {|x| obj.scope = x; obj.for_one? },
+          [1, 3, 7, 9, 11])
+      else
+        assert_equal(
+          (0..11).select {|x| obj.scope = x; obj.for_one? },
+          [1, 3, 4, 7, 9, 11])
+      end
+    end
+
+    def test_for_opponent_p
+      obj = @@klass.new
+      assert_equal(
+        (0..11).select {|x| obj.scope = x; obj.for_opponent? },
+        [1, 2, 3, 4, 5, 6])
+    end
+
+    def test_for_random_p
+      obj = @@klass.new
+      if RGSS == 3
+        assert_equal(
+          (0..11).select {|x| obj.scope = x; obj.for_random? },
+          [3, 4, 5, 6])
+      else
+        assert_equal(
+          (0..11).select {|x| obj.scope = x; obj.for_random? },
+          [4, 5, 6])
+      end
+    end
+
+    def test_for_three_p
+      RGSS == 2 or return
+      obj = @@klass.new
+      assert_equal((0..11).select {|x| obj.scope = x; obj.for_three? }, [6])
+    end
+
+    def test_for_two_p
+      RGSS == 2 or return
+      obj = @@klass.new
+      assert_equal((0..11).select {|x| obj.scope = x; obj.for_two? }, [5])
+    end
+
+    def test_for_user_p
+      obj = @@klass.new
+      assert_equal((0..11).select {|x| obj.scope = x; obj.for_user? }, [11])
+    end
+
+    def test_magical_p
+      RGSS == 3 or return
+      obj = @@klass.new
+      assert_equal((0..2).select {|x| obj.hit_type = x; obj.magical? }, [2])
+    end
+
+    def test_menu_ok_p
+      obj = @@klass.new
+      assert_equal((0..3).select {|x| obj.occasion = x; obj.menu_ok? }, [0, 2])
+    end
+
+    def test_need_selection_p
+      obj = @@klass.new
+      if RGSS == 3
+        assert_equal(
+          (0..11).select {|x| obj.scope = x; obj.need_selection? },
+          [1, 7, 9])
+      else
+        assert_equal(
+          (0..11).select {|x| obj.scope = x; obj.need_selection? },
+          [1, 3, 7, 9])
+      end
+    end
+
+    def test_number_of_targets
+      RGSS == 3 or return
+      obj = @@klass.new
+      assert_equal(
+        (0..11).map {|x| obj.scope = x; obj.number_of_targets },
+        [0, 0, 0, 1, 2, 3, 4, 0, 0, 0, 0, 0])
+    end
+
+    def test_physical_p
+      RGSS == 3 or return
+      obj = @@klass.new
+      assert_equal((0..2).select {|x| obj.hit_type = x; obj.physical? }, [1])
+    end
+  end
+
   run_test(TestRPGBaseItem) if RGSS >= 2
   run_test(TestRPGBaseItemFeature) if RGSS == 3
   run_test(TestRPGActor)
   run_test(TestRPGClass)
   run_test(TestRPGClassLearning)
+  run_test(TestRPGUsableItem) if RGSS >= 2
 end
