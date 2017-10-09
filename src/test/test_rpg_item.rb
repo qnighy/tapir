@@ -438,6 +438,201 @@ module RGSSTest
         assert_equal(obj.weapon_set, [])
       end
     end
+
+    def test_exp_for_level_1
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [0, 0, 25, 1.0/0.0]
+      assert_equal(obj.exp_for_level(2), 0)
+      assert_equal(obj.exp_for_level(50), 0)
+      assert_equal(obj.exp_for_level(99), 0)
+    end
+
+    def test_exp_for_level_2
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [0, 1, 25, 1.0/0.0]
+      assert_equal(obj.exp_for_level(2), 1)
+      assert_equal(obj.exp_for_level(50), 49)
+      assert_equal(obj.exp_for_level(99), 98)
+    end
+
+    def test_exp_for_level_3
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [0, 10, 25, 1.0/0.0]
+      assert_equal(obj.exp_for_level(2), 10)
+      assert_equal(obj.exp_for_level(50), 490)
+      assert_equal(obj.exp_for_level(99), 980)
+    end
+
+    def test_exp_for_level_4
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [0, 0.999, 25, 1.0/0.0]
+      assert_equal(obj.exp_for_level(2), 1)
+      assert_equal(obj.exp_for_level(50), 49)
+      assert_equal(obj.exp_for_level(99), 98)
+    end
+
+    def test_exp_for_level_5
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [1, 0, 25, 1.0/0.0]
+      assert_equal(obj.exp_for_level(2), 1)
+      assert_equal(obj.exp_for_level(3), 4)
+      assert_equal(obj.exp_for_level(4), 10)
+      assert_equal(obj.exp_for_level(5), 20)
+      assert_equal(obj.exp_for_level(6), 35)
+      assert_equal(obj.exp_for_level(7), 56)
+      assert_equal(obj.exp_for_level(8), 84)
+      assert_equal(obj.exp_for_level(9), 120)
+    end
+
+    def test_exp_for_level_6
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [6, 0, 25, 1.0/0.0]
+      assert_equal(obj.exp_for_level(2), 6)
+      assert_equal(obj.exp_for_level(3), 24)
+      assert_equal(obj.exp_for_level(4), 60)
+      assert_equal(obj.exp_for_level(5), 120)
+      assert_equal(obj.exp_for_level(6), 210)
+      assert_equal(obj.exp_for_level(7), 336)
+      assert_equal(obj.exp_for_level(8), 504)
+      assert_equal(obj.exp_for_level(9), 720)
+      assert_equal(obj.exp_for_level(10), 990)
+    end
+
+    def test_exp_for_level_7
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [6, 0, -225, 1.0/0.0]
+      assert_equal(obj.exp_for_level(2), 6)
+      assert_equal(obj.exp_for_level(3), 12)
+      assert_equal(obj.exp_for_level(4), 20)
+      assert_equal(obj.exp_for_level(5), 30)
+      assert_equal(obj.exp_for_level(6), 42)
+      assert_equal(obj.exp_for_level(7), 56)
+      assert_equal(obj.exp_for_level(8), 72)
+      assert_equal(obj.exp_for_level(9), 90)
+    end
+
+    def test_exp_for_level_8
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [6, 0, 275, 1.0/0.0]
+      assert_equal(obj.exp_for_level(2), 6)
+      assert_equal(obj.exp_for_level(3), 48)
+      assert_equal(obj.exp_for_level(4), 180)
+      assert_equal(obj.exp_for_level(5), 480)
+      assert_equal(obj.exp_for_level(6), 1050)
+      assert_equal(obj.exp_for_level(7), 2016)
+      assert_equal(obj.exp_for_level(8), 3528)
+      assert_equal(obj.exp_for_level(9), 5760)
+    end
+
+    def test_exp_for_level_9
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [30, 0, 30, 1.0/0.0]
+      assert_equal(obj.exp_for_level(2), 30)
+      assert_equal(obj.exp_for_level(3), 122)
+      assert_equal(obj.exp_for_level(4), 307)
+      assert_equal(obj.exp_for_level(5), 617)
+      assert_equal(obj.exp_for_level(10), 5172)
+      assert_equal(obj.exp_for_level(20), 42320)
+      assert_equal(obj.exp_for_level(33), 192405)
+      assert_equal(obj.exp_for_level(64), 1423609)
+      assert_equal(obj.exp_for_level(99), 5316867)
+    end
+
+    def test_exp_for_level_10
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [10000, 0, 25, 1.0/0.0]
+      assert_equal(obj.exp_for_level(2), 10000)
+      assert_equal(obj.exp_for_level(3), 40000)
+      assert_equal(obj.exp_for_level(4), 100000)
+      assert_equal(obj.exp_for_level(5), 200000)
+      assert_equal(obj.exp_for_level(6), 350000)
+      assert_equal(obj.exp_for_level(7), 560000)
+      assert_equal(obj.exp_for_level(8), 840000)
+      assert_equal(obj.exp_for_level(9), 1200000)
+    end
+
+    def test_exp_for_level_11
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [10000, 0, 25, 0.02]
+      assert_equal(obj.exp_for_level(2), 6000)
+      assert_equal(obj.exp_for_level(3), 16000)
+      assert_equal(obj.exp_for_level(4), 27273)
+      assert_equal(obj.exp_for_level(5), 38710)
+      assert_equal(obj.exp_for_level(6), 50000)
+      assert_equal(obj.exp_for_level(7), 61091)
+      assert_equal(obj.exp_for_level(8), 72000)
+      assert_equal(obj.exp_for_level(9), 82759)
+    end
+
+    def test_exp_for_level_12
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [10000, 0, 25, 0.01]
+      assert_equal(obj.exp_for_level(2), 4286)
+      assert_equal(obj.exp_for_level(3), 10000)
+      assert_equal(obj.exp_for_level(4), 15789)
+      assert_equal(obj.exp_for_level(5), 21429)
+      assert_equal(obj.exp_for_level(6), 26923)
+      assert_equal(obj.exp_for_level(7), 32308)
+      assert_equal(obj.exp_for_level(8), 37612)
+      assert_equal(obj.exp_for_level(9), 42857)
+    end
+
+    def test_exp_for_level_13
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [30, 0, 30, 30]
+      assert_equal(obj.exp_for_level(2), 30)
+      assert_equal(obj.exp_for_level(3), 122)
+      assert_equal(obj.exp_for_level(4), 306)
+      assert_equal(obj.exp_for_level(5), 615)
+      assert_equal(obj.exp_for_level(10), 5116)
+      assert_equal(obj.exp_for_level(20), 40519)
+      assert_equal(obj.exp_for_level(44), 377709)
+      assert_equal(obj.exp_for_level(78), 1543968)
+      assert_equal(obj.exp_for_level(99), 2545173)
+    end
+
+    def test_exp_for_level_14
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [0, 20, 30, 30]
+      assert_equal(obj.exp_for_level(2), 20)
+      assert_equal(obj.exp_for_level(3), 40)
+      assert_equal(obj.exp_for_level(4), 60)
+      assert_equal(obj.exp_for_level(5), 80)
+      assert_equal(obj.exp_for_level(10), 180)
+      assert_equal(obj.exp_for_level(20), 380)
+      assert_equal(obj.exp_for_level(36), 700)
+      assert_equal(obj.exp_for_level(56), 1100)
+      assert_equal(obj.exp_for_level(99), 1960)
+    end
+
+    def test_exp_for_level_15
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.exp_params = [30, 20, 30, 30]
+      assert_equal(obj.exp_for_level(2), 50)
+      assert_equal(obj.exp_for_level(3), 162)
+      assert_equal(obj.exp_for_level(4), 366)
+      assert_equal(obj.exp_for_level(5), 695)
+      assert_equal(obj.exp_for_level(10), 5296)
+      assert_equal(obj.exp_for_level(20), 40899)
+      assert_equal(obj.exp_for_level(30), 131711)
+      assert_equal(obj.exp_for_level(80), 1634055)
+      assert_equal(obj.exp_for_level(99), 2547133)
+    end
   end
 
   class TestRPGClassLearning
