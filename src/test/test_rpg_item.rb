@@ -1721,6 +1721,20 @@ module RGSSTest
         assert_equal(obj.str_plus, 0)
       end
     end
+
+    def test_performance_1
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.params = [639, 384, 103, 898, 904, 945, 110, 227]
+      assert_equal(obj.performance, 5217)
+    end
+
+    def test_performance_2
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.params = [996, 76, 970, 365, 477, 718, 994, 721]
+      assert_equal(obj.performance, 6764)
+    end
   end
 
   class TestRPGArmor
@@ -1854,6 +1868,20 @@ module RGSSTest
         assert_equal(obj.price, 0)
         assert_equal(obj.str_plus, 0)
       end
+    end
+
+    def test_performance_1
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.params = [639, 384, 103, 898, 904, 945, 110, 227]
+      assert_equal(obj.performance, 6053)
+    end
+
+    def test_performance_2
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.params = [996, 76, 970, 365, 477, 718, 994, 721]
+      assert_equal(obj.performance, 6400)
     end
   end
 
