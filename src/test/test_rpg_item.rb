@@ -1527,6 +1527,336 @@ module RGSSTest
     end
   end
 
+  class TestRPGEquipItem
+    include RGSSTest
+
+    @@klass = RPG::EquipItem if RGSS == 3
+
+    def test_superclass
+      assert_equal(@@klass.superclass, RPG::BaseItem)
+    end
+
+    def test_constants
+      if RGSS == 3
+        assert_symset_equal(@@klass.constants, [:Feature])
+        assert_equal(@@klass::Feature, RPG::BaseItem::Feature)
+      else
+        assert_symset_equal(@@klass.constants, [])
+      end
+    end
+
+    def test_class_variables
+      assert_symset_equal(@@klass.class_variables, [])
+    end
+
+    def test_class_methods
+      assert_symset_equal(@@klass.methods - Object.methods, [])
+    end
+
+    def test_instance_methods
+      assert_symset_equal(owned_instance_methods(@@klass), [
+        :etype_id, :etype_id=, :params, :params=, :price, :price=])
+    end
+
+    def test_instance_variables
+      obj = @@klass.new
+      assert_symset_equal(obj.instance_variables, [
+        :@description, :@etype_id, :@features, :@icon_index, :@id, :@name,
+        :@note, :@params, :@price])
+    end
+
+    def test_new
+      obj = @@klass.new
+
+      assert_raise(ArgumentError) { @@klass.new(:hoge) }
+
+      assert_equal(obj.description, "")
+      assert_equal(obj.etype_id, 0)
+      assert_equal(obj.features, [])
+      assert_equal(obj.icon_index, 0)
+      assert_equal(obj.id, 0)
+      assert_equal(obj.name, "")
+      assert_equal(obj.note, "")
+      assert_equal(obj.params, [0, 0, 0, 0, 0, 0, 0, 0])
+      assert_equal(obj.price, 0)
+    end
+  end
+
+  class TestRPGWeapon
+    include RGSSTest
+
+    @@klass = RPG::Weapon
+
+    def test_superclass
+      if RGSS == 3
+        assert_equal(@@klass.superclass, RPG::EquipItem)
+      elsif RGSS == 2
+        assert_equal(@@klass.superclass, RPG::BaseItem)
+      else
+        assert_equal(@@klass.superclass, Object)
+      end
+    end
+
+    def test_constants
+      if RGSS == 3
+        assert_symset_equal(@@klass.constants, [:Feature])
+        assert_equal(@@klass::Feature, RPG::BaseItem::Feature)
+      else
+        assert_symset_equal(@@klass.constants, [])
+      end
+    end
+
+    def test_class_variables
+      assert_symset_equal(@@klass.class_variables, [])
+    end
+
+    def test_class_methods
+      assert_symset_equal(@@klass.methods - Object.methods, [])
+    end
+
+    def test_instance_methods
+      if RGSS == 3
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :animation_id, :animation_id=, :performance, :wtype_id, :wtype_id=])
+      elsif RGSS == 2
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :agi, :agi=, :animation_id, :animation_id=, :atk, :atk=,
+          :critical_bonus, :critical_bonus=, :def, :def=, :dual_attack,
+          :dual_attack=, :element_set, :element_set=, :fast_attack,
+          :fast_attack=, :hit, :hit=, :price, :price=, :spi, :spi=, :state_set,
+          :state_set=, :two_handed, :two_handed=])
+      else
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :agi_plus, :agi_plus=, :animation1_id, :animation1_id=,
+          :animation2_id, :animation2_id=, :atk, :atk=, :description,
+          :description=, :dex_plus, :dex_plus=, :element_set, :element_set=,
+          :icon_name, :icon_name=, :id, :id=, :int_plus, :int_plus=, :mdef,
+          :mdef=, :minus_state_set, :minus_state_set=, :name, :name=, :pdef,
+          :pdef=, :plus_state_set, :plus_state_set=, :price, :price=,
+          :str_plus, :str_plus=])
+      end
+    end
+
+    def test_instance_variables
+      obj = @@klass.new
+      if RGSS == 3
+        assert_symset_equal(obj.instance_variables, [
+          :@animation_id, :@description, :@etype_id, :@features, :@icon_index,
+          :@id, :@name, :@note, :@params, :@price, :@wtype_id])
+      elsif RGSS == 2
+        assert_symset_equal(obj.instance_variables, [
+          :@agi, :@animation_id, :@atk, :@critical_bonus, :@def, :@description,
+          :@dual_attack, :@element_set, :@fast_attack, :@hit, :@icon_index,
+          :@id, :@name, :@note, :@price, :@spi, :@state_set, :@two_handed])
+      else
+        assert_symset_equal(obj.instance_variables, [
+          :@agi_plus, :@animation1_id, :@animation2_id, :@atk, :@description,
+          :@dex_plus, :@element_set, :@icon_name, :@id, :@int_plus, :@mdef,
+          :@minus_state_set, :@name, :@pdef, :@plus_state_set, :@price,
+          :@str_plus])
+      end
+    end
+
+    def test_new
+      obj = @@klass.new
+
+      assert_raise(ArgumentError) { @@klass.new(:hoge) }
+
+      if RGSS == 3
+        assert_equal(obj.animation_id, 0)
+        assert_equal(obj.description, "")
+        assert_equal(obj.etype_id, 0)
+        assert_equal(obj.features.size, 2)
+        assert_equal(obj.features[0].class, RPG::BaseItem::Feature)
+        assert_equal(obj.features[0].code, 31)
+        assert_equal(obj.features[0].data_id, 1)
+        assert_equal(obj.features[0].value, 0)
+        assert_equal(obj.features[1].class, RPG::BaseItem::Feature)
+        assert_equal(obj.features[1].code, 22)
+        assert_equal(obj.features[1].data_id, 0)
+        assert_equal(obj.features[1].value, 0)
+        assert_equal(obj.icon_index, 0)
+        assert_equal(obj.id, 0)
+        assert_equal(obj.name, "")
+        assert_equal(obj.note, "")
+        assert_equal(obj.params, [0, 0, 0, 0, 0, 0, 0, 0])
+        assert_equal(obj.price, 0)
+        assert_equal(obj.wtype_id, 0)
+      elsif RGSS == 2
+        assert_equal(obj.agi, 0)
+        assert_equal(obj.animation_id, 0)
+        assert_equal(obj.atk, 0)
+        assert_equal(obj.critical_bonus, false)
+        assert_equal(obj.def, 0)
+        assert_equal(obj.description, "")
+        assert_equal(obj.dual_attack, false)
+        assert_equal(obj.element_set, [])
+        assert_equal(obj.fast_attack, false)
+        assert_equal(obj.hit, 95)
+        assert_equal(obj.icon_index, 0)
+        assert_equal(obj.id, 0)
+        assert_equal(obj.name, "")
+        assert_equal(obj.note, "")
+        assert_equal(obj.price, 0)
+        assert_equal(obj.spi, 0)
+        assert_equal(obj.state_set, [])
+        assert_equal(obj.two_handed, false)
+      else
+        assert_equal(obj.agi_plus, 0)
+        assert_equal(obj.animation1_id, 0)
+        assert_equal(obj.animation2_id, 0)
+        assert_equal(obj.atk, 0)
+        assert_equal(obj.description, "")
+        assert_equal(obj.dex_plus, 0)
+        assert_equal(obj.element_set, [])
+        assert_equal(obj.icon_name, "")
+        assert_equal(obj.id, 0)
+        assert_equal(obj.int_plus, 0)
+        assert_equal(obj.mdef, 0)
+        assert_equal(obj.minus_state_set, [])
+        assert_equal(obj.name, "")
+        assert_equal(obj.pdef, 0)
+        assert_equal(obj.plus_state_set, [])
+        assert_equal(obj.price, 0)
+        assert_equal(obj.str_plus, 0)
+      end
+    end
+  end
+
+  class TestRPGArmor
+    include RGSSTest
+
+    @@klass = RPG::Armor
+
+    def test_superclass
+      if RGSS == 3
+        assert_equal(@@klass.superclass, RPG::EquipItem)
+      elsif RGSS == 2
+        assert_equal(@@klass.superclass, RPG::BaseItem)
+      else
+        assert_equal(@@klass.superclass, Object)
+      end
+    end
+
+    def test_constants
+      if RGSS == 3
+        assert_symset_equal(@@klass.constants, [:Feature])
+        assert_equal(@@klass::Feature, RPG::BaseItem::Feature)
+      else
+        assert_symset_equal(@@klass.constants, [])
+      end
+    end
+
+    def test_class_variables
+      assert_symset_equal(@@klass.class_variables, [])
+    end
+
+    def test_class_methods
+      assert_symset_equal(@@klass.methods - Object.methods, [])
+    end
+
+    def test_instance_methods
+      if RGSS == 3
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :atype_id, :atype_id=, :performance])
+      elsif RGSS == 2
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :agi, :agi=, :atk, :atk=, :auto_hp_recover, :auto_hp_recover=, :def,
+          :def=, :double_exp_gain, :double_exp_gain=, :element_set,
+          :element_set=, :eva, :eva=, :half_mp_cost, :half_mp_cost=, :kind,
+          :kind=, :prevent_critical, :prevent_critical=, :price, :price=, :spi,
+          :spi=, :state_set, :state_set=])
+      else
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :agi_plus, :agi_plus=, :auto_state_id, :auto_state_id=, :description,
+          :description=, :dex_plus, :dex_plus=, :eva, :eva=,
+          :guard_element_set, :guard_element_set=, :guard_state_set,
+          :guard_state_set=, :icon_name, :icon_name=, :id, :id=, :int_plus,
+          :int_plus=, :kind, :kind=, :mdef, :mdef=, :name, :name=, :pdef,
+          :pdef=, :price, :price=, :str_plus, :str_plus=])
+      end
+    end
+
+    def test_instance_variables
+      obj = @@klass.new
+      if RGSS == 3
+        assert_symset_equal(obj.instance_variables, [
+          :@atype_id, :@description, :@etype_id, :@features, :@icon_index,
+          :@id, :@name, :@note, :@params, :@price])
+      elsif RGSS == 2
+        assert_symset_equal(obj.instance_variables, [
+          :@agi, :@atk, :@auto_hp_recover, :@def, :@description,
+          :@double_exp_gain, :@element_set, :@eva, :@half_mp_cost,
+          :@icon_index, :@id, :@kind, :@name, :@note, :@prevent_critical,
+          :@price, :@spi, :@state_set])
+      else
+        assert_symset_equal(obj.instance_variables, [
+          :@agi_plus, :@auto_state_id, :@description, :@dex_plus, :@eva,
+          :@guard_element_set, :@guard_state_set, :@icon_name, :@id,
+          :@int_plus, :@kind, :@mdef, :@name, :@pdef, :@price, :@str_plus])
+      end
+    end
+
+    def test_new
+      obj = @@klass.new
+
+      assert_raise(ArgumentError) { @@klass.new(:hoge) }
+
+      if RGSS == 3
+        assert_equal(obj.atype_id, 0)
+        assert_equal(obj.description, "")
+        assert_equal(obj.etype_id, 1)
+        assert_equal(obj.features.size, 1)
+        assert_equal(obj.features[0].class, RPG::BaseItem::Feature)
+        assert_equal(obj.features[0].code, 22)
+        assert_equal(obj.features[0].data_id, 1)
+        assert_equal(obj.features[0].value, 0)
+        assert_equal(obj.icon_index, 0)
+        assert_equal(obj.id, 0)
+        assert_equal(obj.name, "")
+        assert_equal(obj.note, "")
+        assert_equal(obj.params, [0, 0, 0, 0, 0, 0, 0, 0])
+        assert_equal(obj.price, 0)
+      elsif RGSS == 2
+        assert_equal(obj.agi, 0)
+        assert_equal(obj.atk, 0)
+        assert_equal(obj.auto_hp_recover, false)
+        assert_equal(obj.def, 0)
+        assert_equal(obj.description, "")
+        assert_equal(obj.double_exp_gain, false)
+        assert_equal(obj.element_set, [])
+        assert_equal(obj.eva, 0)
+        assert_equal(obj.half_mp_cost, false)
+        assert_equal(obj.icon_index, 0)
+        assert_equal(obj.id, 0)
+        assert_equal(obj.kind, 0)
+        assert_equal(obj.name, "")
+        assert_equal(obj.note, "")
+        assert_equal(obj.prevent_critical, false)
+        assert_equal(obj.price, 0)
+        assert_equal(obj.spi, 0)
+        assert_equal(obj.state_set, [])
+      else
+        assert_equal(obj.agi_plus, 0)
+        assert_equal(obj.auto_state_id, 0)
+        assert_equal(obj.description, "")
+        assert_equal(obj.dex_plus, 0)
+        assert_equal(obj.eva, 0)
+        assert_equal(obj.guard_element_set, [])
+        assert_equal(obj.guard_state_set, [])
+        assert_equal(obj.icon_name, "")
+        assert_equal(obj.id, 0)
+        assert_equal(obj.int_plus, 0)
+        assert_equal(obj.kind, 0)
+        assert_equal(obj.mdef, 0)
+        assert_equal(obj.name, "")
+        assert_equal(obj.pdef, 0)
+        assert_equal(obj.price, 0)
+        assert_equal(obj.str_plus, 0)
+      end
+    end
+  end
+
   run_test(TestRPGBaseItem) if RGSS >= 2
   run_test(TestRPGBaseItemFeature) if RGSS == 3
   run_test(TestRPGActor)
@@ -1537,4 +1867,7 @@ module RGSSTest
   run_test(TestRPGUsableItemEffect) if RGSS == 3
   run_test(TestRPGSkill)
   run_test(TestRPGItem)
+  run_test(TestRPGEquipItem) if RGSS == 3
+  run_test(TestRPGWeapon)
+  run_test(TestRPGArmor)
 end
