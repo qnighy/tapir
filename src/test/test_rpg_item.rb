@@ -1885,6 +1885,386 @@ module RGSSTest
     end
   end
 
+  class TestRPGEnemy
+    include RGSSTest
+
+    @@klass = RPG::Enemy
+
+    def test_superclass
+      if RGSS == 3
+        assert_equal(@@klass.superclass, RPG::BaseItem)
+      else
+        assert_equal(@@klass.superclass, Object)
+      end
+    end
+
+    def test_constants
+      if RGSS == 3
+        assert_symset_equal(@@klass.constants, [:Action, :DropItem, :Feature])
+        assert_equal(@@klass::Feature, RPG::BaseItem::Feature)
+      elsif RGSS == 2
+        assert_symset_equal(@@klass.constants, [:Action, :DropItem])
+      else
+        assert_symset_equal(@@klass.constants, [:Action])
+      end
+    end
+
+    def test_class_variables
+      assert_symset_equal(@@klass.class_variables, [])
+    end
+
+    def test_class_methods
+      assert_symset_equal(@@klass.methods - Object.methods, [])
+    end
+
+    def test_instance_methods
+      if RGSS == 3
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :actions, :actions=, :battler_hue, :battler_hue=, :battler_name,
+          :battler_name=, :drop_items, :drop_items=, :exp, :exp=, :gold,
+          :gold=, :params, :params=])
+      elsif RGSS == 2
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :actions, :actions=, :agi, :agi=, :atk, :atk=, :battler_hue,
+          :battler_hue=, :battler_name, :battler_name=, :def, :def=,
+          :drop_item1, :drop_item1=, :drop_item2, :drop_item2=, :element_ranks,
+          :element_ranks=, :eva, :eva=, :exp, :exp=, :gold, :gold=,
+          :has_critical, :has_critical=, :hit, :hit=, :id, :id=, :levitate,
+          :levitate=, :maxhp, :maxhp=, :maxmp, :maxmp=, :name, :name=, :note,
+          :note=, :spi, :spi=, :state_ranks, :state_ranks=])
+      else
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :actions, :actions=, :agi, :agi=, :animation1_id, :animation1_id=,
+          :animation2_id, :animation2_id=, :armor_id, :armor_id=, :atk, :atk=,
+          :battler_hue, :battler_hue=, :battler_name, :battler_name=, :dex,
+          :dex=, :element_ranks, :element_ranks=, :eva, :eva=, :exp, :exp=,
+          :gold, :gold=, :id, :id=, :int, :int=, :item_id, :item_id=, :maxhp,
+          :maxhp=, :maxsp, :maxsp=, :mdef, :mdef=, :name, :name=, :pdef,
+          :pdef=, :state_ranks, :state_ranks=, :str, :str=, :treasure_prob,
+          :treasure_prob=, :weapon_id, :weapon_id=])
+      end
+    end
+
+    def test_instance_variables
+      obj = @@klass.new
+      if RGSS == 3
+        assert_symset_equal(obj.instance_variables, [
+          :@actions, :@battler_hue, :@battler_name, :@description,
+          :@drop_items, :@exp, :@features, :@gold, :@icon_index, :@id, :@name,
+          :@note, :@params])
+      elsif RGSS == 2
+        assert_symset_equal(obj.instance_variables, [
+          :@actions, :@agi, :@atk, :@battler_hue, :@battler_name, :@def,
+          :@drop_item1, :@drop_item2, :@element_ranks, :@eva, :@exp, :@gold,
+          :@has_critical, :@hit, :@id, :@levitate, :@maxhp, :@maxmp, :@name,
+          :@note, :@spi, :@state_ranks])
+      else
+        assert_symset_equal(obj.instance_variables, [
+          :@actions, :@agi, :@animation1_id, :@animation2_id, :@armor_id,
+          :@atk, :@battler_hue, :@battler_name, :@dex, :@element_ranks, :@eva,
+          :@exp, :@gold, :@id, :@int, :@item_id, :@maxhp, :@maxsp, :@mdef,
+          :@name, :@pdef, :@state_ranks, :@str, :@treasure_prob, :@weapon_id])
+      end
+    end
+
+    def test_new
+      obj = @@klass.new
+
+      assert_raise(ArgumentError) { @@klass.new(:hoge) }
+
+      if RGSS == 3
+        assert_equal(obj.actions.size, 1)
+        assert_equal(obj.actions[0].class, RPG::Enemy::Action)
+        assert_equal(obj.actions[0].condition_param1, 0)
+        assert_equal(obj.actions[0].condition_param2, 0)
+        assert_equal(obj.actions[0].condition_type, 0)
+        assert_equal(obj.actions[0].rating, 5)
+        assert_equal(obj.actions[0].skill_id, 1)
+        assert_equal(obj.battler_hue, 0)
+        assert_equal(obj.battler_name, "")
+        assert_equal(obj.description, "")
+        assert_equal(obj.drop_items.size, 3)
+        assert_equal(obj.drop_items[0].class, RPG::Enemy::DropItem)
+        assert_equal(obj.drop_items[0].data_id, 1)
+        assert_equal(obj.drop_items[0].denominator, 1)
+        assert_equal(obj.drop_items[0].kind, 0)
+        assert_equal(obj.drop_items[1].class, RPG::Enemy::DropItem)
+        assert_equal(obj.drop_items[1].data_id, 1)
+        assert_equal(obj.drop_items[1].denominator, 1)
+        assert_equal(obj.drop_items[1].kind, 0)
+        assert_equal(obj.drop_items[2].class, RPG::Enemy::DropItem)
+        assert_equal(obj.drop_items[2].data_id, 1)
+        assert_equal(obj.drop_items[2].denominator, 1)
+        assert_equal(obj.drop_items[2].kind, 0)
+        assert_equal(obj.exp, 0)
+        assert_equal(obj.features.size, 3)
+        assert_equal(obj.features[0].class, RPG::BaseItem::Feature)
+        assert_equal(obj.features[0].code, 22)
+        assert_equal(obj.features[0].data_id, 0)
+        assert_equal(obj.features[0].value, 0.95)
+        assert_equal(obj.features[1].class, RPG::BaseItem::Feature)
+        assert_equal(obj.features[1].code, 22)
+        assert_equal(obj.features[1].data_id, 1)
+        assert_equal(obj.features[1].value, 0.05)
+        assert_equal(obj.features[2].class, RPG::BaseItem::Feature)
+        assert_equal(obj.features[2].code, 31)
+        assert_equal(obj.features[2].data_id, 1)
+        assert_equal(obj.features[2].value, 0)
+        assert_equal(obj.features[2].value.class, Fixnum)
+        assert_equal(obj.gold, 0)
+        assert_equal(obj.icon_index, 0)
+        assert_equal(obj.id, 0)
+        assert_equal(obj.name, "")
+        assert_equal(obj.note, "")
+        assert_equal(obj.params, [100, 0, 10, 10, 10, 10, 10, 10])
+      elsif RGSS == 2
+        assert_equal(obj.actions.size, 1)
+        assert_equal(obj.actions[0].class, RPG::Enemy::Action)
+        assert_equal(obj.actions[0].basic, 0)
+        assert_equal(obj.actions[0].condition_param1, 0)
+        assert_equal(obj.actions[0].condition_param2, 0)
+        assert_equal(obj.actions[0].condition_type, 0)
+        assert_equal(obj.actions[0].kind, 0)
+        assert_equal(obj.actions[0].rating, 5)
+        assert_equal(obj.actions[0].skill_id, 1)
+        assert_equal(obj.agi, 10)
+        assert_equal(obj.atk, 10)
+        assert_equal(obj.battler_hue, 0)
+        assert_equal(obj.battler_name, "")
+        assert_equal(obj.def, 10)
+        assert_equal(obj.drop_item1.class, RPG::Enemy::DropItem)
+        assert_equal(obj.drop_item1.armor_id, 1)
+        assert_equal(obj.drop_item1.denominator, 1)
+        assert_equal(obj.drop_item1.item_id, 1)
+        assert_equal(obj.drop_item1.kind, 0)
+        assert_equal(obj.drop_item1.weapon_id, 1)
+        assert_equal(obj.drop_item2.class, RPG::Enemy::DropItem)
+        assert_equal(obj.drop_item2.armor_id, 1)
+        assert_equal(obj.drop_item2.denominator, 1)
+        assert_equal(obj.drop_item2.item_id, 1)
+        assert_equal(obj.drop_item2.kind, 0)
+        assert_equal(obj.drop_item2.weapon_id, 1)
+        assert_equal(obj.element_ranks.class, Table)
+        assert_equal(obj.element_ranks._dump(0), Table.new(1)._dump(0))
+        assert_equal(obj.eva, 5)
+        assert_equal(obj.exp, 0)
+        assert_equal(obj.gold, 0)
+        assert_equal(obj.has_critical, false)
+        assert_equal(obj.hit, 95)
+        assert_equal(obj.id, 0)
+        assert_equal(obj.levitate, false)
+        assert_equal(obj.maxhp, 10)
+        assert_equal(obj.maxmp, 10)
+        assert_equal(obj.name, "")
+        assert_equal(obj.note, "")
+        assert_equal(obj.spi, 10)
+        assert_equal(obj.state_ranks.class, Table)
+        assert_equal(obj.state_ranks._dump(0), Table.new(1)._dump(0))
+      else
+        assert_equal(obj.actions.size, 1)
+        assert_equal(obj.actions[0].class, RPG::Enemy::Action)
+        assert_equal(obj.actions[0].basic, 0)
+        assert_equal(obj.actions[0].condition_hp, 100)
+        assert_equal(obj.actions[0].condition_level, 1)
+        assert_equal(obj.actions[0].condition_switch_id, 0)
+        assert_equal(obj.actions[0].condition_turn_a, 0)
+        assert_equal(obj.actions[0].condition_turn_b, 1)
+        assert_equal(obj.actions[0].kind, 0)
+        assert_equal(obj.actions[0].rating, 5)
+        assert_equal(obj.actions[0].skill_id, 1)
+        assert_equal(obj.agi, 50)
+        assert_equal(obj.animation1_id, 0)
+        assert_equal(obj.animation2_id, 0)
+        assert_equal(obj.armor_id, 0)
+        assert_equal(obj.atk, 100)
+        assert_equal(obj.battler_hue, 0)
+        assert_equal(obj.battler_name, "")
+        assert_equal(obj.dex, 50)
+        assert_equal(obj.element_ranks.class, Table)
+        assert_equal(obj.element_ranks._dump(0), Table.new(1)._dump(0))
+        assert_equal(obj.eva, 0)
+        assert_equal(obj.exp, 0)
+        assert_equal(obj.gold, 0)
+        assert_equal(obj.id, 0)
+        assert_equal(obj.int, 50)
+        assert_equal(obj.item_id, 0)
+        assert_equal(obj.maxhp, 500)
+        assert_equal(obj.maxsp, 500)
+        assert_equal(obj.mdef, 100)
+        assert_equal(obj.name, "")
+        assert_equal(obj.pdef, 100)
+        assert_equal(obj.state_ranks.class, Table)
+        assert_equal(obj.state_ranks._dump(0), Table.new(1)._dump(0))
+        assert_equal(obj.str, 50)
+        assert_equal(obj.treasure_prob, 100)
+        assert_equal(obj.weapon_id, 0)
+      end
+    end
+  end
+
+  class TestRPGEnemyDropItem
+    include RGSSTest
+
+    @@klass = RPG::Enemy::DropItem if RGSS >= 2
+
+    def test_superclass
+      assert_equal(@@klass.superclass, Object)
+    end
+
+    def test_constants
+      assert_symset_equal(@@klass.constants, [])
+    end
+
+    def test_class_variables
+      assert_symset_equal(@@klass.class_variables, [])
+    end
+
+    def test_class_methods
+      assert_symset_equal(@@klass.methods - Object.methods, [])
+    end
+
+    def test_instance_methods
+      if RGSS == 3
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :data_id, :data_id=, :denominator, :denominator=, :kind, :kind=])
+      else
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :armor_id, :armor_id=, :denominator, :denominator=, :item_id,
+          :item_id=, :kind, :kind=, :weapon_id, :weapon_id=])
+      end
+    end
+
+    def test_instance_variables
+      obj = @@klass.new
+      if RGSS == 3
+        assert_symset_equal(obj.instance_variables, [
+          :@data_id, :@denominator, :@kind])
+      else
+        assert_symset_equal(obj.instance_variables, [
+          :@armor_id, :@denominator, :@item_id, :@kind, :@weapon_id])
+      end
+    end
+
+    def test_new
+      obj = @@klass.new
+      if RGSS == 3
+        assert_equal(obj.data_id, 1)
+        assert_equal(obj.denominator, 1)
+        assert_equal(obj.kind, 0)
+      else
+        assert_equal(obj.item_id, 1)
+        assert_equal(obj.denominator, 1)
+        assert_equal(obj.kind, 0)
+        assert_equal(obj.armor_id, 1)
+        assert_equal(obj.weapon_id, 1)
+      end
+
+      assert_raise(ArgumentError) { @@klass.new(:hoge) }
+    end
+  end
+
+  class TestRPGEnemyAction
+    include RGSSTest
+
+    @@klass = RPG::Enemy::Action
+
+    def test_superclass
+      assert_equal(@@klass.superclass, Object)
+    end
+
+    def test_constants
+      assert_symset_equal(@@klass.constants, [])
+    end
+
+    def test_class_variables
+      assert_symset_equal(@@klass.class_variables, [])
+    end
+
+    def test_class_methods
+      assert_symset_equal(@@klass.methods - Object.methods, [])
+    end
+
+    def test_instance_methods
+      if RGSS == 3
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :condition_param1, :condition_param1=, :condition_param2,
+          :condition_param2=, :condition_type, :condition_type=, :rating,
+          :rating=, :skill_id, :skill_id=])
+      elsif RGSS == 2
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :basic, :basic=, :condition_param1, :condition_param1=,
+          :condition_param2, :condition_param2=, :condition_type,
+          :condition_type=, :kind, :kind=, :rating, :rating=, :skill?,
+          :skill_id, :skill_id=])
+      else
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :basic, :basic=, :condition_hp, :condition_hp=, :condition_level,
+          :condition_level=, :condition_switch_id, :condition_switch_id=,
+          :condition_turn_a, :condition_turn_a=, :condition_turn_b,
+          :condition_turn_b=, :kind, :kind=, :rating, :rating=, :skill_id,
+          :skill_id=])
+      end
+    end
+
+    def test_instance_variables
+      obj = @@klass.new
+      if RGSS == 3
+        assert_symset_equal(obj.instance_variables, [
+          :@condition_param1, :@condition_param2, :@condition_type, :@rating,
+          :@skill_id])
+      elsif RGSS == 2
+        assert_symset_equal(obj.instance_variables, [
+          :@basic, :@condition_param1, :@condition_param2, :@condition_type,
+          :@kind, :@rating, :@skill_id])
+      else
+        assert_symset_equal(obj.instance_variables, [
+          :@basic, :@condition_hp, :@condition_level, :@condition_switch_id,
+          :@condition_turn_a, :@condition_turn_b, :@kind, :@rating,
+          :@skill_id])
+      end
+    end
+
+    def test_new
+      obj = @@klass.new
+      if RGSS == 3
+        assert_equal(obj.condition_param1, 0)
+        assert_equal(obj.condition_param2, 0)
+        assert_equal(obj.condition_type, 0)
+        assert_equal(obj.rating, 5)
+        assert_equal(obj.skill_id, 1)
+      elsif RGSS == 2
+        assert_equal(obj.basic, 0)
+        assert_equal(obj.condition_param1, 0)
+        assert_equal(obj.condition_param2, 0)
+        assert_equal(obj.condition_type, 0)
+        assert_equal(obj.kind, 0)
+        assert_equal(obj.rating, 5)
+        assert_equal(obj.skill_id, 1)
+      else
+        assert_equal(obj.basic, 0)
+        assert_equal(obj.condition_hp, 100)
+        assert_equal(obj.condition_level, 1)
+        assert_equal(obj.condition_switch_id, 0)
+        assert_equal(obj.condition_turn_a, 0)
+        assert_equal(obj.condition_turn_b, 1)
+        assert_equal(obj.kind, 0)
+        assert_equal(obj.rating, 5)
+        assert_equal(obj.skill_id, 1)
+      end
+
+      assert_raise(ArgumentError) { @@klass.new(:hoge) }
+    end
+
+    def test_skill_p
+      RGSS == 2 or return
+      obj = @@klass.new
+      obj.kind = 0
+      assert_equal(obj.skill?, false)
+      obj.kind = 1
+      assert_equal(obj.skill?, true)
+    end
+  end
+
   run_test(TestRPGBaseItem) if RGSS >= 2
   run_test(TestRPGBaseItemFeature) if RGSS == 3
   run_test(TestRPGActor)
@@ -1898,4 +2278,7 @@ module RGSSTest
   run_test(TestRPGEquipItem) if RGSS == 3
   run_test(TestRPGWeapon)
   run_test(TestRPGArmor)
+  run_test(TestRPGEnemy)
+  run_test(TestRPGEnemyDropItem) if RGSS >= 2
+  run_test(TestRPGEnemyAction)
 end
