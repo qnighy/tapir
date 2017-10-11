@@ -2265,6 +2265,191 @@ module RGSSTest
     end
   end
 
+  class TestRPGState
+    include RGSSTest
+
+    @@klass = RPG::State
+
+    def test_superclass
+      if RGSS == 3
+        assert_equal(@@klass.superclass, RPG::BaseItem)
+      else
+        assert_equal(@@klass.superclass, Object)
+      end
+    end
+
+    def test_constants
+      if RGSS == 3
+        assert_symset_equal(@@klass.constants, [:Feature])
+        assert_equal(@@klass::Feature, RPG::BaseItem::Feature)
+      else
+        assert_symset_equal(@@klass.constants, [])
+      end
+    end
+
+    def test_class_variables
+      assert_symset_equal(@@klass.class_variables, [])
+    end
+
+    def test_class_methods
+      assert_symset_equal(@@klass.methods - Object.methods, [])
+    end
+
+    def test_instance_methods
+      if RGSS == 3
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :auto_removal_timing, :auto_removal_timing=, :chance_by_damage,
+          :chance_by_damage=, :max_turns, :max_turns=, :message1, :message1=,
+          :message2, :message2=, :message3, :message3=, :message4, :message4=,
+          :min_turns, :min_turns=, :priority, :priority=,
+          :remove_at_battle_end, :remove_at_battle_end=, :remove_by_damage,
+          :remove_by_damage=, :remove_by_restriction, :remove_by_restriction=,
+          :remove_by_walking, :remove_by_walking=, :restriction, :restriction=,
+          :steps_to_remove, :steps_to_remove=])
+      elsif RGSS == 2
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :agi_rate, :agi_rate=, :atk_rate, :atk_rate=, :auto_release_prob,
+          :auto_release_prob=, :battle_only, :battle_only=, :def_rate,
+          :def_rate=, :element_set, :element_set=, :hold_turn, :hold_turn=,
+          :icon_index, :icon_index=, :id, :id=, :message1, :message1=,
+          :message2, :message2=, :message3, :message3=, :message4, :message4=,
+          :name, :name=, :nonresistance, :nonresistance=, :note, :note=,
+          :offset_by_opposite, :offset_by_opposite=, :priority, :priority=,
+          :reduce_hit_ratio, :reduce_hit_ratio=, :release_by_damage,
+          :release_by_damage=, :restriction, :restriction=, :slip_damage,
+          :slip_damage=, :spi_rate, :spi_rate=, :state_set, :state_set=])
+      else
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :agi_rate, :agi_rate=, :animation_id, :animation_id=, :atk_rate,
+          :atk_rate=, :auto_release_prob, :auto_release_prob=, :battle_only,
+          :battle_only=, :cant_evade, :cant_evade=, :cant_get_exp,
+          :cant_get_exp=, :dex_rate, :dex_rate=, :eva, :eva=,
+          :guard_element_set, :guard_element_set=, :hit_rate, :hit_rate=,
+          :hold_turn, :hold_turn=, :id, :id=, :int_rate, :int_rate=,
+          :maxhp_rate, :maxhp_rate=, :maxsp_rate, :maxsp_rate=, :mdef_rate,
+          :mdef_rate=, :minus_state_set, :minus_state_set=, :name, :name=,
+          :nonresistance, :nonresistance=, :pdef_rate, :pdef_rate=,
+          :plus_state_set, :plus_state_set=, :rating, :rating=, :restriction,
+          :restriction=, :shock_release_prob, :shock_release_prob=,
+          :slip_damage, :slip_damage=, :str_rate, :str_rate=, :zero_hp,
+          :zero_hp=])
+      end
+    end
+
+    def test_instance_variables
+      obj = @@klass.new
+      if RGSS == 3
+        assert_symset_equal(obj.instance_variables, [
+          :@auto_removal_timing, :@chance_by_damage, :@description, :@features,
+          :@icon_index, :@id, :@max_turns, :@message1, :@message2, :@message3,
+          :@message4, :@min_turns, :@name, :@note, :@priority,
+          :@remove_at_battle_end, :@remove_by_damage, :@remove_by_restriction,
+          :@remove_by_walking, :@restriction, :@steps_to_remove])
+      elsif RGSS == 2
+        assert_symset_equal(obj.instance_variables, [
+          :@agi_rate, :@atk_rate, :@auto_release_prob, :@battle_only,
+          :@def_rate, :@element_set, :@hold_turn, :@icon_index, :@id,
+          :@message1, :@message2, :@message3, :@message4, :@name,
+          :@nonresistance, :@note, :@offset_by_opposite, :@priority,
+          :@reduce_hit_ratio, :@release_by_damage, :@restriction,
+          :@slip_damage, :@spi_rate, :@state_set])
+      else
+        assert_symset_equal(obj.instance_variables, [
+          :@agi_rate, :@animation_id, :@atk_rate, :@auto_release_prob,
+          :@battle_only, :@cant_evade, :@cant_get_exp, :@dex_rate, :@eva,
+          :@guard_element_set, :@hit_rate, :@hold_turn, :@id, :@int_rate,
+          :@maxhp_rate, :@maxsp_rate, :@mdef_rate, :@minus_state_set, :@name,
+          :@nonresistance, :@pdef_rate, :@plus_state_set, :@rating,
+          :@restriction, :@shock_release_prob, :@slip_damage, :@str_rate,
+          :@zero_hp])
+      end
+    end
+
+    def test_new
+      obj = @@klass.new
+
+      assert_raise(ArgumentError) { @@klass.new(:hoge) }
+
+      if RGSS == 3
+        assert_equal(obj.auto_removal_timing, 0)
+        assert_equal(obj.chance_by_damage, 100)
+        assert_equal(obj.description, "")
+        assert_equal(obj.features, [])
+        assert_equal(obj.icon_index, 0)
+        assert_equal(obj.id, 0)
+        assert_equal(obj.max_turns, 1)
+        assert_equal(obj.message1, "")
+        assert_equal(obj.message2, "")
+        assert_equal(obj.message3, "")
+        assert_equal(obj.message4, "")
+        assert_equal(obj.min_turns, 1)
+        assert_equal(obj.name, "")
+        assert_equal(obj.note, "")
+        assert_equal(obj.priority, 50)
+        assert_equal(obj.remove_at_battle_end, false)
+        assert_equal(obj.remove_by_damage, false)
+        assert_equal(obj.remove_by_restriction, false)
+        assert_equal(obj.remove_by_walking, false)
+        assert_equal(obj.restriction, 0)
+        assert_equal(obj.steps_to_remove, 100)
+      elsif RGSS == 2
+        assert_equal(obj.agi_rate, 100)
+        assert_equal(obj.atk_rate, 100)
+        assert_equal(obj.auto_release_prob, 0)
+        assert_equal(obj.battle_only, true)
+        assert_equal(obj.def_rate, 100)
+        assert_equal(obj.element_set, [])
+        assert_equal(obj.hold_turn, 0)
+        assert_equal(obj.icon_index, 0)
+        assert_equal(obj.id, 0)
+        assert_equal(obj.message1, "")
+        assert_equal(obj.message2, "")
+        assert_equal(obj.message3, "")
+        assert_equal(obj.message4, "")
+        assert_equal(obj.name, "")
+        assert_equal(obj.nonresistance, false)
+        assert_equal(obj.note, "")
+        assert_equal(obj.offset_by_opposite, false)
+        assert_equal(obj.priority, 5)
+        assert_equal(obj.reduce_hit_ratio, false)
+        assert_equal(obj.release_by_damage, false)
+        assert_equal(obj.restriction, 0)
+        assert_equal(obj.slip_damage, false)
+        assert_equal(obj.spi_rate, 100)
+        assert_equal(obj.state_set, [])
+      else
+        assert_equal(obj.agi_rate, 100)
+        assert_equal(obj.animation_id, 0)
+        assert_equal(obj.atk_rate, 100)
+        assert_equal(obj.auto_release_prob, 0)
+        assert_equal(obj.battle_only, true)
+        assert_equal(obj.cant_evade, false)
+        assert_equal(obj.cant_get_exp, false)
+        assert_equal(obj.dex_rate, 100)
+        assert_equal(obj.eva, 0)
+        assert_equal(obj.guard_element_set, [])
+        assert_equal(obj.hit_rate, 100)
+        assert_equal(obj.hold_turn, 0)
+        assert_equal(obj.id, 0)
+        assert_equal(obj.int_rate, 100)
+        assert_equal(obj.maxhp_rate, 100)
+        assert_equal(obj.maxsp_rate, 100)
+        assert_equal(obj.mdef_rate, 100)
+        assert_equal(obj.minus_state_set, [])
+        assert_equal(obj.name, "")
+        assert_equal(obj.nonresistance, false)
+        assert_equal(obj.pdef_rate, 100)
+        assert_equal(obj.plus_state_set, [])
+        assert_equal(obj.rating, 5)
+        assert_equal(obj.restriction, 0)
+        assert_equal(obj.shock_release_prob, 0)
+        assert_equal(obj.slip_damage, false)
+        assert_equal(obj.str_rate, 100)
+        assert_equal(obj.zero_hp, false)
+      end
+    end
+  end
+
   run_test(TestRPGBaseItem) if RGSS >= 2
   run_test(TestRPGBaseItemFeature) if RGSS == 3
   run_test(TestRPGActor)
@@ -2281,4 +2466,5 @@ module RGSSTest
   run_test(TestRPGEnemy)
   run_test(TestRPGEnemyDropItem) if RGSS >= 2
   run_test(TestRPGEnemyAction)
+  run_test(TestRPGState)
 end
