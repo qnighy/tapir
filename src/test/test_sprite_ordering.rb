@@ -44,8 +44,7 @@ module RGSSTest
         s1.bitmap = filled_bitmap(200, 200, Color.new(0, 255, 0, 255))
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_z_ordering_sprite_1.png"))
+        assert_bitmap_equal2("test_z_ordering_sprite_1", snap)
       end
     end
 
@@ -60,8 +59,7 @@ module RGSSTest
         s2.bitmap = filled_bitmap(100, 100, Color.new(255, 0, 0, 255))
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_z_ordering_sprite_2.png"))
+        assert_bitmap_equal2("test_z_ordering_sprite_2", snap)
       end
     end
 
@@ -79,8 +77,7 @@ module RGSSTest
         s1.bitmap = filled_bitmap(200, 200, Color.new(0, 255, 0, 255))
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_z_ordering_window_1.png"))
+        assert_bitmap_equal2("test_z_ordering_window_1", snap)
       end
     end
 
@@ -98,8 +95,7 @@ module RGSSTest
         s1.bitmap = filled_bitmap(100, 100, Color.new(0, 255, 0, 255))
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_z_ordering_window_2.png"))
+        assert_bitmap_equal2("test_z_ordering_window_2", snap)
       end
     end
 
@@ -114,8 +110,7 @@ module RGSSTest
         s1.bitmap = filled_bitmap(100, 100, Color.new(0, 255, 0, 255))
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_z_ordering_plane_1.png"))
+        assert_bitmap_equal2("test_z_ordering_plane_1", snap)
       end
     end
 
@@ -130,8 +125,7 @@ module RGSSTest
         s1.bitmap = filled_bitmap(100, 100, Color.new(0, 255, 0, 255))
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_z_ordering_plane_2.png"))
+        assert_bitmap_equal2("test_z_ordering_plane_2", snap)
       end
     end
 
@@ -161,8 +155,7 @@ module RGSSTest
         s3.bitmap = filled_bitmap(20, 20, Color.new(255, 0, 0, 255))
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_z_ordering_tilemap.png"))
+        assert_bitmap_equal2("test_z_ordering_tilemap", snap)
       end
     end
 
@@ -177,8 +170,7 @@ module RGSSTest
         s1.bitmap = filled_bitmap(200, 100, Color.new(0, 255, 0, 255))
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_y_ordering_sprite_1.png"))
+        assert_bitmap_equal2("test_y_ordering_sprite_1", snap)
       end
     end
 
@@ -193,8 +185,7 @@ module RGSSTest
         s2.bitmap = filled_bitmap(100, 200, Color.new(255, 0, 0, 255))
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_y_ordering_sprite_2.png"))
+        assert_bitmap_equal2("test_y_ordering_sprite_2", snap)
       end
     end
 
@@ -217,8 +208,7 @@ module RGSSTest
         s1.bitmap = filled_bitmap(100, 100, Color.new(255, 0, 0, 255))
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_y_ordering_window_1.png"))
+        assert_bitmap_equal2("test_y_ordering_window_1", snap)
       end
     end
 
@@ -237,8 +227,7 @@ module RGSSTest
         s2.bitmap = filled_bitmap(100, 100, Color.new(0, 0, 255, 255))
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_y_ordering_plane_1.png"))
+        assert_bitmap_equal2("test_y_ordering_plane_1", snap)
       end
     end
 
@@ -275,8 +264,7 @@ module RGSSTest
         s4.bitmap = filled_bitmap(130, 300, Color.new(255, 0, 255, 255))
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_y_ordering_tilemap.png"))
+        assert_bitmap_equal2("test_y_ordering_tilemap", snap)
       end
     end
 
@@ -294,8 +282,7 @@ module RGSSTest
         s1.bitmap = filled_bitmap(200, 100, Color.new(0, 255, 0, 255))
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_t_ordering_1.png"))
+        assert_bitmap_equal2("test_t_ordering_1", snap)
       end
     end
 
@@ -313,8 +300,7 @@ module RGSSTest
         w1.height = 200
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_t_ordering_2.png"))
+        assert_bitmap_equal2("test_t_ordering_2", snap)
       end
     end
 
@@ -329,20 +315,17 @@ module RGSSTest
         s2.bitmap = filled_bitmap(100, 200, Color.new(255, 0, 0, 255))
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_t_reordering_a.png"))
+        assert_bitmap_equal2("test_t_reordering_a", snap)
 
         s1.y = 1
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_t_reordering_b.png"))
+        assert_bitmap_equal2("test_t_reordering_b", snap)
 
         s1.y = 0
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_t_reordering_c.png"))
+        assert_bitmap_equal2("test_t_reordering_c", snap)
       end
     end
   end

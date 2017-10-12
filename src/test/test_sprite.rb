@@ -40,8 +40,7 @@ module RGSSTest
         s2.mirror = true
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_positioning_1.png"))
+        assert_bitmap_equal2("test_sprite_positioning_1", snap)
       end
     end
 
@@ -68,8 +67,7 @@ module RGSSTest
         s2.zoom_y = 1.2
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_zoom_1.png"))
+        assert_bitmap_equal2("test_sprite_zoom_1", snap)
       end
     end
 
@@ -93,8 +91,7 @@ module RGSSTest
         s2.angle = 30
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_angle_1.png"))
+        assert_bitmap_equal2("test_sprite_angle_1", snap)
       end
     end
 
@@ -118,8 +115,7 @@ module RGSSTest
         s2.opacity = 200
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_bush_1.png"))
+        assert_bitmap_equal2("test_sprite_bush_1", snap)
       end
     end
 
@@ -142,8 +138,7 @@ module RGSSTest
         s2.wave_phase = 167
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_wave_1.png"))
+        assert_bitmap_equal2("test_sprite_wave_1", snap)
       end
     end
 
@@ -179,8 +174,7 @@ module RGSSTest
         s2.opacity = 200
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_1.png"))
+        assert_bitmap_equal2("test_sprite_1", snap)
       end
     end
 
@@ -212,8 +206,7 @@ module RGSSTest
         s2.opacity = 200
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_2.png"))
+        assert_bitmap_equal2("test_sprite_2", snap)
       end
     end
 
@@ -228,8 +221,7 @@ module RGSSTest
         s1.angle = 1.0
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_rect_angle.png"))
+        assert_bitmap_equal2("test_sprite_rect_angle", snap)
       end
     end
 
@@ -248,8 +240,7 @@ module RGSSTest
         s2.color = Color.new(20, 158, 240, 150)
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_color_1.png"))
+        assert_bitmap_equal2("test_sprite_color_1", snap)
       end
     end
 
@@ -269,8 +260,7 @@ module RGSSTest
         s2.opacity = 128
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_color_2.png"))
+        assert_bitmap_equal2("test_sprite_color_2", snap)
       end
     end
 
@@ -299,8 +289,7 @@ module RGSSTest
         s2.color = Color.new(20, 158, 240, 150)
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_color_3.png"))
+        assert_bitmap_equal2("test_sprite_color_3", snap)
       end
     end
 
@@ -319,8 +308,7 @@ module RGSSTest
         s2.tone = Tone.new(20, 158, -133, 0)
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_tone_1.png"))
+        assert_bitmap_equal2("test_sprite_tone_1", snap)
       end
     end
 
@@ -339,8 +327,7 @@ module RGSSTest
         s2.tone = Tone.new(20, 158, -133, 180)
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_tone_2.png"))
+        assert_bitmap_equal2("test_sprite_tone_2", snap)
       end
     end
 
@@ -360,8 +347,7 @@ module RGSSTest
         s2.opacity = 230
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_tone_3.png"))
+        assert_bitmap_equal2("test_sprite_tone_3", snap)
       end
     end
 
@@ -382,8 +368,7 @@ module RGSSTest
         s2.opacity = 230
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_tone_4.png"))
+        assert_bitmap_equal2("test_sprite_tone_4", snap)
       end
     end
 
@@ -405,8 +390,7 @@ module RGSSTest
 
         8.times do|t|
           snap = Graphics.snap_to_bitmap
-          assert_bitmap_equal(
-            snap, Bitmap.new("#@@imgdir/test_sprite_flash_1_#{t}.png"))
+          assert_bitmap_equal2("test_sprite_flash_1_#{t}", snap)
           s2.update
         end
       end
@@ -452,8 +436,7 @@ module RGSSTest
         s2.blend_type = 1
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_blend_type_1.png"))
+        assert_bitmap_equal2("test_sprite_blend_type_1", snap)
       end
     end
 
@@ -472,8 +455,7 @@ module RGSSTest
         s2.blend_type = 2
 
         snap = Graphics.snap_to_bitmap
-        assert_bitmap_equal(
-          snap, Bitmap.new("#@@imgdir/test_sprite_blend_type_2.png"))
+        assert_bitmap_equal2("test_sprite_blend_type_2", snap)
       end
     end
   end

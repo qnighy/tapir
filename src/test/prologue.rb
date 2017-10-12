@@ -140,6 +140,26 @@ module RGSSTest
     end
   end
 
+  @@imgdir = "../../src/test/Graphics"
+
+  def assert_bitmap_equal2(name, actual, save = false, message = nil)
+    if save
+      $stderr.puts "assert_bitmap_equal2: saving to #@@imgdir/#{name}.png..."
+      save_bitmap(actual, "#@@imgdir/#{name}.png")
+      return
+    end
+    expected = Bitmap.new("#@@imgdir/#{name}.png")
+    comparison = compare_bitmap(expected, actual)
+    unless comparison < 1e-3
+      save_bitmap(actual, "#{name}_actual.png") rescue nil
+      save_bitmap(expected, "#{name}_expected.png") rescue nil
+      message = \
+        "#{name}_expected.png != #{name}_actual.png " +
+        "(difference: #{comparison})" if message.nil?
+      raise AssertionFailedError, message
+    end
+  end
+
   def compare_bitmap(bitmap0, bitmap1)
     (bitmap0.width == bitmap1.width && bitmap0.height == bitmap1.height) or
       return 1.0 / 0.0

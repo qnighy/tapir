@@ -37,8 +37,7 @@ module RGSSTest
 
     def test_new_1
       b0 = Bitmap.new(43, 30)
-      b1 = Bitmap.new("#@@imgdir/empty_43x30.png")
-      assert_bitmap_equal(b0, b1)
+      assert_bitmap_equal2("test_bitmap_new_1", b0)
     end
 
     def test_new_2
@@ -111,56 +110,56 @@ module RGSSTest
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.blt(0, 0, b1, b1.rect, 255)
-      assert_bitmap_equal(b0, b1)
+      assert_bitmap_equal2("test_blt_1", b0)
     end
 
     def test_blt_1a
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.blt(0.9, 0.9, b1, b1.rect)
-      assert_bitmap_equal(b0, b1)
+      assert_bitmap_equal2("test_blt_1a", b0)
     end
 
     def test_blt_2
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.blt(0, 0, b1, b1.rect, 128)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_2.png"))
+      assert_bitmap_equal2("test_blt_2", b0)
     end
 
     def test_blt_3
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgba_40x32_b.png")
       b0.blt(0, 0, b1, b1.rect, 128)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_3.png"))
+      assert_bitmap_equal2("test_blt_3", b0)
     end
 
     def test_blt_4
       b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgba_40x32_b.png")
       b0.blt(0, 0, b1, b1.rect, 128)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_4.png"))
+      assert_bitmap_equal2("test_blt_4", b0)
     end
 
     def test_blt_5
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.blt(-5, -3, b1, b1.rect)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_5.png"))
+      assert_bitmap_equal2("test_blt_5", b0)
     end
 
     def test_blt_6
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.blt(5, 3, b1, b1.rect)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_6.png"))
+      assert_bitmap_equal2("test_blt_6", b0)
     end
 
     def test_blt_7
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.blt(10, 6, b1, Rect.new(2, 3, 4, 5))
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_7.png"))
+      assert_bitmap_equal2("test_blt_7", b0)
     end
 
     def test_blt_8
@@ -170,7 +169,7 @@ module RGSSTest
       r.x = -7
       r.y = -8
       b0.blt(-8, -9, b1, r)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_8.png"))
+      assert_bitmap_equal2("test_blt_8", b0)
     end
 
     def test_blt_9
@@ -180,7 +179,7 @@ module RGSSTest
       r.x = -17
       r.y = -18
       b0.blt(-8, -9, b1, r)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_9.png"))
+      assert_bitmap_equal2("test_blt_9", b0)
     end
 
     def test_blt_10
@@ -190,7 +189,7 @@ module RGSSTest
       r.x = 7
       r.y = 8
       b0.blt(8, 9, b1, r)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_10.png"))
+      assert_bitmap_equal2("test_blt_10", b0)
     end
 
     def test_blt_11
@@ -200,21 +199,21 @@ module RGSSTest
       r.x = 17
       r.y = 18
       b0.blt(8, 9, b1, r)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_11.png"))
+      assert_bitmap_equal2("test_blt_11", b0)
     end
 
     def test_blt_12
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.blt(20, 20, b1, Rect.new(20, 20, -20, 20))
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_12.png"))
+      assert_bitmap_equal2("test_blt_12", b0)
     end
 
     def test_blt_13
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.blt(20, 20, b1, Rect.new(20, 20, 20, -20))
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_13.png"))
+      assert_bitmap_equal2("test_blt_13", b0)
     end
 
     def test_blt_14
@@ -230,56 +229,56 @@ module RGSSTest
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.stretch_blt(b1.rect, b1, b1.rect, 255)
-      assert_bitmap_equal(b0, b1)
+      assert_bitmap_equal2("test_stretch_blt_1", b0)
     end
 
     def test_stretch_blt_1a
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.stretch_blt(b1.rect, b1, b1.rect)
-      assert_bitmap_equal(b0, b1)
+      assert_bitmap_equal2("test_stretch_blt_1a", b0)
     end
 
     def test_stretch_blt_2
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.stretch_blt(b1.rect, b1, b1.rect, 128)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_2.png"))
+      assert_bitmap_equal2("test_stretch_blt_2", b0)
     end
 
     def test_stretch_blt_3
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgba_40x32_b.png")
       b0.stretch_blt(b1.rect, b1, b1.rect, 128)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_3.png"))
+      assert_bitmap_equal2("test_stretch_blt_3", b0)
     end
 
     def test_stretch_blt_4
       b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgba_40x32_b.png")
       b0.stretch_blt(b1.rect, b1, b1.rect, 128)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_4.png"))
+      assert_bitmap_equal2("test_stretch_blt_4", b0)
     end
 
     def test_stretch_blt_5
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.stretch_blt(Rect.new(-5, -3, b1.width, b1.height), b1, b1.rect)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_5.png"))
+      assert_bitmap_equal2("test_stretch_blt_5", b0)
     end
 
     def test_stretch_blt_6
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.stretch_blt(Rect.new(5, 3, b1.width, b1.height), b1, b1.rect)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_6.png"))
+      assert_bitmap_equal2("test_stretch_blt_6", b0)
     end
 
     def test_stretch_blt_7
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.stretch_blt(Rect.new(10, 6, 4, 5), b1, Rect.new(2, 3, 4, 5))
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_7.png"))
+      assert_bitmap_equal2("test_stretch_blt_7", b0)
     end
 
     def test_stretch_blt_8
@@ -289,7 +288,7 @@ module RGSSTest
       r.x = -7
       r.y = -8
       b0.stretch_blt(Rect.new(-8, -9, b1.width, b1.height), b1, r)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_8.png"))
+      assert_bitmap_equal2("test_stretch_blt_8", b0)
     end
 
     def test_stretch_blt_9
@@ -299,7 +298,7 @@ module RGSSTest
       r.x = -17
       r.y = -18
       b0.stretch_blt(Rect.new(-8, -9, b1.width, b1.height), b1, r)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_9.png"))
+      assert_bitmap_equal2("test_stretch_blt_9", b0)
     end
 
     def test_stretch_blt_10
@@ -309,7 +308,7 @@ module RGSSTest
       r.x = 7
       r.y = 8
       b0.stretch_blt(Rect.new(8, 9, b1.width, b1.height), b1, r)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_10.png"))
+      assert_bitmap_equal2("test_stretch_blt_10", b0)
     end
 
     def test_stretch_blt_11
@@ -319,63 +318,63 @@ module RGSSTest
       r.x = 17
       r.y = 18
       b0.stretch_blt(Rect.new(8, 9, b1.width, b1.height), b1, r)
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_11.png"))
+      assert_bitmap_equal2("test_stretch_blt_11", b0)
     end
 
     def test_stretch_blt_12
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.stretch_blt(Rect.new(20, 20, 20, 20), b1, Rect.new(20, 20, -20, 20))
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_12.png"))
+      assert_bitmap_equal2("test_stretch_blt_12", b0)
     end
 
     def test_stretch_blt_13
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.stretch_blt(Rect.new(20, 20, 20, 20), b1, Rect.new(20, 20, 20, -20))
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_blt_13.png"))
+      assert_bitmap_equal2("test_stretch_blt_13", b0)
     end
 
     def test_stretch_blt_14
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.stretch_blt(Rect.new(2, 3, 18, 14), b1, Rect.new(4, 5, 6, 7))
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_stretch_blt_14.png"))
+      assert_bitmap_equal2("test_stretch_blt_14", b0)
     end
 
     def test_stretch_blt_15
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.stretch_blt(Rect.new(2, 3, 6, 7), b1, Rect.new(4, 5, 12, 21))
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_stretch_blt_15.png"))
+      assert_bitmap_equal2("test_stretch_blt_15", b0)
     end
 
     def test_stretch_blt_16
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.stretch_blt(Rect.new(3, 3, 37, 29), b1, Rect.new(1, 1, 8, 10))
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_stretch_blt_16.png"))
+      assert_bitmap_equal2("test_stretch_blt_16", b0)
     end
 
     def test_stretch_blt_17
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.stretch_blt(Rect.new(10, 10, 15, 15), b1, Rect.new(1, 1, 39, 31))
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_stretch_blt_17.png"))
+      assert_bitmap_equal2("test_stretch_blt_17", b0)
     end
 
     def test_stretch_blt_18
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.stretch_blt(Rect.new(35, 5, 13, 17), b1, Rect.new(5, -13, 22, 22))
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_stretch_blt_18.png"))
+      assert_bitmap_equal2("test_stretch_blt_18", b0)
     end
 
     def test_stretch_blt_19
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b1 = Bitmap.new("#@@imgdir/random_rgb_40x32_b.png")
       b0.stretch_blt(Rect.new(-1, -1, 42, 34), b1, Rect.new(-10, 5, 80, 80))
-      assert_bitmap_equal(b0, Bitmap.new("#@@imgdir/test_stretch_blt_19.png"))
+      assert_bitmap_equal2("test_stretch_blt_19", b0)
     end
 
     def test_stretch_blt_20

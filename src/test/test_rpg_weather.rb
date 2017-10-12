@@ -46,10 +46,10 @@ module RGSSTest
       assert_equal(obj.instance_eval("@max"), 0)
       assert_equal(obj.instance_eval("@ox"), 0)
       assert_equal(obj.instance_eval("@oy"), 0)
-      assert_bitmap_equal(obj.instance_eval("@rain_bitmap"), rain_expected)
-      assert_bitmap_equal(obj.instance_eval("@snow_bitmap"), snow_expected)
+      assert_bitmap_equal2("rain_bitmap", obj.instance_eval("@rain_bitmap"))
+      assert_bitmap_equal2("snow_bitmap", obj.instance_eval("@snow_bitmap"))
       # assert_equal(obj.instance_eval("@sprites"), nil)
-      assert_bitmap_equal(obj.instance_eval("@storm_bitmap"), storm_expected)
+      assert_bitmap_equal2("storm_bitmap", obj.instance_eval("@storm_bitmap"))
       assert_equal(obj.instance_eval("@type"), 0)
     end
   end
