@@ -49,6 +49,9 @@ static VALUE rb_bitmap_m_height(VALUE self);
 static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self);
 static VALUE rb_bitmap_m_stretch_blt(int argc, VALUE *argv, VALUE self);
 static VALUE rb_bitmap_m_fill_rect(int argc, VALUE *argv, VALUE self);
+#if RGSS >= 2
+static VALUE rb_bitmap_m_gradient_fill_rect(int argc, VALUE *argv, VALUE self);
+#endif
 static VALUE rb_bitmap_m_clear(VALUE self);
 #if RGSS >= 2
 static VALUE rb_bitmap_m_clear_rect(int argc, VALUE *argv, VALUE self);
@@ -100,6 +103,10 @@ void Init_Bitmap(void) {
   rb_define_method(rb_cBitmap, "blt", rb_bitmap_m_blt, -1);
   rb_define_method(rb_cBitmap, "stretch_blt", rb_bitmap_m_stretch_blt, -1);
   rb_define_method(rb_cBitmap, "fill_rect", rb_bitmap_m_fill_rect, -1);
+#if RGSS >= 2
+  rb_define_method(rb_cBitmap, "gradient_fill_rect",
+      rb_bitmap_m_gradient_fill_rect, -1);
+#endif
   rb_define_method(rb_cBitmap, "clear", rb_bitmap_m_clear, 0);
 #if RGSS >= 2
   rb_define_method(rb_cBitmap, "clear_rect", rb_bitmap_m_clear_rect, -1);
@@ -110,10 +117,7 @@ void Init_Bitmap(void) {
   rb_define_method(rb_cBitmap, "text_size", rb_bitmap_m_text_size, 1);
   rb_define_method(rb_cBitmap, "font", rb_bitmap_m_font, 0);
   rb_define_method(rb_cBitmap, "font=", rb_bitmap_m_set_font, 1);
-  // TODO: implement Bitmap#dispose
-  // TODO: implement Bitmap#disposed?
   // TODO: implement Bitmap#rect
-  // TODO: implement Bitmap#gradient_fill_rect
   // TODO: implement Bitmap#hue_change
   // TODO: implement Bitmap#blur
   // TODO: implement Bitmap#radial_blur
@@ -437,6 +441,77 @@ static VALUE rb_bitmap_m_fill_rect(int argc, VALUE *argv, VALUE self) {
   SDL_FillRect(ptr->surface, &sdl_rect, color);
   return Qnil;
 }
+
+#if RGSS >= 2
+static VALUE rb_bitmap_m_gradient_fill_rect(
+    int argc, VALUE *argv, VALUE self) {
+  struct Bitmap *ptr = rb_bitmap_data_mut(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  ptr->texture_invalidated = true;
+
+  SDL_Rect sdl_rect;
+  const struct Color *color1_ptr, *color2_ptr;
+  bool vertical = false;
+  if(argc == 3 || argc == 4) {
+    const struct Rect *rect_ptr = rb_rect_data(argv[0]);
+    sdl_rect.x = rect_ptr->x;
+    sdl_rect.y = rect_ptr->y;
+    sdl_rect.w = rect_ptr->width;
+    sdl_rect.h = rect_ptr->height;
+    color1_ptr = rb_color_data(argv[1]);
+    color2_ptr = rb_color_data(argv[2]);
+    if(argc == 4) vertical = RTEST(argv[3]);
+  } else if(argc == 6 || argc == 7) {
+    sdl_rect.x = NUM2INT(argv[0]);
+    sdl_rect.y = NUM2INT(argv[1]);
+    sdl_rect.w = NUM2INT(argv[2]);
+    sdl_rect.h = NUM2INT(argv[3]);
+    color1_ptr = rb_color_data(argv[4]);
+    color2_ptr = rb_color_data(argv[5]);
+    // Note: this should be RTEST(argv[6]),
+    // but original RGSS wrongly uses RTEST(argv[3]);
+    if(argc == 7) vertical = RTEST(argv[3]);
+  } else {
+    rb_raise(rb_eArgError,
+        "wrong number of arguments (%d for 3..4 or 6..7)", argc);
+  }
+  Uint32 red1 = (Uint8)color1_ptr->red;
+  Uint32 green1 = (Uint8)color1_ptr->green;
+  Uint32 blue1 = (Uint8)color1_ptr->blue;
+  Uint32 alpha1 = (Uint8)color1_ptr->alpha;
+  Uint32 red2 = (Uint8)color2_ptr->red;
+  Uint32 green2 = (Uint8)color2_ptr->green;
+  Uint32 blue2 = (Uint8)color2_ptr->blue;
+  Uint32 alpha2 = (Uint8)color2_ptr->alpha;
+  Uint32 *pixels = ptr->surface->pixels;
+  int pitch = ptr->surface->pitch / 4;
+  int width = ptr->surface->w;
+  int height = ptr->surface->h;
+  int l = vertical ? sdl_rect.h : sdl_rect.w;
+  if(l > 1) --l;
+  for(int yi = 0; yi < sdl_rect.h; ++yi) {
+    for(int xi = 0; xi < sdl_rect.w; ++xi) {
+      int y = sdl_rect.y + yi;
+      int x = sdl_rect.x + xi;
+      if(!(0 <= x && x < width && 0 <= y && y < height)) {
+        continue;
+      }
+      int i = vertical ? yi : xi;
+      Uint32 red = red1 + (int)(red2 - red1) * i / l;
+      Uint32 green = green1 + (int)(green2 - green1) * i / l;
+      Uint32 blue = blue1 + (int)(blue2 - blue1) * i / l;
+      Uint32 alpha = alpha1 + (int)(alpha2 - alpha1) * i / l;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+      Uint32 color = (red << 24) | (green << 16) | (blue << 8) | alpha;
+#else
+      Uint32 color = red | (green << 8) | (blue << 16) | (alpha << 24);
+#endif
+      pixels[y * pitch + x] = color;
+    }
+  }
+  return Qnil;
+}
+#endif
 
 static VALUE rb_bitmap_m_clear(VALUE self) {
   struct Bitmap *ptr = rb_bitmap_data_mut(self);
