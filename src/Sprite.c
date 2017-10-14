@@ -632,7 +632,7 @@ static void renderSprite(
 
   glUseProgram(shader);
   glUniform1i(glGetUniformLocation(shader, "tex"), 0);
-  glUniform2f(glGetUniformLocation(shader, "dst_size"),
+  glUniform2f(glGetUniformLocation(shader, "resolution"),
       window_width, window_height);
   glUniform2f(glGetUniformLocation(shader, "src_size"),
       surface->w, surface->h);
@@ -657,7 +657,9 @@ static void renderSprite(
   // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-  gl_draw_rect(-1.0, -1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+  gl_draw_rect(
+      0.0, 0.0, window_width, window_height,
+      0.0, 0.0, window_width, window_height);
 
   glUseProgram(0);
 }
@@ -666,8 +668,13 @@ void initSpriteSDL() {
   static const char *vsh_source =
     "#version 120\n"
     "\n"
+    "uniform vec2 resolution;\n"
+    "\n"
     "void main(void) {\n"
-    "    gl_Position = gl_Vertex;\n"
+    "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+    "    gl_Position.x = gl_Vertex.x / resolution.x * 2.0 - 1.0;\n"
+    "    gl_Position.y = 1.0 - gl_Vertex.y / resolution.y * 2.0;\n"
+    "    gl_Position.zw = vec2(0.0, 1.0);\n"
     "}\n";
 
   static const char *fsh_source =
@@ -677,8 +684,8 @@ void initSpriteSDL() {
     "#define texture2DProj textureProj\n"
     "#endif\n"
     "\n"
+    "uniform vec2 resolution;\n"
     "uniform sampler2D tex;\n"
-    "uniform vec2 dst_size;\n"
     "uniform vec2 dst_translate;\n"
     "uniform vec2 src_translate;\n"
     "uniform vec2 src_topleft;\n"
@@ -691,7 +698,7 @@ void initSpriteSDL() {
     // "uniform vec4 sprite_tone;\n"
     "\n"
     "void main(void) {\n"
-    "    vec2 coord = vec2(gl_FragCoord.x, dst_size.y - gl_FragCoord.y);\n"
+    "    vec2 coord = gl_TexCoord[0].xy;\n"
     "    coord = coord - dst_translate;\n"
     "    coord = vec2(coord.x / zoom.x, coord.y / zoom.y);\n"
     "    coord = coord + src_translate;\n"
