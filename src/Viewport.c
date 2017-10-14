@@ -326,8 +326,6 @@ static void renderViewport(
   }
   rviewport.ox = ptr->ox;
   rviewport.oy = ptr->oy;
-  if(ptr->ox != 0) WARN_UNIMPLEMENTED("Viewport#ox");
-  if(ptr->oy != 0) WARN_UNIMPLEMENTED("Viewport#oy");
 
   renderQueue(&ptr->viewport_queue, &rviewport);
 
