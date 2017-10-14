@@ -1291,12 +1291,27 @@ static void load_libs() {
       "    end\n"
 #endif
       "    def initialize\n"
-      "      warn_unimplemented(\"RPG::Animation.new\")\n"
+#if RGSS >= 2
+      "      @animation1_hue = 0\n"
+      "      @animation1_name = \"\"\n"
+      "      @animation2_hue = 0\n"
+      "      @animation2_name = \"\"\n"
+#else
+      "      @animation_hue = 0\n"
+      "      @animation_name = \"\"\n"
+#endif
+      "      @frame_max = 1\n"
+      "      @frames = [RPG::Animation::Frame.new]\n"
+      "      @id = 0\n"
+      "      @name = \"\"\n"
+      "      @position = 1\n"
+      "      @timings = []\n"
       "    end\n"
       "    class Frame\n"
       "      attr_accessor :cell_data, :cell_max\n"
       "      def initialize\n"
-      "        warn_unimplemented(\"RPG::Animation::Frame.new\")\n"
+      "        @cell_data = Table.new(0, 0)\n"
+      "        @cell_max = 0\n"
       "      end\n"
       "    end\n"
       "    class Timing\n"
@@ -1305,7 +1320,16 @@ static void load_libs() {
       "      attr_accessor :condition\n"
 #endif
       "      def initialize\n"
-      "        warn_unimplemented(\"RPG::Animation::Timing.new\")\n"
+      "        @flash_color = Color.new(255, 255, 255, 255)\n"
+      "        @flash_duration = 5\n"
+      "        @flash_scope = 0\n"
+      "        @frame = 0\n"
+#if RGSS >= 2
+      "        @se = RPG::SE.new(\"\", 80)\n"
+#else
+      "        @se = RPG::AudioFile.new(\"\", 80)\n"
+      "        @condition = 0\n"
+#endif
       "      end\n"
       "    end\n"
       "  end\n"
