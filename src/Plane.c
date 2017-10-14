@@ -48,7 +48,8 @@ static VALUE rb_plane_m_set_tone(VALUE self, VALUE newval);
 
 static void prepareRenderPlane(struct Renderable *renderable, int t);
 static void renderPlane(
-    struct Renderable *renderable, const struct RenderJob *job);
+    struct Renderable *renderable, const struct RenderJob *job,
+    const struct RenderViewport *viewport);
 
 VALUE rb_cPlane;
 
@@ -357,7 +358,8 @@ static void prepareRenderPlane(struct Renderable *renderable, int t) {
 }
 
 static void renderPlane(
-    struct Renderable *renderable, const struct RenderJob *job) {
+    struct Renderable *renderable, const struct RenderJob *job,
+    const struct RenderViewport *viewport) {
   (void) job;
   struct Plane *ptr = (struct Plane *)renderable;
   {
@@ -382,7 +384,7 @@ static void renderPlane(
   glUseProgram(shader);
   glUniform1i(glGetUniformLocation(shader, "tex"), 0);
   glUniform2f(glGetUniformLocation(shader, "resolution"),
-      window_width, window_height);
+      viewport->width, viewport->height);
   glUniform2f(glGetUniformLocation(shader, "src_size"),
       surface->w, surface->h);
   glUniform2f(glGetUniformLocation(shader, "src_translate"),
@@ -401,8 +403,11 @@ static void renderPlane(
   // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
   gl_draw_rect(
-      0.0, 0.0, window_width, window_height,
-      0.0, 0.0, window_width, window_height);
+      0.0, 0.0, viewport->width, viewport->height,
+      viewport->ox,
+      viewport->oy,
+      viewport->ox + viewport->width,
+      viewport->oy + viewport->height);
 
   glUseProgram(0);
 }

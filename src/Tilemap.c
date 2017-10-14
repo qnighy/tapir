@@ -50,9 +50,11 @@ static VALUE rb_tilemap_m_set_oy(VALUE self, VALUE newval);
 
 static void prepareRenderTilemap(struct Renderable *renderable, int t);
 static void renderTilemap(
-    struct Renderable *renderable, const struct RenderJob *job);
+    struct Renderable *renderable, const struct RenderJob *job,
+    const struct RenderViewport *viewport);
 
-static void renderTile(struct Tilemap *ptr, int tile_id, int x, int y);
+static void renderTile(struct Tilemap *ptr, int tile_id, int x, int y,
+    const struct RenderViewport *viewport);
 
 VALUE rb_cTilemap;
 
@@ -389,6 +391,7 @@ static void prepareRenderTilemap(struct Renderable *renderable, int t) {
   const struct Table *priorities_ptr = NULL;
   if(ptr->priorities != Qnil) rb_table_data(ptr->priorities);
 
+  // TODO respect Viewport width
   int x_start = ptr->ox >> 5;
   int x_end = (ptr->ox + window_width + 31) >> 5;
   int y_start = ptr->oy >> 5;
@@ -423,7 +426,8 @@ static void prepareRenderTilemap(struct Renderable *renderable, int t) {
 #endif
 }
 static void renderTilemap(
-    struct Renderable *renderable, const struct RenderJob *job) {
+    struct Renderable *renderable, const struct RenderJob *job,
+    const struct RenderViewport *viewport) {
   struct Tilemap *ptr = (struct Tilemap *)renderable;
 #if RGSS >= 2
   if(ptr->map_data == Qnil) return;
@@ -435,10 +439,10 @@ static void renderTilemap(
   const struct Table *flags_ptr = NULL;
   if(ptr->flags != Qnil) flags_ptr = rb_table_data(ptr->flags);
 
-  int x_start = ptr->ox >> 5;
-  int x_end = (ptr->ox + window_width + 31) >> 5;
-  int y_start = ptr->oy >> 5;
-  int y_end = (ptr->oy + window_height + 31) >> 5;
+  int x_start = (viewport->ox + ptr->ox) >> 5;
+  int x_end = (viewport->ox + ptr->ox + viewport->width + 31) >> 5;
+  int y_start = (viewport->oy + ptr->oy) >> 5;
+  int y_end = (viewport->oy + ptr->oy + viewport->height + 31) >> 5;
 
   for(int zi = 0; zi < zsize; ++zi) {
     for(int yi = y_start; yi <= y_end; ++yi) {
@@ -455,7 +459,8 @@ static void renderTilemap(
           z = (flags_ptr->data[tile_id] & 0x10) ? 200 : 0;
         }
         if(z != job->z) continue;
-        renderTile(ptr, tile_id, xi * 32 - ptr->ox, yi * 32 - ptr->oy);
+        renderTile(ptr, tile_id, xi * 32 - ptr->ox, yi * 32 - ptr->oy,
+            viewport);
       }
     }
   }
@@ -471,7 +476,7 @@ static void renderTilemap(
   int xii = (xi % xsize + xsize) % xsize;
   int yii = (yi % ysize + ysize) % ysize;
   int tile_id = map_data_ptr->data[(zi * ysize + yii) * xsize + xii];
-  renderTile(ptr, tile_id, xi * 32 - ptr->ox, yi * 32 - ptr->oy);
+  renderTile(ptr, tile_id, xi * 32 - ptr->ox, yi * 32 - ptr->oy, viewport);
 #endif
 }
 
@@ -522,7 +527,8 @@ static const int counter_alternatives[48] = {
 };
 #endif
 
-static void renderTile(struct Tilemap *ptr, int tile_id, int x, int y) {
+static void renderTile(struct Tilemap *ptr, int tile_id, int x, int y,
+    const struct RenderViewport *viewport) {
   VALUE tileset = Qnil;
   int autotile_shape_id = -1;
   bool is_counter = false;
@@ -640,7 +646,7 @@ static void renderTile(struct Tilemap *ptr, int tile_id, int x, int y) {
   glUseProgram(shader);
   glUniform1i(glGetUniformLocation(shader, "tex"), 0);
   glUniform2f(glGetUniformLocation(shader, "resolution"),
-      window_width, window_height);
+      viewport->width, viewport->height);
 
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture((struct Bitmap *)tileset_ptr);
@@ -667,17 +673,20 @@ static void renderTile(struct Tilemap *ptr, int tile_id, int x, int y) {
         int dst_x = x + (i % 2) * 16;
         int dst_y = y + (i / 2) * 16;
         gl_draw_rect(
-            dst_x, dst_y + j * 8,
-            dst_x + 16, dst_y + 16 + j * 8,
-            src_xi / (double)tileset_surface->w,
-            src_yi / (double)tileset_surface->h,
+            -viewport->ox + dst_x, dst_y + j * 8,
+            -viewport->oy + dst_x + 16, dst_y + 16 + j * 8,
+            -viewport->ox + src_xi / (double)tileset_surface->w,
+            -viewport->oy + src_yi / (double)tileset_surface->h,
             (src_xi + 16) / (double)tileset_surface->w,
             (src_yi + 16) / (double)tileset_surface->h);
       }
     }
   } else {
     gl_draw_rect(
-        x, y, x + 32, y + 32,
+        -viewport->ox + x,
+        -viewport->oy + y,
+        -viewport->ox + x + 32,
+        -viewport->oy + y + 32,
         src_x / (double)tileset_surface->w,
         src_y / (double)tileset_surface->h,
         (src_x + 32) / (double)tileset_surface->w,

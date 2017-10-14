@@ -33,7 +33,8 @@ static VALUE rb_viewport_m_set_tone(VALUE self, VALUE newval);
 static void clearViewportQueue(struct Renderable *renderable);
 static void prepareRenderViewport(struct Renderable *renderable, int t);
 static void renderViewport(
-    struct Renderable *renderable, const struct RenderJob *job);
+    struct Renderable *renderable, const struct RenderJob *job,
+    const struct RenderViewport *viewport);
 
 VALUE rb_cViewport;
 
@@ -285,10 +286,19 @@ static void prepareRenderViewport(struct Renderable *renderable, int t) {
 }
 
 static void renderViewport(
-    struct Renderable *renderable, const struct RenderJob *job) {
+    struct Renderable *renderable, const struct RenderJob *job,
+    const struct RenderViewport *viewport) {
   (void) job;
+  (void) viewport;
 
   struct Viewport *ptr = (struct Viewport *)renderable;
+
+  struct RenderViewport rviewport;
+  rviewport.width = window_width;
+  rviewport.height = window_height;
+  rviewport.ox = 0;
+  rviewport.oy = 0;
+
   {
     const struct Color *color = rb_color_data(ptr->color);
     if(color->red || color->green || color->blue || color->alpha) {
@@ -303,16 +313,25 @@ static void renderViewport(
   }
   {
     const struct Rect *rect = rb_rect_data(ptr->rect);
-    if(rect->width < 0 || rect->height < 0) return;
+    if(rect->width <= 0 || rect->height <= 0) return;
     glEnable(GL_SCISSOR_TEST);
     glScissor(
         rect->x, window_height - (rect->y + rect->height),
         rect->width, rect->height);
+    glViewport(
+        rect->x, window_height - (rect->y + rect->height),
+        rect->width, rect->height);
+    rviewport.width = rect->width;
+    rviewport.height = rect->height;
   }
+  rviewport.ox = ptr->ox;
+  rviewport.oy = ptr->oy;
   if(ptr->ox != 0) WARN_UNIMPLEMENTED("Viewport#ox");
   if(ptr->oy != 0) WARN_UNIMPLEMENTED("Viewport#oy");
-  renderQueue(&ptr->viewport_queue);
+
+  renderQueue(&ptr->viewport_queue, &rviewport);
 
   glDisable(GL_SCISSOR_TEST);
   glScissor(0, 0, window_width, window_height);
+  glViewport(0, 0, window_width, window_height);
 }

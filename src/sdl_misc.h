@@ -5,12 +5,18 @@
 #include <ruby.h>
 #include <SDL.h>
 
+struct RenderViewport {
+  int width, height;
+  int ox, oy;
+};
+
 struct RenderJob;
 
 struct Renderable {
   void (*clear)(struct Renderable *renderable);
   void (*prepare)(struct Renderable *renderable, int t);
-  void (*render)(struct Renderable *renderable, const struct RenderJob *job);
+  void (*render)(struct Renderable *renderable, const struct RenderJob *job,
+      const struct RenderViewport *viewport);
   bool disposed;
 };
 
@@ -43,7 +49,8 @@ void disposeAll(void);
 
 void initRenderQueue(struct RenderQueue *queue);
 void clearRenderQueue(struct RenderQueue *queue);
-void renderQueue(struct RenderQueue *queue);
+void renderQueue(struct RenderQueue *queue,
+    const struct RenderViewport *viewport);
 void queueRenderJob(VALUE viewport, struct RenderJob job);
 void deinitRenderQueue(struct RenderQueue *queue);
 

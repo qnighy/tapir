@@ -189,7 +189,12 @@ static void renderScreen() {
   for(size_t t = 0; t < registry_size; ++t) {
     registry[t]->prepare(registry[t], t);
   }
-  renderQueue(&main_queue);
+  struct RenderViewport viewport;
+  viewport.width = window_width;
+  viewport.height = window_height;
+  viewport.ox = 0;
+  viewport.oy = 0;
+  renderQueue(&main_queue, &viewport);
 }
 
 void renderSDL() {
@@ -286,11 +291,12 @@ void clearRenderQueue(struct RenderQueue *queue) {
   queue->size = 0;
 }
 
-void renderQueue(struct RenderQueue *queue) {
+void renderQueue(struct RenderQueue *queue,
+    const struct RenderViewport *viewport) {
   qsort(queue->queue, queue->size, sizeof(*queue->queue), compare_jobs);
   for(size_t i = 0; i < queue->size; ++i) {
     struct RenderJob *job = &queue->queue[i];
-    job->renderable->render(job->renderable, job);
+    job->renderable->render(job->renderable, job, viewport);
   }
 }
 
