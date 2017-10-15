@@ -595,17 +595,11 @@ static void renderSprite(
     const struct RenderViewport *viewport) {
   (void) job;
   struct Sprite *ptr = (struct Sprite *)renderable;
-  {
-    const struct Color *color = rb_color_data(ptr->color);
-    if(color->red || color->green || color->blue || color->alpha) {
-      WARN_UNIMPLEMENTED("Sprite#color");
-    }
-  }
-  {
-    const struct Tone *tone = rb_tone_data(ptr->tone);
-    if(tone->red || tone->green || tone->blue || tone->gray) {
-      WARN_UNIMPLEMENTED("Sprite#tone");
-    }
+
+  const struct Color *color_ptr = rb_color_data(ptr->color);
+  const struct Tone *tone_ptr = rb_tone_data(ptr->tone);
+  if(tone_ptr->red || tone_ptr->green || tone_ptr->blue || tone_ptr->gray) {
+    WARN_UNIMPLEMENTED("Sprite#tone");
   }
 #if RGSS >= 2
   if(ptr->wave_amp) WARN_UNIMPLEMENTED("Sprite#wave_amp");
@@ -650,6 +644,16 @@ static void renderSprite(
   glUniform1i(glGetUniformLocation(shader, "mirror"), ptr->mirror);
   glUniform1f(glGetUniformLocation(shader, "opacity"),
       ptr->opacity / 255.0);
+  glUniform4f(glGetUniformLocation(shader, "sprite_color"),
+      color_ptr->red / 255.0,
+      color_ptr->green / 255.0,
+      color_ptr->blue / 255.0,
+      color_ptr->alpha / 255.0);
+  glUniform4f(glGetUniformLocation(shader, "sprite_tone"),
+      tone_ptr->red / 255.0,
+      tone_ptr->green / 255.0,
+      tone_ptr->blue / 255.0,
+      tone_ptr->gray / 255.0);
 
   glActiveTexture(GL_TEXTURE0);
   bitmapBindTexture((struct Bitmap *)bitmap_ptr);
@@ -700,8 +704,8 @@ void initSpriteSDL() {
     "uniform bool mirror;\n"
     "uniform float opacity;\n"
     // "uniform float angle;\n"
-    // "uniform vec4 sprite_color;\n"
-    // "uniform vec4 sprite_tone;\n"
+    "uniform vec4 sprite_color;\n"
+    "uniform vec4 sprite_tone;\n"
     "\n"
     "void main(void) {\n"
     "    vec2 coord = gl_TexCoord[0].xy;\n"
@@ -717,6 +721,8 @@ void initSpriteSDL() {
     "    } else {\n"
     "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
     "    }\n"
+    "    gl_FragColor.rgb *= 1.0 - sprite_color.a;\n"
+    "    gl_FragColor.rgb += sprite_color.rgb * sprite_color.a;\n"
     "    gl_FragColor.a *= opacity;\n"
     "    /* premultiplication */\n"
     "    gl_FragColor.rgb *= gl_FragColor.a;\n"
