@@ -607,7 +607,6 @@ static void renderSprite(
       WARN_UNIMPLEMENTED("Sprite#tone");
     }
   }
-  if(ptr->mirror) WARN_UNIMPLEMENTED("Sprite#mirror");
 #if RGSS >= 2
   if(ptr->wave_amp) WARN_UNIMPLEMENTED("Sprite#wave_amp");
 #endif
@@ -648,6 +647,7 @@ static void renderSprite(
       ptr->ox + src_rect->x, ptr->oy + src_rect->y);
   glUniform2f(glGetUniformLocation(shader, "zoom"),
       ptr->zoom_x, ptr->zoom_y);
+  glUniform1i(glGetUniformLocation(shader, "mirror"), ptr->mirror);
   glUniform1f(glGetUniformLocation(shader, "opacity"),
       ptr->opacity / 255.0);
 
@@ -697,6 +697,7 @@ void initSpriteSDL() {
     "uniform vec2 src_bottomright;\n"
     "uniform vec2 src_size;\n"
     "uniform vec2 zoom;\n"
+    "uniform bool mirror;\n"
     "uniform float opacity;\n"
     // "uniform float angle;\n"
     // "uniform vec4 sprite_color;\n"
@@ -708,6 +709,9 @@ void initSpriteSDL() {
     "    coord = vec2(coord.x / zoom.x, coord.y / zoom.y);\n"
     "    coord = coord + src_translate;\n"
     "    if(src_topleft.x <= coord.x && src_topleft.y <= coord.y && coord.x <= src_bottomright.x && coord.y <= src_bottomright.y) {\n"
+    "      if(mirror) {\n"
+    "        coord.x = src_topleft.x + src_bottomright.x - coord.x;\n"
+    "      }\n"
     "      vec4 color = texture2D(tex, vec2(coord.x / src_size.x, coord.y / src_size.y));\n"
     "      gl_FragColor = color;\n"
     "    } else {\n"
