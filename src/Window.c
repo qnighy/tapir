@@ -702,6 +702,10 @@ static void renderWindow(
     SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
     if(!skin_surface) return;
 
+#if RGSS == 3
+    const struct Tone *tone_ptr = rb_tone_data(ptr->tone);
+#endif
+
     glActiveTexture(GL_TEXTURE0);
     bitmapBindTexture((struct Bitmap *)skin_bitmap_ptr);
 
@@ -716,6 +720,16 @@ static void renderWindow(
         viewport->width, viewport->height);
     glUniform1f(glGetUniformLocation(shader1, "opacity"),
         ptr->opacity * ptr->back_opacity / (255.0 * 255.0));
+#if RGSS == 3
+    glUniform4f(glGetUniformLocation(shader1, "window_tone"),
+        tone_ptr->red / 255.0,
+        tone_ptr->green / 255.0,
+        tone_ptr->blue / 255.0,
+        tone_ptr->gray / 255.0);
+#else
+    glUniform4f(glGetUniformLocation(shader1, "window_tone"),
+        0.0, 0.0, 0.0, 0.0);
+#endif
 
     gl_draw_rect(
         -viewport->ox + ptr->x + 2,
@@ -731,6 +745,16 @@ static void renderWindow(
         viewport->width, viewport->height);
     glUniform1f(glGetUniformLocation(shader2, "opacity"),
         ptr->opacity * ptr->back_opacity / (255.0 * 255.0));
+#if RGSS == 3
+    glUniform4f(glGetUniformLocation(shader2, "window_tone"),
+        tone_ptr->red / 255.0,
+        tone_ptr->green / 255.0,
+        tone_ptr->blue / 255.0,
+        tone_ptr->gray / 255.0);
+#else
+    glUniform4f(glGetUniformLocation(shader2, "window_tone"),
+        0.0, 0.0, 0.0, 0.0);
+#endif
 
     gl_draw_rect(
         -viewport->ox + ptr->x + 2,
@@ -879,6 +903,7 @@ void initWindowSDL() {
     "\n"
     "uniform sampler2D windowskin;\n"
     "uniform float opacity;\n"
+    "uniform vec4 window_tone;\n"
     "\n"
     "void main(void) {\n"
 #if RGSS >= 2
@@ -886,6 +911,12 @@ void initWindowSDL() {
 #else
     "    vec4 color = texture2D(windowskin, vec2(gl_TexCoord[0].x * (2.0 / 3.0), gl_TexCoord[0].y));\n"
 #endif
+    "    /* Grayscale */\n"
+    "    float gray = color.r * 0.298912 + color.g * 0.586611 + color.b * 0.114478;\n"
+    "    color.rgb *= 1.0 - window_tone.a;\n"
+    "    color.rgb += vec3(gray, gray, gray) * window_tone.a;\n"
+    "    /* tone blending */\n"
+    "    color.rgb = min(max(color.rgb + window_tone.rgb, 0.0), 1.0);\n"
     "    color.a *= opacity;\n"
     "    gl_FragColor = color;\n"
     "    /* premultiplication */\n"
@@ -916,6 +947,7 @@ void initWindowSDL() {
     "\n"
     "uniform sampler2D windowskin;\n"
     "uniform float opacity;\n"
+    "uniform vec4 window_tone;\n"
     "\n"
     "void main(void) {\n"
     "    vec2 coord = mod(gl_TexCoord[0].xy, 1.0);\n"
@@ -924,6 +956,12 @@ void initWindowSDL() {
 #else
     "    vec4 color = texture2D(windowskin, vec2(coord.x * (2.0 / 3.0), coord.y));\n"
 #endif
+    "    /* Grayscale */\n"
+    "    float gray = color.r * 0.298912 + color.g * 0.586611 + color.b * 0.114478;\n"
+    "    color.rgb *= 1.0 - window_tone.a;\n"
+    "    color.rgb += vec3(gray, gray, gray) * window_tone.a;\n"
+    "    /* tone blending */\n"
+    "    color.rgb = min(max(color.rgb + window_tone.rgb, 0.0), 1.0);\n"
     "    color.a *= opacity;\n"
     "    gl_FragColor = color;\n"
     "    /* premultiplication */\n"
