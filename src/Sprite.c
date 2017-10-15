@@ -598,9 +598,6 @@ static void renderSprite(
 
   const struct Color *color_ptr = rb_color_data(ptr->color);
   const struct Tone *tone_ptr = rb_tone_data(ptr->tone);
-  if(tone_ptr->red || tone_ptr->green || tone_ptr->blue || tone_ptr->gray) {
-    WARN_UNIMPLEMENTED("Sprite#tone");
-  }
 #if RGSS >= 2
   if(ptr->wave_amp) WARN_UNIMPLEMENTED("Sprite#wave_amp");
 #endif
@@ -708,6 +705,7 @@ void initSpriteSDL() {
     "uniform vec4 sprite_tone;\n"
     "\n"
     "void main(void) {\n"
+    "    vec4 color;\n"
     "    vec2 coord = gl_TexCoord[0].xy;\n"
     "    coord = coord - dst_translate;\n"
     "    coord = vec2(coord.x / zoom.x, coord.y / zoom.y);\n"
@@ -716,14 +714,21 @@ void initSpriteSDL() {
     "      if(mirror) {\n"
     "        coord.x = src_topleft.x + src_bottomright.x - coord.x;\n"
     "      }\n"
-    "      vec4 color = texture2D(tex, vec2(coord.x / src_size.x, coord.y / src_size.y));\n"
-    "      gl_FragColor = color;\n"
+    "      color = texture2D(tex, vec2(coord.x / src_size.x, coord.y / src_size.y));\n"
     "    } else {\n"
-    "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
+    "      color = vec4(0.0, 0.0, 0.0, 0.0);\n"
     "    }\n"
-    "    gl_FragColor.rgb *= 1.0 - sprite_color.a;\n"
-    "    gl_FragColor.rgb += sprite_color.rgb * sprite_color.a;\n"
-    "    gl_FragColor.a *= opacity;\n"
+    "    /* Grayscale */\n"
+    "    float gray = color.r * 0.298912 + color.g * 0.586611 + color.b * 0.114478;\n"
+    "    color.rgb *= 1.0 - sprite_tone.a;\n"
+    "    color.rgb += vec3(gray, gray, gray) * sprite_tone.a;\n"
+    "    /* tone blending */\n"
+    "    color.rgb = min(max(color.rgb + sprite_tone.rgb, 0.0), 1.0);\n"
+    "    /* color blending */\n"
+    "    color.rgb *= 1.0 - sprite_color.a;\n"
+    "    color.rgb += sprite_color.rgb * sprite_color.a;\n"
+    "    color.a *= opacity;\n"
+    "    gl_FragColor = color;\n"
     "    /* premultiplication */\n"
     "    gl_FragColor.rgb *= gl_FragColor.a;\n"
     "}\n";
