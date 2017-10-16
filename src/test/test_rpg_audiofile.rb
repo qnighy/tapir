@@ -238,6 +238,24 @@ module RGSSTest
       assert_equal(history, [[:bgm_stop]])
     end
 
+    def test_replay
+      RGSS == 3 or return
+      history = mock_audio {
+        @@klass.class_eval("@@last = nil")
+        obj = @@klass.new("hoge", 22, 37)
+        obj.pos = 24
+        obj.replay
+        last = @@klass.last
+        assert_not_same(obj, last)
+        assert_equal(last.class, @@klass)
+        assert_equal(last.name, "hoge")
+        assert_equal(last.pitch, 37)
+        assert_equal(last.pos, 33)
+        assert_equal(last.volume, 22)
+      }
+      assert_equal(history, [[:bgm_play, "Audio/BGM/hoge", 22, 37, 24]])
+    end
+
     def test_stop
       history = mock_audio {
         @@klass.class_eval("@@last = nil")
@@ -396,6 +414,24 @@ module RGSSTest
         assert_equal(last.volume, 100)
       }
       assert_equal(history, [[:bgs_stop]])
+    end
+
+    def test_replay
+      RGSS == 3 or return
+      history = mock_audio {
+        @@klass.class_eval("@@last = nil")
+        obj = @@klass.new("hoge", 22, 37)
+        obj.pos = 24
+        obj.replay
+        last = @@klass.last
+        assert_not_same(obj, last)
+        assert_equal(last.class, @@klass)
+        assert_equal(last.name, "hoge")
+        assert_equal(last.pitch, 37)
+        assert_equal(last.pos, 44)
+        assert_equal(last.volume, 22)
+      }
+      assert_equal(history, [[:bgs_play, "Audio/BGS/hoge", 22, 37, 24]])
     end
 
     def test_stop
