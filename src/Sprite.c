@@ -20,6 +20,8 @@ static VALUE rb_sprite_m_initialize_copy(VALUE self, VALUE orig);
 
 static VALUE rb_sprite_m_dispose(VALUE self);
 static VALUE rb_sprite_m_disposed_p(VALUE self);
+static VALUE rb_sprite_m_flash(VALUE self, VALUE color, VALUE duration);
+static VALUE rb_sprite_m_update(VALUE self);
 static VALUE rb_sprite_m_bitmap(VALUE self);
 static VALUE rb_sprite_m_set_bitmap(VALUE self, VALUE bitmap);
 #if RGSS >= 2
@@ -28,8 +30,8 @@ static VALUE rb_sprite_m_height(VALUE self);
 #endif
 static VALUE rb_sprite_m_src_rect(VALUE self);
 static VALUE rb_sprite_m_set_src_rect(VALUE self, VALUE newval);
-#if RGSS >= 2
 static VALUE rb_sprite_m_viewport(VALUE self);
+#if RGSS >= 2
 static VALUE rb_sprite_m_set_viewport(VALUE self, VALUE newval);
 #endif
 static VALUE rb_sprite_m_visible(VALUE self);
@@ -96,6 +98,8 @@ void Init_Sprite(void) {
       rb_sprite_m_initialize_copy, 1);
   rb_define_method(rb_cSprite, "dispose", rb_sprite_m_dispose, 0);
   rb_define_method(rb_cSprite, "disposed?", rb_sprite_m_disposed_p, 0);
+  rb_define_method(rb_cSprite, "flash", rb_sprite_m_flash, 2);
+  rb_define_method(rb_cSprite, "update", rb_sprite_m_update, 0);
 #if RGSS >= 2
   rb_define_method(rb_cSprite, "width", rb_sprite_m_width, 0);
   rb_define_method(rb_cSprite, "height", rb_sprite_m_height, 0);
@@ -104,8 +108,8 @@ void Init_Sprite(void) {
   rb_define_method(rb_cSprite, "bitmap=", rb_sprite_m_set_bitmap, 1);
   rb_define_method(rb_cSprite, "src_rect", rb_sprite_m_src_rect, 0);
   rb_define_method(rb_cSprite, "src_rect=", rb_sprite_m_set_src_rect, 1);
-#if RGSS >= 2
   rb_define_method(rb_cSprite, "viewport", rb_sprite_m_viewport, 0);
+#if RGSS >= 2
   rb_define_method(rb_cSprite, "viewport=", rb_sprite_m_set_viewport, 1);
 #endif
   rb_define_method(rb_cSprite, "visible", rb_sprite_m_visible, 0);
@@ -153,8 +157,6 @@ void Init_Sprite(void) {
   rb_define_method(rb_cSprite, "color=", rb_sprite_m_set_color, 1);
   rb_define_method(rb_cSprite, "tone", rb_sprite_m_tone, 0);
   rb_define_method(rb_cSprite, "tone=", rb_sprite_m_set_tone, 1);
-  // TODO: implement Sprite#flash
-  // TODO: implement Sprite#update
 }
 
 bool rb_sprite_data_p(VALUE obj) {
@@ -303,6 +305,25 @@ static VALUE rb_sprite_m_disposed_p(VALUE self) {
   return ptr->renderable.disposed ? Qtrue : Qfalse;
 }
 
+static VALUE rb_sprite_m_flash(VALUE self, VALUE color, VALUE duration) {
+  (void) self;
+  (void) color;
+  (void) duration;
+  WARN_UNIMPLEMENTED("Sprite#flash");
+  return Qnil;
+}
+
+static VALUE rb_sprite_m_update(VALUE self) {
+  struct Sprite *ptr = rb_sprite_data_mut(self);
+#if RGSS >= 2
+  ptr->wave_phase += (double)ptr->wave_speed / ptr->wave_length;
+#else
+  (void) ptr;
+#endif
+  WARN_UNIMPLEMENTED("Sprite#update");
+  return Qnil;
+}
+
 static VALUE rb_sprite_m_bitmap(VALUE self) {
   const struct Sprite *ptr = rb_sprite_data(self);
   return ptr->bitmap;
@@ -339,12 +360,12 @@ static VALUE rb_sprite_m_set_src_rect(VALUE self, VALUE newval) {
   return newval;
 }
 
-#if RGSS >= 2
 static VALUE rb_sprite_m_viewport(VALUE self) {
   const struct Sprite *ptr = rb_sprite_data(self);
   return ptr->viewport;
 }
 
+#if RGSS >= 2
 static VALUE rb_sprite_m_set_viewport(VALUE self, VALUE newval) {
   struct Sprite *ptr = rb_sprite_data_mut(self);
   if(newval != Qnil) rb_viewport_data(newval);
