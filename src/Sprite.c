@@ -1,3 +1,4 @@
+#include <math.h>
 #include <SDL.h>
 #include "gl_misc.h"
 #include "Sprite.h"
@@ -602,7 +603,6 @@ static void renderSprite(
   if(ptr->wave_amp) WARN_UNIMPLEMENTED("Sprite#wave_amp");
 #endif
   if(ptr->bush_depth) WARN_UNIMPLEMENTED("Sprite#bush_depth");
-  if(ptr->angle != 0.0) WARN_UNIMPLEMENTED("Sprite#angle");
   if(ptr->bitmap == Qnil) return;
   const struct Bitmap *bitmap_ptr = rb_bitmap_data(ptr->bitmap);
   SDL_Surface *surface = bitmap_ptr->surface;
@@ -634,6 +634,17 @@ static void renderSprite(
   if(src_right > surface->w) src_right = surface->w;
   if(src_bottom > surface->h) src_bottom = surface->h;
 
+  double angle_rad = ptr->angle * (3.1415926535897932384 / 180.0);
+  double angle_cos = cos(angle_rad);
+  double angle_sin = sin(angle_rad);
+  double zoom_x_inv = 1.0 / ptr->zoom_x;
+  double zoom_y_inv = 1.0 / ptr->zoom_y;
+
+  GLfloat zoom_angle[4] = {
+    zoom_x_inv * angle_cos, zoom_x_inv * -angle_sin,
+    zoom_y_inv * angle_sin, zoom_y_inv * angle_cos
+  };
+
   glUseProgram(shader);
   glUniform1i(glGetUniformLocation(shader, "tex"), 0);
   glUniform2f(glGetUniformLocation(shader, "resolution"),
@@ -648,8 +659,8 @@ static void renderSprite(
       ptr->x, ptr->y);
   glUniform2f(glGetUniformLocation(shader, "src_translate"),
       ptr->ox + src_rect->x, ptr->oy + src_rect->y);
-  glUniform2f(glGetUniformLocation(shader, "zoom"),
-      ptr->zoom_x, ptr->zoom_y);
+  glUniformMatrix2fv(glGetUniformLocation(shader, "zoom_angle"),
+      1, true, zoom_angle);
   glUniform1i(glGetUniformLocation(shader, "mirror"), ptr->mirror);
   glUniform1f(glGetUniformLocation(shader, "opacity"),
       ptr->opacity / 255.0);
@@ -709,10 +720,9 @@ void initSpriteSDL() {
     "uniform vec2 src_topleft;\n"
     "uniform vec2 src_bottomright;\n"
     "uniform vec2 src_size;\n"
-    "uniform vec2 zoom;\n"
+    "uniform mat2 zoom_angle;\n"
     "uniform bool mirror;\n"
     "uniform float opacity;\n"
-    // "uniform float angle;\n"
     "uniform vec4 sprite_color;\n"
     "uniform vec4 sprite_tone;\n"
     "\n"
@@ -720,7 +730,7 @@ void initSpriteSDL() {
     "    vec4 color;\n"
     "    vec2 coord = gl_TexCoord[0].xy;\n"
     "    coord = coord - dst_translate;\n"
-    "    coord = vec2(coord.x / zoom.x, coord.y / zoom.y);\n"
+    "    coord = zoom_angle * coord;\n"
     "    coord = coord + src_translate;\n"
     "    if(src_topleft.x <= coord.x && src_topleft.y <= coord.y && coord.x <= src_bottomright.x && coord.y <= src_bottomright.y) {\n"
     "      if(mirror) {\n"
