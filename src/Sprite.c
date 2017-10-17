@@ -189,6 +189,7 @@ static void sprite_mark(struct Sprite *ptr) {
   rb_gc_mark(ptr->src_rect);
   rb_gc_mark(ptr->color);
   rb_gc_mark(ptr->tone);
+  rb_gc_mark(ptr->flash_color);
 }
 
 static void sprite_free(struct Sprite *ptr) {
@@ -229,10 +230,14 @@ static VALUE sprite_alloc(VALUE klass) {
   ptr->blend_type = 0;
   ptr->color = Qnil;
   ptr->tone = Qnil;
+  ptr->flash_color = Qnil;
+  ptr->flash_duration = 0;
+  ptr->flash_count = 0;
   VALUE ret = Data_Wrap_Struct(klass, sprite_mark, sprite_free, ptr);
   ptr->src_rect = rb_rect_new2();
   ptr->color = rb_color_new2();
   ptr->tone = rb_tone_new2();
+  ptr->flash_color = rb_color_new2();
   registerRenderable(&ptr->renderable);
   return ret;
 }
@@ -291,6 +296,9 @@ static VALUE rb_sprite_m_initialize_copy(VALUE self, VALUE orig) {
 #if RGSS >= 2
   ptr->wave_phase = orig_ptr->wave_phase;
 #endif
+  rb_color_set2(ptr->flash_color, orig_ptr->flash_color);
+  ptr->flash_duration = orig_ptr->flash_duration;
+  ptr->flash_count = orig_ptr->flash_count;
   return Qnil;
 }
 
@@ -306,10 +314,10 @@ static VALUE rb_sprite_m_disposed_p(VALUE self) {
 }
 
 static VALUE rb_sprite_m_flash(VALUE self, VALUE color, VALUE duration) {
-  (void) self;
-  (void) color;
-  (void) duration;
-  WARN_UNIMPLEMENTED("Sprite#flash");
+  struct Sprite *ptr = rb_sprite_data_mut(self);
+  rb_color_set2(ptr->flash_color, color);
+  ptr->flash_duration = NUM2INT(duration);
+  ptr->flash_count = 0;
   return Qnil;
 }
 
@@ -317,10 +325,12 @@ static VALUE rb_sprite_m_update(VALUE self) {
   struct Sprite *ptr = rb_sprite_data_mut(self);
 #if RGSS >= 2
   ptr->wave_phase += (double)ptr->wave_speed / ptr->wave_length;
-#else
-  (void) ptr;
 #endif
-  WARN_UNIMPLEMENTED("Sprite#update");
+  ++ptr->flash_count;
+  if(ptr->flash_count >= ptr->flash_duration) {
+    ptr->flash_count = 0;
+    ptr->flash_duration = 0;
+  }
   return Qnil;
 }
 
@@ -619,6 +629,10 @@ static void renderSprite(
   struct Sprite *ptr = (struct Sprite *)renderable;
 
   const struct Color *color_ptr = rb_color_data(ptr->color);
+  const struct Color *flash_color_ptr = rb_color_data(ptr->flash_color);
+  double flash_opacity =
+    ptr->flash_duration <= 0 ? 0.0 :
+    1.0 - (double)ptr->flash_count / ptr->flash_duration;
   const struct Tone *tone_ptr = rb_tone_data(ptr->tone);
 #if RGSS >= 2
   if(ptr->wave_amp) WARN_UNIMPLEMENTED("Sprite#wave_amp");
@@ -685,11 +699,19 @@ static void renderSprite(
   glUniform1i(glGetUniformLocation(shader, "mirror"), ptr->mirror);
   glUniform1f(glGetUniformLocation(shader, "opacity"),
       ptr->opacity / 255.0);
-  glUniform4f(glGetUniformLocation(shader, "sprite_color"),
-      color_ptr->red / 255.0,
-      color_ptr->green / 255.0,
-      color_ptr->blue / 255.0,
-      color_ptr->alpha / 255.0);
+  if(flash_color_ptr->alpha * flash_opacity > color_ptr->alpha) {
+    glUniform4f(glGetUniformLocation(shader, "sprite_color"),
+        flash_color_ptr->red / 255.0,
+        flash_color_ptr->green / 255.0,
+        flash_color_ptr->blue / 255.0,
+        flash_color_ptr->alpha / 255.0 * flash_opacity);
+  } else {
+    glUniform4f(glGetUniformLocation(shader, "sprite_color"),
+        color_ptr->red / 255.0,
+        color_ptr->green / 255.0,
+        color_ptr->blue / 255.0,
+        color_ptr->alpha / 255.0);
+  }
   glUniform4f(glGetUniformLocation(shader, "sprite_tone"),
       tone_ptr->red / 255.0,
       tone_ptr->green / 255.0,
