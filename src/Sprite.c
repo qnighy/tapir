@@ -602,7 +602,6 @@ static void renderSprite(
   if(ptr->wave_amp) WARN_UNIMPLEMENTED("Sprite#wave_amp");
 #endif
   if(ptr->bush_depth) WARN_UNIMPLEMENTED("Sprite#bush_depth");
-  if(ptr->blend_type) WARN_UNIMPLEMENTED("Sprite#blend_type");
   if(ptr->angle != 0.0) WARN_UNIMPLEMENTED("Sprite#angle");
   if(ptr->bitmap == Qnil) return;
   const struct Bitmap *bitmap_ptr = rb_bitmap_data(ptr->bitmap);
@@ -611,7 +610,20 @@ static void renderSprite(
   const struct Rect *src_rect = rb_rect_data(ptr->src_rect);
 
   glEnable(GL_BLEND);
-  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+  if(ptr->blend_type == 1) {
+    glBlendFuncSeparate(
+        GL_ONE, GL_ONE,
+        GL_ZERO, GL_ONE);
+    glBlendEquation(GL_FUNC_ADD);
+  } else if(ptr->blend_type == 2) {
+    glBlendFuncSeparate(
+        GL_ONE, GL_ONE,
+        GL_ZERO, GL_ONE);
+    glBlendEquationSeparate(GL_FUNC_REVERSE_SUBTRACT, GL_FUNC_ADD);
+  } else {
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendEquation(GL_FUNC_ADD);
+  }
 
   int src_left = src_rect->x;
   int src_top = src_rect->y;

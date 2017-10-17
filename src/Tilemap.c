@@ -642,6 +642,7 @@ static void renderTile(struct Tilemap *ptr, int tile_id, int x, int y,
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendEquation(GL_FUNC_ADD);
 
   glUseProgram(shader);
   glUniform1i(glGetUniformLocation(shader, "tex"), 0);

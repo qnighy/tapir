@@ -210,6 +210,7 @@ void renderSDL() {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendEquation(GL_FUNC_ADD);
 
     glUseProgram(transition_shader);
     glUniform1f(glGetUniformLocation(transition_shader, "brightness"),

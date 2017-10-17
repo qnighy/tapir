@@ -375,11 +375,26 @@ static void renderPlane(
     }
   }
   if(ptr->opacity == 0) return;
-  if(ptr->blend_type) WARN_UNIMPLEMENTED("Plane#blend_type");
   if(ptr->bitmap == Qnil) return;
   const struct Bitmap *bitmap_ptr = rb_bitmap_data(ptr->bitmap);
   SDL_Surface *surface = bitmap_ptr->surface;
   if(!surface) return;
+
+  glEnable(GL_BLEND);
+  if(ptr->blend_type == 1) {
+    glBlendFuncSeparate(
+        GL_ONE, GL_ONE,
+        GL_ZERO, GL_ONE);
+    glBlendEquation(GL_FUNC_ADD);
+  } else if(ptr->blend_type == 2) {
+    glBlendFuncSeparate(
+        GL_ONE, GL_ONE,
+        GL_ZERO, GL_ONE);
+    glBlendEquationSeparate(GL_FUNC_REVERSE_SUBTRACT, GL_FUNC_ADD);
+  } else {
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendEquation(GL_FUNC_ADD);
+  }
 
   glUseProgram(shader);
   glUniform1i(glGetUniformLocation(shader, "tex"), 0);

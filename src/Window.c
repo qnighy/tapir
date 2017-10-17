@@ -696,6 +696,7 @@ static void renderWindow(
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendEquation(GL_FUNC_ADD);
 
   if(ptr->windowskin != Qnil && job->aux[0] == 0) {
     const struct Bitmap *skin_bitmap_ptr = rb_bitmap_data(ptr->windowskin);
