@@ -650,10 +650,17 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
   int fg_width = fg_rendered->w;
   int fg_height = fg_rendered->h;
 
-  // TODO: implement scaling
-  rect.x += (rect.w - fg_width) * align / 2;
+  int fg_stretch_width;
+  if(rect.w < fg_width * 3 / 5) {
+    fg_stretch_width = fg_width * 3 / 5;
+  } else if(rect.w < fg_width) {
+    fg_stretch_width = rect.w;
+  } else {
+    fg_stretch_width = fg_width;
+  }
+  rect.x += (rect.w - fg_stretch_width) * align / 2;
   if(rect.h > fg_height) rect.y += (rect.h - fg_height) / 2;
-  rect.w = fg_width;
+  rect.w = fg_stretch_width;
   rect.h = fg_height;
 
 #if RGSS == 3
@@ -688,12 +695,12 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
     // out_rect.y -= (out_height - rect.h) / 2;
     --out_rect.x;
     --out_rect.y;
-    out_rect.w = out_width;
+    out_rect.w += out_width - fg_width;
     out_rect.h = out_height;
 
     blt(ptr->surface, out_rendered,
         out_rect.x, out_rect.y, out_rect.w, out_rect.h,
-        0, 0, out_rect.w, out_rect.h, font_out_color_ptr->alpha);
+        0, 0, out_width, out_height, font_out_color_ptr->alpha);
     SDL_FreeSurface(out_rendered);
 
     TTF_SetFontOutline(sdl_font, 0);
@@ -721,14 +728,14 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
 
     blt(ptr->surface, shadow_rendered,
         shadow_rect.x, shadow_rect.y, shadow_rect.w, shadow_rect.h,
-        0, 0, shadow_rect.w, shadow_rect.h, font_color_ptr->alpha);
+        0, 0, fg_width, fg_height, font_color_ptr->alpha);
     SDL_FreeSurface(shadow_rendered);
   }
 #endif
 
   blt(ptr->surface, fg_rendered,
       rect.x, rect.y, rect.w, rect.h,
-      0, 0, rect.w, rect.h, font_color_ptr->alpha);
+      0, 0, fg_width, fg_height, font_color_ptr->alpha);
   SDL_FreeSurface(fg_rendered);
   return Qnil;
 }
