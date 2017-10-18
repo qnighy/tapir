@@ -642,7 +642,11 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
     fprintf(stderr, "cstr = %s\n", cstr);
     return Qnil;
   }
-  SDL_SetSurfaceBlendMode(fg_rendered, SDL_BLENDMODE_BLEND);
+
+  SDL_Surface *convert_src = fg_rendered;
+  fg_rendered = SDL_ConvertSurfaceFormat(convert_src, PIXELFORMAT_RGBA32, 0);
+  SDL_FreeSurface(convert_src);
+
   int fg_width = fg_rendered->w;
   int fg_height = fg_rendered->h;
 
@@ -671,7 +675,11 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
       SDL_FreeSurface(fg_rendered);
       return Qnil;
     }
-    SDL_SetSurfaceBlendMode(out_rendered, SDL_BLENDMODE_BLEND);
+    SDL_Surface *convert_src = out_rendered;
+    out_rendered =
+      SDL_ConvertSurfaceFormat(convert_src, PIXELFORMAT_RGBA32, 0);
+    SDL_FreeSurface(convert_src);
+
     int out_width = out_rendered->w;
     int out_height = out_rendered->h;
 
@@ -683,7 +691,9 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
     out_rect.w = out_width;
     out_rect.h = out_height;
 
-    SDL_BlitSurface(out_rendered, NULL, ptr->surface, &out_rect);
+    blt(ptr->surface, out_rendered,
+        out_rect.x, out_rect.y, out_rect.w, out_rect.h,
+        0, 0, out_rect.w, out_rect.h, font_out_color_ptr->alpha);
     SDL_FreeSurface(out_rendered);
 
     TTF_SetFontOutline(sdl_font, 0);
@@ -700,17 +710,25 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
       SDL_FreeSurface(fg_rendered);
       return Qnil;
     }
-    SDL_SetSurfaceBlendMode(shadow_rendered, SDL_BLENDMODE_BLEND);
+    SDL_Surface *convert_src = shadow_rendered;
+    shadow_rendered =
+      SDL_ConvertSurfaceFormat(convert_src, PIXELFORMAT_RGBA32, 0);
+    SDL_FreeSurface(convert_src);
+
     SDL_Rect shadow_rect = rect;
     ++shadow_rect.x;
     ++shadow_rect.y;
 
-    SDL_BlitSurface(shadow_rendered, NULL, ptr->surface, &shadow_rect);
+    blt(ptr->surface, shadow_rendered,
+        shadow_rect.x, shadow_rect.y, shadow_rect.w, shadow_rect.h,
+        0, 0, shadow_rect.w, shadow_rect.h, font_color_ptr->alpha);
     SDL_FreeSurface(shadow_rendered);
   }
 #endif
 
-  SDL_BlitSurface(fg_rendered, NULL, ptr->surface, &rect);
+  blt(ptr->surface, fg_rendered,
+      rect.x, rect.y, rect.w, rect.h,
+      0, 0, rect.w, rect.h, font_color_ptr->alpha);
   SDL_FreeSurface(fg_rendered);
   return Qnil;
 }
