@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <fontconfig/fontconfig.h>
 #include "font_lookup.h"
+#include "openres.h"
 
 static FcConfig *config = NULL;
 
@@ -11,6 +12,9 @@ void initFontLookup(void) {
     exit(1);
   }
   config = FcInitLoadConfigAndFonts();
+  // TODO case-insensitive paths
+  FcConfigAppFontAddDir(config, (const FcChar8 *)"Fonts");
+  FcConfigAppFontAddDir(config, (const FcChar8 *)(RTP_PATH "/Fonts"));
 }
 
 void uninitFontLookup(void) {
