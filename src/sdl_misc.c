@@ -50,7 +50,7 @@ static GLuint transition_shader;
 static void initTransition(void);
 static void deinitTransition(void);
 
-void initSDL() {
+void initSDL(const char *window_title) {
   registry_capacity = 100;
   registry = malloc(sizeof(*registry) * registry_capacity);
 
@@ -89,8 +89,7 @@ void initSDL() {
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
-  /* TODO: fetch window title from Game.ini */
-  window = SDL_CreateWindow("tapir",
+  window = SDL_CreateWindow(window_title,
       SDL_WINDOWPOS_CENTERED,
       SDL_WINDOWPOS_CENTERED,
       window_width, window_height,

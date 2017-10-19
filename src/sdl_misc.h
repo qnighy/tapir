@@ -37,7 +37,7 @@ extern SDL_Window *window;
 extern SDL_Renderer *renderer;
 extern SDL_GLContext glcontext;
 
-void initSDL(void);
+void initSDL(const char *window_title);
 void cleanupSDL(void);
 void event_loop(void);
 void renderSDL(void);

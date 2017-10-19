@@ -8,6 +8,7 @@
 #include "archive.h"
 #include "openres.h"
 #include "font_lookup.h"
+#include "ini.h"
 #include "Audio.h"
 #include "Bitmap.h"
 #include "BitmapArray.h"
@@ -108,7 +109,15 @@ int main(int argc, char **argv) {
     fprintf(stderr, "warning: ignored console flag\n");
   }
 
-  initSDL();
+  struct ini *ini_data = load_ini("Game.ini", 0);
+  struct ini_section *game_section =
+    ini_data ? find_ini_section(ini_data, "Game") : NULL;
+  const char *game_title =
+    game_section ? find_ini_entry(game_section, "Title") : NULL;
+
+  if(!game_title) game_title = "tapir";
+
+  initSDL(game_title);
 
   initArchive();
 
@@ -142,6 +151,8 @@ int main(int argc, char **argv) {
     }
   }
 #endif
+
+  if(ini_data) free_ini(ini_data);
 
   return state;
 }

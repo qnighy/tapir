@@ -19,7 +19,7 @@ EXEC = tapir-x
 endif
 endif
 OBJS = main.o main_rb.o archive.o openres.o gl_misc.o sdl_misc.o misc.o \
-       font_lookup.o \
+       font_lookup.o ini.o \
        Bitmap.o BitmapArray.o \
        Audio.o Color.o Font.o Graphics.o Input.o Plane.o \
        RGSSError.o RGSSReset.o Rect.o Sprite.o Table.o Tilemap.o Tone.o \
