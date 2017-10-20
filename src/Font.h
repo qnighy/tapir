@@ -26,9 +26,9 @@ struct Font {
   TTF_Font *cache;
 };
 
-bool isFont(VALUE obj);
-struct Font *convertFont(VALUE obj);
-void rb_font_modify(VALUE obj);
+bool rb_font_data_p(VALUE obj);
+const struct Font *rb_font_data(VALUE obj);
+struct Font *rb_font_data_mut(VALUE obj);
 
 VALUE rb_font_new(void);
 void rb_font_set(VALUE self, VALUE other);

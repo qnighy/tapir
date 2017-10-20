@@ -83,13 +83,18 @@ static VALUE rb_input_s_update(VALUE klass) {
 }
 
 static int convertRubyKey(VALUE key) {
+#if RGSS == 3
   for(int i = 0; i < RGSS_KEY_MAX; ++i) {
     if(!keynames[i]) continue;
     if(key == INT2NUM(i)) return i;
-#if RGSS == 3
     if(key == ID2SYM(keyname_ids[i])) return i;
-#endif
   }
+#else
+  int i = NUM2INT(key);
+  if(0 <= i && i < RGSS_KEY_MAX && keynames[i]) {
+    return i;
+  }
+#endif
   return -1;
 }
 
@@ -99,8 +104,7 @@ static VALUE rb_input_s_press_p(VALUE klass, VALUE key) {
   if(rkey != -1) {
     return keycount[rkey] >= 0 ? Qtrue : Qfalse;
   }
-  // TODO: error handling
-  return Qnil;
+  return Qfalse;
 }
 
 static VALUE rb_input_s_trigger_p(VALUE klass, VALUE key) {
@@ -109,8 +113,7 @@ static VALUE rb_input_s_trigger_p(VALUE klass, VALUE key) {
   if(rkey != -1) {
     return keycount[rkey] == 0 ? Qtrue : Qfalse;
   }
-  // TODO: error handling
-  return Qnil;
+  return Qfalse;
 }
 
 static VALUE rb_input_s_repeat_p(VALUE klass, VALUE key) {
@@ -120,19 +123,31 @@ static VALUE rb_input_s_repeat_p(VALUE klass, VALUE key) {
     return (keycount[rkey] == 0 ||
       (keycount[rkey] >= 24 && keycount[rkey] % 6 == 0)) ? Qtrue : Qfalse;
   }
-  return Qnil;
+  return Qfalse;
 }
 
 static VALUE rb_input_s_dir4(VALUE klass) {
   (void) klass;
-  WARN_UNIMPLEMENTED("Input.dir4");
-  return Qnil;
+  int x = (keycount[RGSS_KEY_RIGHT] >= 0) - (keycount[RGSS_KEY_LEFT] >= 0);
+  int y = (keycount[RGSS_KEY_DOWN] >= 0) - (keycount[RGSS_KEY_UP] >= 0);
+  if(x && y) {
+    int xcount = x < 0 ? keycount[RGSS_KEY_LEFT] : keycount[RGSS_KEY_RIGHT];
+    int ycount = y < 0 ? keycount[RGSS_KEY_UP] : keycount[RGSS_KEY_DOWN];
+    if(xcount >= ycount) y = 0;
+    else x = 0;
+  }
+  int dir = 5 + x - y * 3;
+  if(dir == 5) dir = 0;
+  return INT2NUM(dir);
 }
 
 static VALUE rb_input_s_dir8(VALUE klass) {
   (void) klass;
-  WARN_UNIMPLEMENTED("Input.dir8");
-  return Qnil;
+  int x = (keycount[RGSS_KEY_RIGHT] >= 0) - (keycount[RGSS_KEY_LEFT] >= 0);
+  int y = (keycount[RGSS_KEY_DOWN] >= 0) - (keycount[RGSS_KEY_UP] >= 0);
+  int dir = 5 + x - y * 3;
+  if(dir == 5) dir = 0;
+  return INT2NUM(dir);
 }
 
 static int convertSDLKey(SDL_Keycode key) {

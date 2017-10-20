@@ -6,7 +6,7 @@ static VALUE rect_alloc(VALUE klass);
 
 VALUE rb_rect_new(int32_t x, int32_t y, int32_t width, int32_t height) {
   VALUE ret = rect_alloc(rb_cRect);
-  struct Rect *ptr = convertRect(ret);
+  struct Rect *ptr = rb_rect_data_mut(ret);
   ptr->x = x;
   ptr->y = y;
   ptr->width = width;
@@ -19,8 +19,8 @@ VALUE rb_rect_new2(void) {
 }
 
 bool rb_rect_equal(VALUE self, VALUE other) {
-  struct Rect *ptr = convertRect(self);
-  struct Rect *other_ptr = convertRect(other);
+  struct Rect *ptr = rb_rect_data_mut(self);
+  const struct Rect *other_ptr = rb_rect_data(other);
   return
     ptr->x == other_ptr->x &&
     ptr->y == other_ptr->y &&
@@ -31,8 +31,7 @@ bool rb_rect_equal(VALUE self, VALUE other) {
 void rb_rect_set(
     VALUE self, int32_t newx, int32_t newy,
     int32_t newwidth, int32_t newheight) {
-  struct Rect *ptr = convertRect(self);
-  rb_rect_modify(self);
+  struct Rect *ptr = rb_rect_data_mut(self);
   ptr->x = newx;
   ptr->y = newy;
   ptr->width = newwidth;
@@ -40,9 +39,8 @@ void rb_rect_set(
 }
 
 void rb_rect_set2(VALUE self, VALUE other) {
-  struct Rect *ptr = convertRect(self);
-  struct Rect *other_ptr = convertRect(other);
-  rb_rect_modify(self);
+  struct Rect *ptr = rb_rect_data_mut(self);
+  const struct Rect *other_ptr = rb_rect_data(other);
   ptr->x = other_ptr->x;
   ptr->y = other_ptr->y;
   ptr->width = other_ptr->width;
@@ -50,39 +48,35 @@ void rb_rect_set2(VALUE self, VALUE other) {
 }
 
 int32_t rb_rect_x(VALUE self) {
-  struct Rect *ptr = convertRect(self);
+  const struct Rect *ptr = rb_rect_data(self);
   return ptr->x;
 }
 void rb_rect_set_x(VALUE self, int32_t newval) {
-  struct Rect *ptr = convertRect(self);
-  rb_rect_modify(self);
+  struct Rect *ptr = rb_rect_data_mut(self);
   ptr->x = newval;
 }
 int32_t rb_rect_y(VALUE self) {
-  struct Rect *ptr = convertRect(self);
+  const struct Rect *ptr = rb_rect_data(self);
   return ptr->y;
 }
 void rb_rect_set_y(VALUE self, int32_t newval) {
-  struct Rect *ptr = convertRect(self);
-  rb_rect_modify(self);
+  struct Rect *ptr = rb_rect_data_mut(self);
   ptr->y = newval;
 }
 int32_t rb_rect_width(VALUE self) {
-  struct Rect *ptr = convertRect(self);
+  const struct Rect *ptr = rb_rect_data(self);
   return ptr->width;
 }
 void rb_rect_set_width(VALUE self, int32_t newval) {
-  struct Rect *ptr = convertRect(self);
-  rb_rect_modify(self);
+  struct Rect *ptr = rb_rect_data_mut(self);
   ptr->width = newval;
 }
 int32_t rb_rect_height(VALUE self) {
-  struct Rect *ptr = convertRect(self);
+  const struct Rect *ptr = rb_rect_data(self);
   return ptr->height;
 }
 void rb_rect_set_height(VALUE self, int32_t newval) {
-  struct Rect *ptr = convertRect(self);
-  rb_rect_modify(self);
+  struct Rect *ptr = rb_rect_data_mut(self);
   ptr->height = newval;
 }
 
@@ -135,12 +129,12 @@ void Init_Rect() {
   rb_define_method(rb_cRect, "_dump", rb_rect_m_old_dump, 1);
 }
 
-bool isRect(VALUE obj) {
+bool rb_rect_data_p(VALUE obj) {
   if(TYPE(obj) != T_DATA) return false;
   return RDATA(obj)->dmark == (void(*)(void*))rect_mark;
 }
 
-struct Rect *convertRect(VALUE obj) {
+const struct Rect *rb_rect_data(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))rect_mark) {
@@ -153,9 +147,10 @@ struct Rect *convertRect(VALUE obj) {
   return ret;
 }
 
-void rb_rect_modify(VALUE obj) {
+struct Rect *rb_rect_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Rect");
+  return (struct Rect *)rb_rect_data(obj);
 }
 
 static void rect_mark(struct Rect *ptr) {
@@ -212,7 +207,7 @@ static VALUE rb_rect_m_initialize_copy(VALUE self, VALUE orig) {
  * Compares it to another rectangle.
  */
 static VALUE rb_rect_m_equal(VALUE self, VALUE other) {
-  if(!isRect(other)) return Qfalse;
+  if(!rb_rect_data_p(other)) return Qfalse;
   return rb_rect_equal(self, other) ? Qtrue : Qfalse;
 }
 
@@ -351,7 +346,7 @@ static VALUE rb_rect_m_set_height(VALUE self, VALUE newval) {
  * Returns the string representation of the rectangle.
  */
 static VALUE rb_rect_m_to_s(VALUE self) {
-  struct Rect *ptr = convertRect(self);
+  const struct Rect *ptr = rb_rect_data(self);
   char s[50];
   snprintf(s, sizeof(s), "(%d, %d, %d, %d)",
       ptr->x, ptr->y, ptr->width, ptr->height);
@@ -367,12 +362,11 @@ static VALUE rb_rect_m_to_s(VALUE self) {
 static VALUE rb_rect_s_old_load(VALUE klass, VALUE str) {
   (void) klass;
   VALUE ret = rect_alloc(rb_cRect);
-  struct Rect *ptr = convertRect(ret);
+  struct Rect *ptr = rb_rect_data_mut(ret);
   StringValue(str);
   // Note: original RGSS doesn't check types.
   Check_Type(str, T_STRING);
   const char *s = RSTRING_PTR(str);
-  rb_rect_modify(ret);
   // Note: original RGSS doesn't check length.
   if(RSTRING_LEN(str) != sizeof(int32_t)*4) {
     rb_raise(rb_eArgError, "Corrupted marshal data for Rect.");
@@ -393,7 +387,7 @@ static VALUE rb_rect_s_old_load(VALUE klass, VALUE str) {
  */
 static VALUE rb_rect_m_old_dump(VALUE self, VALUE limit) {
   (void) limit;
-  struct Rect *ptr = convertRect(self);
+  const struct Rect *ptr = rb_rect_data(self);
   char s[sizeof(int32_t)*4];
   writeInt32(s+sizeof(int32_t)*0, ptr->x);
   writeInt32(s+sizeof(int32_t)*1, ptr->y);

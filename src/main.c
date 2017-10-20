@@ -8,18 +8,24 @@
 #include "archive.h"
 #include "openres.h"
 #include "font_lookup.h"
+#include "ini.h"
+#include "Audio.h"
 #include "Bitmap.h"
+#include "BitmapArray.h"
 #include "Color.h"
 #include "Font.h"
 #include "Graphics.h"
 #include "Input.h"
+#include "Plane.h"
 #include "RGSSError.h"
 #include "RGSSReset.h"
 #include "Rect.h"
 #include "Sprite.h"
 #include "Table.h"
+#include "Tilemap.h"
 #include "Tone.h"
 #include "Viewport.h"
+#include "Win32APIFake.h"
 #include "Window.h"
 
 static bool is_test_mode = false;
@@ -27,6 +33,13 @@ static bool is_btest_mode = false;
 static bool is_console_mode = false;
 
 void Init_zlib(void);
+#if RGSS == 3
+void Init_single_byte(void);
+void Init_utf_16_32(void);
+void Init_japanese_sjis(void);
+#elif RGSS == 2
+void Init_nkf(void);
+#endif
 static void Init_RGSS(void);
 static void tapir_atexit(void);
 
@@ -98,7 +111,15 @@ int main(int argc, char **argv) {
     fprintf(stderr, "warning: ignored console flag\n");
   }
 
-  initSDL();
+  struct ini *ini_data = load_ini("Game.ini", 0);
+  struct ini_section *game_section =
+    ini_data ? find_ini_section(ini_data, "Game") : NULL;
+  const char *game_title =
+    game_section ? find_ini_entry(game_section, "Title") : NULL;
+
+  if(!game_title) game_title = "tapir";
+
+  initSDL(game_title);
 
   initArchive();
 
@@ -110,6 +131,11 @@ int main(int argc, char **argv) {
     RUBY_INIT_STACK;
     ruby_init();
     Init_zlib();
+#if RGSS == 3
+    Init_single_byte();
+    Init_utf_16_32();
+    Init_japanese_sjis();
+#endif
     Init_RGSS();
     rb_protect(main_rb, Qnil, &state);
   }
@@ -119,6 +145,9 @@ int main(int argc, char **argv) {
     (void) ruby_argv;
     ruby_init();
     Init_zlib();
+#if RGSS == 2
+    Init_nkf();
+#endif
     Init_RGSS();
     {
       extern void Init_stack(void *addr);
@@ -127,6 +156,8 @@ int main(int argc, char **argv) {
     }
   }
 #endif
+
+  if(ini_data) free_ini(ini_data);
 
   return state;
 }
@@ -155,7 +186,12 @@ static void Init_RGSS(void) {
   Init_Viewport();
   Init_Sprite();
   Init_Window();
+  Init_Tilemap();
+  Init_BitmapArray();
+  Init_Plane();
   Init_Graphics();
   Init_Input();
+  Init_Audio();
+  Init_Win32APIFake();
   rb_define_global_function("load_data", rb_load_data, 1);
 }

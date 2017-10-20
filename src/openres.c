@@ -1,42 +1,32 @@
-#include <stdbool.h>
 #include <sys/types.h>
 #include <dirent.h>
-#include <ruby.h>
 #include "openres.h"
 #include "archive.h"
 #include "misc.h"
 #include "RGSSError.h"
 
-// TODO: Make RTP base path configurable
-// TODO: Make RTP name configurable (Game.ini)
-// TODO: Support multiple RTPs (Game.ini)
-#if RGSS == 3
-#define RTP_PATH "/usr/local/share/Enterbrain/RGSS3/RPGVXAce"
-#elif RGSS == 2
-#define RTP_PATH "/usr/local/share/Enterbrain/RGSS2/RPGVX"
-#else
-#define RTP_PATH "/usr/local/share/Enterbrain/RGSS/Standard"
-#endif
-
-static SDL_RWops *caseless_open(const char *path, const char *mode);
+static SDL_RWops *caseless_open(char *path, const char *mode);
 static void modify_case(char *path);
 
-SDL_RWops *openres(const char *path) {
-  SDL_RWops *file = openFromArchive(path);
-  if(file) return file;
-  VALUE path2 = rb_str_new2(path);
-  for(ssize_t i = 0; i < RSTRING_LEN(path2); ++i) {
-    if(RSTRING_PTR(path2)[i] == '\\') {
-      RSTRING_PTR(path2)[i] = '/';
+SDL_RWops *openres(VALUE path, bool use_archive) {
+  SDL_RWops *file;
+  if(use_archive) {
+    file = openFromArchive(StringValueCStr(path));
+    if(file) return file;
+  }
+  for(ssize_t i = 0; i < RSTRING_LEN(path); ++i) {
+    if(RSTRING_PTR(path)[i] == '\\') {
+      RSTRING_PTR(path)[i] = '/';
     }
   }
   // TODO: support case-insensitive paths
-  file = caseless_open(RSTRING_PTR(path2), "rb");
+  file = caseless_open(StringValueCStr(path), "rb");
   if(file) return file;
-  VALUE path3 = rb_str_new2(RTP_PATH);
-  rb_str_cat2(path3, "/");
-  rb_str_concat(path3, path2);
-  return caseless_open(RSTRING_PTR(path3), "rb");
+  VALUE path2 = rb_str_new2(RTP_PATH);
+  rb_str_cat2(path2, "/");
+  rb_str_concat(path2, path);
+  rb_str_update(path, 0, RSTRING_LEN(path), path2);
+  return caseless_open(StringValueCStr(path), "rb");
 }
 
 VALUE rb_load_data(VALUE self, VALUE path) {
@@ -64,7 +54,7 @@ VALUE rb_load_data(VALUE self, VALUE path) {
   return rb_funcall(rb_mMarshal, rb_intern("load"), 1, str);
 }
 
-static SDL_RWops *caseless_open(const char *path, const char *mode) {
+static SDL_RWops *caseless_open(char *path, const char *mode) {
   SDL_RWops *file = SDL_RWFromFile(path, mode);
   if(file) return file;
   VALUE path2 = rb_str_new2(path);

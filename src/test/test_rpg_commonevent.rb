@@ -1,0 +1,80 @@
+module RGSSTest
+  class TestRPGCommonEvent
+    include RGSSTest
+
+    @@klass = RPG::CommonEvent
+
+    def test_superclass
+      assert_equal(@@klass.superclass, Object)
+    end
+
+    def test_constants
+      assert_symset_equal(@@klass.constants, [])
+    end
+
+    def test_class_variables
+      assert_symset_equal(@@klass.class_variables, [])
+    end
+
+    def test_class_methods
+      assert_symset_equal(@@klass.methods - Object.methods, [])
+    end
+
+    def test_instance_methods
+      if RGSS == 3
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :autorun?, :id, :id=, :list, :list=, :name, :name=, :parallel?,
+          :switch_id, :switch_id=, :trigger, :trigger=])
+      else
+        assert_symset_equal(owned_instance_methods(@@klass), [
+          :id, :id=, :list, :list=, :name, :name=, :switch_id, :switch_id=,
+          :trigger, :trigger=])
+      end
+    end
+
+    def test_instance_variables
+      obj = @@klass.new
+      assert_symset_equal(obj.instance_variables, [
+        :@id, :@list, :@name, :@switch_id, :@trigger])
+    end
+
+    def test_new
+      obj = @@klass.new
+
+      assert_raise(ArgumentError) { @@klass.new(:hoge) }
+      assert_equal(obj.id, 0)
+      assert_equal(obj.list.size, 1)
+      assert_equal(obj.list[0].class, RPG::EventCommand)
+      assert_equal(obj.list[0].code, 0)
+      assert_equal(obj.list[0].indent, 0)
+      assert_equal(obj.list[0].parameters, [])
+      assert_equal(obj.name, "")
+      assert_equal(obj.switch_id, 1)
+      assert_equal(obj.trigger, 0)
+    end
+
+    def test_autorun_p
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.trigger = 0
+      assert_equal(obj.autorun?, false)
+      obj.trigger = 1
+      assert_equal(obj.autorun?, true)
+      obj.trigger = 2
+      assert_equal(obj.autorun?, false)
+    end
+
+    def test_parallel_p
+      RGSS == 3 or return
+      obj = @@klass.new
+      obj.trigger = 0
+      assert_equal(obj.parallel?, false)
+      obj.trigger = 1
+      assert_equal(obj.parallel?, false)
+      obj.trigger = 2
+      assert_equal(obj.parallel?, true)
+    end
+  end
+
+  run_test(TestRPGCommonEvent)
+end

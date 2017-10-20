@@ -1,3 +1,6 @@
+#define GL_GLEXT_PROTOTYPES
+#include <SDL.h>
+#include <SDL_opengl.h>
 #include "Viewport.h"
 #include "Rect.h"
 #include "Tone.h"
@@ -26,6 +29,12 @@ static VALUE rb_viewport_m_color(VALUE self);
 static VALUE rb_viewport_m_set_color(VALUE self, VALUE newval);
 static VALUE rb_viewport_m_tone(VALUE self);
 static VALUE rb_viewport_m_set_tone(VALUE self, VALUE newval);
+
+static void clearViewportQueue(struct Renderable *renderable);
+static void prepareRenderViewport(struct Renderable *renderable, int t);
+static void renderViewport(
+    struct Renderable *renderable, const struct RenderJob *job,
+    const struct RenderViewport *viewport);
 
 VALUE rb_cViewport;
 
@@ -59,12 +68,12 @@ void Init_Viewport(void) {
   // TODO: implement Viewport#update
 }
 
-bool isViewport(VALUE obj) {
+bool rb_viewport_data_p(VALUE obj) {
   if(TYPE(obj) != T_DATA) return false;
   return RDATA(obj)->dmark == (void(*)(void*))viewport_mark;
 }
 
-struct Viewport *convertViewport(VALUE obj) {
+const struct Viewport *rb_viewport_data(VALUE obj) {
   Check_Type(obj, T_DATA);
   // Note: original RGSS doesn't check types.
   if(RDATA(obj)->dmark != (void(*)(void*))viewport_mark) {
@@ -77,9 +86,10 @@ struct Viewport *convertViewport(VALUE obj) {
   return ret;
 }
 
-void rb_viewport_modify(VALUE obj) {
+struct Viewport *rb_viewport_data_mut(VALUE obj) {
   // Note: original RGSS doesn't check frozen.
   if(OBJ_FROZEN(obj)) rb_error_frozen("Viewport");
+  return (struct Viewport *)rb_viewport_data(obj);
 }
 
 static void viewport_mark(struct Viewport *ptr) {
@@ -89,20 +99,31 @@ static void viewport_mark(struct Viewport *ptr) {
 }
 
 static void viewport_free(struct Viewport *ptr) {
+  disposeRenderable(&ptr->renderable);
+  deinitRenderQueue(&ptr->viewport_queue);
   xfree(ptr);
 }
 
 static VALUE viewport_alloc(VALUE klass) {
   struct Viewport *ptr = ALLOC(struct Viewport);
-  ptr->rect = rb_rect_new2();
-  ptr->color = rb_color_new2();
-  ptr->tone = rb_tone_new2();
-  ptr->disposed = false;
+  ptr->renderable.clear = clearViewportQueue;
+  ptr->renderable.prepare = prepareRenderViewport;
+  ptr->renderable.render = renderViewport;
+  ptr->renderable.disposed = false;
+  initRenderQueue(&ptr->viewport_queue);
+
+  ptr->rect = Qnil;
+  ptr->color = Qnil;
+  ptr->tone = Qnil;
   ptr->visible = true;
   ptr->ox = 0;
   ptr->oy = 0;
   ptr->z = 0;
   VALUE ret = Data_Wrap_Struct(klass, viewport_mark, viewport_free, ptr);
+  ptr->rect = rb_rect_new2();
+  ptr->color = rb_color_new2();
+  ptr->tone = rb_tone_new2();
+  registerRenderable(&ptr->renderable);
   return ret;
 }
 
@@ -115,7 +136,7 @@ static VALUE viewport_alloc(VALUE klass) {
  * Creates a new viewport.
  */
 static VALUE rb_viewport_m_initialize(int argc, VALUE *argv, VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   switch(argc) {
     case 1:
       rb_rect_set2(ptr->rect, argv[0]);
@@ -127,6 +148,7 @@ static VALUE rb_viewport_m_initialize(int argc, VALUE *argv, VALUE self) {
       break;
 #if RGSS == 3
     case 0:
+      rb_rect_set(ptr->rect, 0, 0, window_width, window_height);
       break;
 #endif
     default:
@@ -143,12 +165,11 @@ static VALUE rb_viewport_m_initialize(int argc, VALUE *argv, VALUE self) {
 }
 
 static VALUE rb_viewport_m_initialize_copy(VALUE self, VALUE orig) {
-  struct Viewport *ptr = convertViewport(self);
-  struct Viewport *orig_ptr = convertViewport(orig);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
+  const struct Viewport *orig_ptr = rb_viewport_data(orig);
   rb_rect_set2(ptr->rect, orig_ptr->rect);
   rb_color_set2(ptr->color, orig_ptr->color);
   rb_tone_set2(ptr->tone, orig_ptr->tone);
-  ptr->disposed = orig_ptr->disposed;
   ptr->visible = orig_ptr->visible;
   ptr->ox = orig_ptr->ox;
   ptr->oy = orig_ptr->oy;
@@ -157,96 +178,158 @@ static VALUE rb_viewport_m_initialize_copy(VALUE self, VALUE orig) {
 }
 
 static VALUE rb_viewport_m_dispose(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
-  ptr->disposed = true;
+  struct Viewport *ptr = rb_viewport_data_mut(self);
+  disposeRenderable(&ptr->renderable);
   return Qnil;
 }
 
 static VALUE rb_viewport_m_disposed_p(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
-  return ptr->disposed ? Qtrue : Qfalse;
+  const struct Viewport *ptr = rb_viewport_data(self);
+  return ptr->renderable.disposed ? Qtrue : Qfalse;
 }
 
 static VALUE rb_viewport_m_rect(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return ptr->rect;
 }
 
 static VALUE rb_viewport_m_set_rect(VALUE self, VALUE newval) {
-  struct Viewport *ptr = convertViewport(self);
-  rb_viewport_modify(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   rb_rect_set2(ptr->rect, newval);
   return newval;
 }
 
 static VALUE rb_viewport_m_visible(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return ptr->visible ? Qtrue : Qfalse;
 }
 
 static VALUE rb_viewport_m_set_visible(VALUE self, VALUE newval) {
-  struct Viewport *ptr = convertViewport(self);
-  rb_viewport_modify(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   ptr->visible = RTEST(newval);
   return newval;
 }
 
 static VALUE rb_viewport_m_z(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return INT2NUM(ptr->z);
 }
 
 static VALUE rb_viewport_m_set_z(VALUE self, VALUE newval) {
-  struct Viewport *ptr = convertViewport(self);
-  rb_viewport_modify(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   ptr->z = NUM2INT(newval);
   return newval;
 }
 
 static VALUE rb_viewport_m_ox(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return INT2NUM(ptr->ox);
 }
 
 static VALUE rb_viewport_m_set_ox(VALUE self, VALUE newval) {
-  struct Viewport *ptr = convertViewport(self);
-  rb_viewport_modify(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   ptr->ox = NUM2INT(newval);
   return newval;
 }
 
 static VALUE rb_viewport_m_oy(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return INT2NUM(ptr->oy);
 }
 
 static VALUE rb_viewport_m_set_oy(VALUE self, VALUE newval) {
-  struct Viewport *ptr = convertViewport(self);
-  rb_viewport_modify(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   ptr->oy = NUM2INT(newval);
   return newval;
 }
 
 static VALUE rb_viewport_m_color(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return ptr->color;
 }
 
 static VALUE rb_viewport_m_set_color(VALUE self, VALUE newval) {
-  struct Viewport *ptr = convertViewport(self);
-  rb_viewport_modify(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   rb_color_set2(ptr->color, newval);
   return newval;
 }
 
 static VALUE rb_viewport_m_tone(VALUE self) {
-  struct Viewport *ptr = convertViewport(self);
+  const struct Viewport *ptr = rb_viewport_data(self);
   return ptr->tone;
 }
 
 static VALUE rb_viewport_m_set_tone(VALUE self, VALUE newval) {
-  struct Viewport *ptr = convertViewport(self);
-  rb_viewport_modify(self);
+  struct Viewport *ptr = rb_viewport_data_mut(self);
   rb_tone_set2(ptr->tone, newval);
   return newval;
+}
+
+static void clearViewportQueue(struct Renderable *renderable) {
+  struct Viewport *ptr = (struct Viewport *)renderable;
+  clearRenderQueue(&ptr->viewport_queue);
+}
+
+
+static void prepareRenderViewport(struct Renderable *renderable, int t) {
+  struct Viewport *ptr = (struct Viewport *)renderable;
+  if(!ptr->visible) return;
+  struct RenderJob job;
+  job.renderable = renderable;
+  job.z = ptr->z;
+  job.y = 0;
+  job.aux[0] = 0;
+  job.aux[1] = 0;
+  job.aux[2] = 0;
+  job.t = t;
+  queueRenderJob(Qnil, job);
+}
+
+static void renderViewport(
+    struct Renderable *renderable, const struct RenderJob *job,
+    const struct RenderViewport *viewport) {
+  (void) job;
+  (void) viewport;
+
+  struct Viewport *ptr = (struct Viewport *)renderable;
+
+  struct RenderViewport rviewport;
+  rviewport.width = window_width;
+  rviewport.height = window_height;
+  rviewport.ox = 0;
+  rviewport.oy = 0;
+
+  {
+    const struct Color *color = rb_color_data(ptr->color);
+    if(color->red || color->green || color->blue || color->alpha) {
+      WARN_UNIMPLEMENTED("Viewport#color");
+    }
+  }
+  {
+    const struct Tone *tone = rb_tone_data(ptr->tone);
+    if(tone->red || tone->green || tone->blue || tone->gray) {
+      WARN_UNIMPLEMENTED("Viewport#tone");
+    }
+  }
+  {
+    const struct Rect *rect = rb_rect_data(ptr->rect);
+    if(rect->width <= 0 || rect->height <= 0) return;
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(
+        rect->x, window_height - (rect->y + rect->height),
+        rect->width, rect->height);
+    glViewport(
+        rect->x, window_height - (rect->y + rect->height),
+        rect->width, rect->height);
+    rviewport.width = rect->width;
+    rviewport.height = rect->height;
+  }
+  rviewport.ox = ptr->ox;
+  rviewport.oy = ptr->oy;
+
+  renderQueue(&ptr->viewport_queue, &rviewport);
+
+  glDisable(GL_SCISSOR_TEST);
+  glScissor(0, 0, window_width, window_height);
+  glViewport(0, 0, window_width, window_height);
 }

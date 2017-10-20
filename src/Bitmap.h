@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <ruby.h>
+#include <SDL.h>
 #define GL_GLEXT_PROTOTYPES
 #include <SDL_opengl.h>
 #include <SDL_opengl_glext.h>
@@ -17,10 +18,11 @@ struct Bitmap {
   VALUE font;
 };
 
-bool isBitmap(VALUE obj);
-struct Bitmap *convertBitmap(VALUE obj);
-void rb_bitmap_modify(VALUE obj);
+bool rb_bitmap_data_p(VALUE obj);
+const struct Bitmap *rb_bitmap_data(VALUE obj);
+struct Bitmap *rb_bitmap_data_mut(VALUE obj);
 
+VALUE rb_bitmap_new(int width, int height);
 VALUE rb_bitmap_rect(VALUE self);
 void bitmapBindTexture(struct Bitmap *ptr);
 

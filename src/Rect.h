@@ -12,9 +12,9 @@ struct Rect {
   int32_t x, y, width, height;
 };
 
-bool isRect(VALUE obj);
-struct Rect *convertRect(VALUE obj);
-void rb_rect_modify(VALUE obj);
+bool rb_rect_data_p(VALUE obj);
+const struct Rect *rb_rect_data(VALUE obj);
+struct Rect *rb_rect_data_mut(VALUE obj);
 
 VALUE rb_rect_new(int32_t x, int32_t y, int32_t width, int32_t height);
 VALUE rb_rect_new2(void);
