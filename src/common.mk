@@ -37,6 +37,9 @@ else
 CPPFLAGS += -I$(RUBY_DIR)/lib/ruby/1.8/$(RUBY_PLATFORM) \
 	    $(shell pkg-config $(PC_LIBS) --cflags-only-I) \
 	    -DRGSS=$(RGSS)
+ifeq ($(RGSS),2)
+LDLIBS += $(RUBY_SRC_DIR)/ext/nkf/nkf.a
+endif
 endif
 LDFLAGS += -L$(RUBY_DIR)/lib \
 	   $(shell pkg-config $(PC_LIBS) --libs-only-L --libs-only-other)

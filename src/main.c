@@ -37,6 +37,8 @@ void Init_zlib(void);
 void Init_single_byte(void);
 void Init_utf_16_32(void);
 void Init_japanese_sjis(void);
+#elif RGSS == 2
+void Init_nkf(void);
 #endif
 static void Init_RGSS(void);
 static void tapir_atexit(void);
@@ -143,6 +145,9 @@ int main(int argc, char **argv) {
     (void) ruby_argv;
     ruby_init();
     Init_zlib();
+#if RGSS == 2
+    Init_nkf();
+#endif
     Init_RGSS();
     {
       extern void Init_stack(void *addr);

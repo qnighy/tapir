@@ -15,6 +15,7 @@ fi
 
 echo "option nodynamic" > ext/Setup
 echo "zlib" >> ext/Setup
+echo "nkf" >> ext/Setup
 
 make "$@"
 make install

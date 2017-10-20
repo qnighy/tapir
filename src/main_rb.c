@@ -1895,11 +1895,8 @@ static void load_libs() {
 #if RGSS == 3
       "module DL\n"
       "end\n"
-#elif RGSS == 2
-      "module NKF\n"
-      "end\n"
-#else
-      "class Hangup\n"
+#elif RGSS == 1
+      "class Hangup < Exception\n"
       "end\n"
 #endif
       "\n"
