@@ -15,7 +15,7 @@ Following is the instruction for Ubuntu 16.04. It may also work on another platf
 ## Install dependencies / 依存関係のインストール
 
 ```
-$ sudo apt install build-essential autoconf bison flex libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libfontconfig1-dev
+$ sudo apt install build-essential autoconf bison flex libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libfontconfig1-dev libconfig-dev
 ```
 
 ## Compile Ruby / Rubyのコンパイル
@@ -76,4 +76,63 @@ Usage: ./tapir [-h] [-d DIR] [test] [btest] [console]
     test    enable test mode
     btest   enable battle test mode
     console show console (not yet implemented)
+```
+
+# Configuring tapir / tapirの設定
+
+Tapir reads configuration from `/etc/tapir.cfg` and `$HOME/.tapir.cfg`. This is in the `libconfig` format.
+
+Tapirは `/etc/tapir.cfg` と `$HOME/.tapir.cfg` から設定を読み取ります。設定ファイルは `libconfig` 形式です。
+
+Below is an example configuration file:
+
+以下に設定ファイルの例を挙げます:
+
+```
+# Put version-agnostic configs here
+rgss:
+{
+  button1 = "A";
+  button2 = "B";
+  button3 = "C";
+  button4 = "X";
+  button5 = "Y";
+  button6 = "Z";
+  button7 = "L";
+  button8 = "R";
+  button9 = "";
+  button10 = "";
+  space = "C";
+  enter = "C";
+  esc = "B";
+  num0 = "B";
+  shift = "A";
+  key_x = "B";
+  key_v = "";
+  key_b = "";
+  key_a = "X";
+  key_s = "Y";
+  key_d = "Z";
+  key_q = "L";
+  key_w = "R";
+};
+
+# Put version-specific configs here
+rgss1:
+{
+  key_z = "A";
+  key_c = "C";
+}
+
+rgss2:
+{
+  key_z = "C";
+  key_c = "";
+}
+
+rgss3:
+{
+  key_z = "C";
+  key_c = "";
+};
 ```

@@ -1,6 +1,8 @@
 #ifndef INI_H
 #define INI_H
 
+#include <stdlib.h>
+
 extern int ansi_code_page;
 
 struct ini_entry {
