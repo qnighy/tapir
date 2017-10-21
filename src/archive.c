@@ -203,16 +203,15 @@ static Sint64 entry_seek(SDL_RWops *context, Sint64 offset, int whence) {
   if(new_pos > entry_rw->entry->size) {
     new_pos = entry_rw->entry->size;
   }
-  fprintf(stderr, "entry_seek(%d, %s) pos=%d -> %d\n", (int)offset, whence == RW_SEEK_SET ? "RW_SEEK_SET" : whence == RW_SEEK_CUR ? "RW_SEEK_CUR" : "RW_SEEK_END", (int)old_pos, (int)new_pos);
+  // fprintf(stderr, "entry_seek(\"%s\", %d, %s) pos=%d -> %d\n", entry_rw->entry->filename, (int)offset, whence == RW_SEEK_SET ? "RW_SEEK_SET" : whence == RW_SEEK_CUR ? "RW_SEEK_CUR" : "RW_SEEK_END", (int)old_pos, (int)new_pos);
   if(old_pos == new_pos) return new_pos;
-  if(SDL_RWseek(archive, entry_rw->entry->pos + new_pos, RW_SEEK_SET)
-      < 0) {
+  if(SDL_RWseek(archive, entry_rw->entry->pos + new_pos, RW_SEEK_SET) < 0) {
     fprintf(stderr, "Seeking archive failed\n");
     return -1;
   }
   uint32_t a = 7, b = 3;
   entry_rw->key = entry_rw->entry->key;
-  for(int i = 3; new_pos >> i; ++i) {
+  for(int i = 2; new_pos >> i; ++i) {
     if((new_pos >> i) & 1) {
       entry_rw->key = entry_rw->key * a + b;
     }
@@ -228,12 +227,17 @@ static size_t entry_read(SDL_RWops *context, void *ptr, size_t size, size_t maxn
   num = SDL_RWread(archive, ptr, size, num);
   if(num == 0) return num;
   for(size_t i = 0; i < size * num; ++i) {
-    ((char *)ptr)[i] ^= entry_rw->key >> ((entry_rw->pos & 3) << 3);
+    ((unsigned char *)ptr)[i] ^= entry_rw->key >> ((entry_rw->pos & 3) << 3);
     entry_rw->pos++;
     if((entry_rw->pos & 3) == 0) {
       entry_rw->key = entry_rw->key * 7 + 3;
     }
   }
+  // fprintf(stderr, "entry_read(\"%s\", _, %zu, %zu) -> ", entry_rw->entry->filename, size, maxnum);
+  // for(size_t i = 0; i < size * num; ++i) {
+  //   fprintf(stderr, "%02x ", ((unsigned char *)ptr)[i]);
+  // }
+  // fprintf(stderr, "\n");
   return num;
 }
 static size_t entry_write(SDL_RWops *context, const void *ptr, size_t size, size_t num) {
