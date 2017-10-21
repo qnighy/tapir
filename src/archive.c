@@ -26,10 +26,23 @@ struct EntryRW {
 static size_t entries_size = 0, entries_capa = 0;
 static struct Entry *entries = NULL;
 
+static int my_strcasecmp(const char *s1, const char *s2) {
+  while(*s1 || *s2) {
+    char c1 = *s1;
+    char c2 = *s2;
+    if('A' <= c1 && c1 <= 'Z') c1 |= 0x20;
+    if('A' <= c2 && c2 <= 'Z') c2 |= 0x20;
+    if(c1 != c2) return c1 < c2 ? -1 : 1;
+    ++s1;
+    ++s2;
+  }
+  return 0;
+}
+
 static int compare_entries(const void *o1, const void *o2) {
   const struct Entry *e1 = (const struct Entry *)o1;
   const struct Entry *e2 = (const struct Entry *)o2;
-  return strcmp(e1->filename, e2->filename);
+  return my_strcasecmp(e1->filename, e2->filename);
 }
 
 #if RGSS == 3
