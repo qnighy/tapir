@@ -3,6 +3,7 @@
 #include "Input.h"
 #include "misc.h"
 #include "sdl_misc.h"
+#include "config.h"
 
 VALUE rb_mInput;
 
@@ -163,41 +164,35 @@ static int convertSDLKey(SDL_Keycode key) {
   if(key == SDLK_F8) return RGSS_KEY_F8;
   if(key == SDLK_F9) return RGSS_KEY_F9;
   if(key == SDLK_F9) return RGSS_KEY_F9;
-  // TODO: make keys configurable (via F1)
-  if(key == SDLK_SPACE) return RGSS_KEY_C;
-  if(key == SDLK_RETURN || key == SDLK_RETURN2) return RGSS_KEY_C;
-  if(key == SDLK_ESCAPE) return RGSS_KEY_B;
-  if(key == SDLK_KP_0) return RGSS_KEY_B;
-  if(key == SDLK_LSHIFT || key == SDLK_RSHIFT) return RGSS_KEY_A;
-#if RGSS >= 2
-  if(key == SDLK_z) return RGSS_KEY_C;
-  if(key == SDLK_x) return RGSS_KEY_B;
-  if(key == SDLK_c) return -1;
-#else
-  if(key == SDLK_z) return RGSS_KEY_A;
-  if(key == SDLK_x) return RGSS_KEY_B;
-  if(key == SDLK_c) return RGSS_KEY_C;
-#endif
-  if(key == SDLK_v) return -1;
-  if(key == SDLK_b) return -1;
-  if(key == SDLK_a) return RGSS_KEY_X;
-  if(key == SDLK_s) return RGSS_KEY_Y;
-  if(key == SDLK_d) return RGSS_KEY_Z;
-  if(key == SDLK_q) return RGSS_KEY_L;
-  if(key == SDLK_w) return RGSS_KEY_R;
-  return -1;
+  // TODO: provide a GUI for keyconfig (via F1)
+  if(key == SDLK_SPACE) return key_config[10];
+  if(key == SDLK_RETURN || key == SDLK_RETURN2) return key_config[11];
+  if(key == SDLK_ESCAPE) return key_config[12];
+  if(key == SDLK_KP_0) return key_config[13];
+  if(key == SDLK_LSHIFT || key == SDLK_RSHIFT) return key_config[14];
+  if(key == SDLK_z) return key_config[15];
+  if(key == SDLK_x) return key_config[16];
+  if(key == SDLK_c) return key_config[17];
+  if(key == SDLK_v) return key_config[18];
+  if(key == SDLK_b) return key_config[19];
+  if(key == SDLK_a) return key_config[20];
+  if(key == SDLK_s) return key_config[21];
+  if(key == SDLK_d) return key_config[22];
+  if(key == SDLK_q) return key_config[23];
+  if(key == SDLK_w) return key_config[24];
+  return 0;
 }
 
 void keyPressed(SDL_Keycode key) {
   int rkey = convertSDLKey(key);
-  if(rkey >= 0) {
+  if(rkey > 0) {
     keycount2[rkey] = 0;
   }
 }
 
 void keyReleased(SDL_Keycode key) {
   int rkey = convertSDLKey(key);
-  if(rkey >= 0) {
+  if(rkey > 0) {
     keycount2[rkey] = -1;
   }
 }

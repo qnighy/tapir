@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <ruby.h>
 #include <SDL.h>
+#include <libconfig.h>
 #include "main_rb.h"
 #include "misc.h"
 #include "sdl_misc.h"
@@ -9,6 +10,7 @@
 #include "openres.h"
 #include "font_lookup.h"
 #include "ini.h"
+#include "config.h"
 #include "Audio.h"
 #include "Bitmap.h"
 #include "BitmapArray.h"
@@ -49,6 +51,8 @@ RUBY_GLOBAL_SETUP
 
 int main(int argc, char **argv) {
   atexit(tapir_atexit);
+
+  init_tapir_config();
 
   int ruby_argc = 2;
   char *ruby_argv_array[] = {
@@ -166,6 +170,7 @@ static void tapir_atexit(void) {
   uninitFontLookup();
   deinitArchive();
   cleanupSDL();
+  deinit_tapir_config();
 }
 
 static void Init_RGSS(void) {
