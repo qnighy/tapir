@@ -16,7 +16,8 @@ double saturateDouble(double val, double minval, double maxval) {
   if(val <= minval) return minval;
   if(val >= maxval) return maxval;
   if(minval <= val && val <= maxval) return val;
-  rb_raise(rb_eRangeError, "cannot saturate NaN");
+  // rb_raise(rb_eRangeError, "cannot saturate NaN");
+  return 0.0;
 }
 
 union u64d_converter {
