@@ -343,6 +343,7 @@ static VALUE rb_sprite_m_set_bitmap(VALUE self, VALUE newval) {
   struct Sprite *ptr = rb_sprite_data_mut(self);
   const struct Bitmap *bitmap_ptr;
   if(newval != Qnil) bitmap_ptr = rb_bitmap_data(newval);
+  if(ptr->bitmap == newval) return newval;
   ptr->bitmap = newval;
   if(newval != Qnil && bitmap_ptr->surface) {
     rb_rect_set2(ptr->src_rect, rb_bitmap_rect(newval));
