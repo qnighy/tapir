@@ -202,7 +202,7 @@ static VALUE rb_graphics_s_transition(int argc, VALUE *argv, VALUE klass) {
   WARN_UNIMPLEMENTED("Graphics.transition");
 
   for(int i = 0; i < duration; ++i) {
-    window_brightness = duration * 255 / duration;
+    window_brightness = i * 255 / duration;
     rb_graphics_s_update(klass);
   }
   window_brightness = 255;
