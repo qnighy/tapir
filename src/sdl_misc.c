@@ -46,6 +46,7 @@ static struct Renderable **registry;
 static struct RenderQueue main_queue;
 
 static GLuint transition_shader;
+static GLuint transition_texture;
 
 static void initTransition(void);
 static void deinitTransition(void);
@@ -211,11 +212,23 @@ void renderSDL() {
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glBlendEquation(GL_FUNC_ADD);
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, transition_texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
     glUseProgram(transition_shader);
+    glUniform1i(glGetUniformLocation(transition_shader, "tex"), 0);
+    glUniform2f(glGetUniformLocation(transition_shader, "resolution"),
+        window_width, window_height);
     glUniform1f(glGetUniformLocation(transition_shader, "brightness"),
         window_brightness / 255.0);
 
-    gl_draw_rect(-1.0, -1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+    gl_draw_rect(
+        0, 0, window_width, window_height, 0.0, 0.0, 1.0, 1.0);
 
     glUseProgram(0);
   }
@@ -317,6 +330,24 @@ void queueRenderJob(VALUE viewport, struct RenderJob job) {
   queue->queue[queue->size++] = job;
 }
 
+void freeze_screen(void) {
+  SDL_Surface *frozen = create_rgba_surface(window_width, window_height);
+  capturedRenderSDL(frozen);
+  glBindTexture(GL_TEXTURE_2D, transition_texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frozen->w, frozen->h,
+      0, GL_RGBA, GL_UNSIGNED_BYTE, frozen->pixels);
+  SDL_FreeSurface(frozen);
+}
+
+void defreeze_screen(void) {
+  SDL_Surface *frozen = create_rgba_surface(window_width, window_height);
+  SDL_FillRect(frozen, NULL, SDL_MapRGBA(frozen->format, 0, 0, 0, 255));
+  glBindTexture(GL_TEXTURE_2D, transition_texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frozen->w, frozen->h,
+      0, GL_RGBA, GL_UNSIGNED_BYTE, frozen->pixels);
+  SDL_FreeSurface(frozen);
+}
+
 SDL_Surface *create_rgba_surface(int width, int height) {
   return SDL_CreateRGBSurface(
       0, width, height, 32,
@@ -334,8 +365,13 @@ static void initTransition(void) {
   static const char *vsh_source =
     "#version 120\n"
     "\n"
+    "uniform vec2 resolution;\n"
+    "\n"
     "void main(void) {\n"
-    "    gl_Position = gl_Vertex;\n"
+    "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+    "    gl_Position.x = gl_Vertex.x / resolution.x * 2.0 - 1.0;\n"
+    "    gl_Position.y = 1.0 - gl_Vertex.y / resolution.y * 2.0;\n"
+    "    gl_Position.zw = vec2(0.0, 1.0);\n"
     "}\n";
 
   static const char *fsh_source =
@@ -345,16 +381,23 @@ static void initTransition(void) {
     "#define texture2DProj textureProj\n"
     "#endif\n"
     "\n"
+    "uniform sampler2D tex;\n"
     "uniform float brightness;\n"
     "\n"
     "void main(void) {\n"
-    "    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0 - brightness);\n"
+    "    gl_FragColor = texture2D(tex, gl_TexCoord[0].xy);\n"
+    "    gl_FragColor.a *= 1.0 - brightness;\n"
     "    /* premultiplication */\n"
     "    gl_FragColor.rgb *= gl_FragColor.a;\n"
     "}\n";
 
   transition_shader = compileShaders(vsh_source, fsh_source);
+
+  glGenTextures(1, &transition_texture);
+
+  defreeze_screen();
 }
 static void deinitTransition(void) {
+  if(transition_texture) glDeleteTextures(1, &transition_texture);
   if(transition_shader) glDeleteProgram(transition_shader);
 }

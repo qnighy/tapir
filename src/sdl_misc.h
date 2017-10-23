@@ -54,6 +54,9 @@ void renderQueue(struct RenderQueue *queue,
 void queueRenderJob(VALUE viewport, struct RenderJob job);
 void deinitRenderQueue(struct RenderQueue *queue);
 
+void freeze_screen(void);
+void defreeze_screen(void);
+
 SDL_Surface *create_rgba_surface(int width, int height);
 SDL_Surface *create_rgba_surface_from(SDL_Surface *orig);
 

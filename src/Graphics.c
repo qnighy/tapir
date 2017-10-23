@@ -183,7 +183,8 @@ static VALUE rb_graphics_s_fadein(VALUE klass, VALUE duration) {
 
 static VALUE rb_graphics_s_freeze(VALUE klass) {
   (void) klass;
-  WARN_UNIMPLEMENTED("Graphics.freeze");
+  freeze_screen();
+  window_brightness = 0;
   return Qnil;
 }
 
@@ -199,13 +200,16 @@ static VALUE rb_graphics_s_transition(int argc, VALUE *argv, VALUE klass) {
 #endif
   const char *filename = argc > 1 ? StringValueCStr(argv[1]) : NULL;
   int vague = argc > 2 ? NUM2INT(argv[2]) : 40;
-  WARN_UNIMPLEMENTED("Graphics.transition");
+  if(filename) {
+    WARN_UNIMPLEMENTED("Graphics.transition with filename");
+  }
 
   for(int i = 0; i < duration; ++i) {
     window_brightness = i * 255 / duration;
     rb_graphics_s_update(klass);
   }
   window_brightness = 255;
+  defreeze_screen();
 
   (void) vague;
   (void) filename;
