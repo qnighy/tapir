@@ -317,6 +317,19 @@ void queueRenderJob(VALUE viewport, struct RenderJob job) {
   queue->queue[queue->size++] = job;
 }
 
+SDL_Surface *create_rgba_surface(int width, int height) {
+  return SDL_CreateRGBSurface(
+      0, width, height, 32,
+      RMASK, GMASK, BMASK, AMASK);
+}
+
+SDL_Surface *create_rgba_surface_from(SDL_Surface *orig) {
+  SDL_Surface *ret =
+    SDL_ConvertSurfaceFormat(orig, PIXELFORMAT_RGBA32, 0);
+  SDL_FreeSurface(orig);
+  return ret;
+}
+
 static void initTransition(void) {
   static const char *vsh_source =
     "#version 120\n"

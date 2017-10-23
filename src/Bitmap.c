@@ -7,20 +7,7 @@
 #include "Font.h"
 #include "openres.h"
 #include "misc.h"
-
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-#define RMASK 0xff000000
-#define GMASK 0x00ff0000
-#define BMASK 0x0000ff00
-#define AMASK 0x000000ff
-#define PIXELFORMAT_RGBA32 SDL_PIXELFORMAT_RGBA8888
-#else
-#define RMASK 0x000000ff
-#define GMASK 0x0000ff00
-#define BMASK 0x00ff0000
-#define AMASK 0xff000000
-#define PIXELFORMAT_RGBA32 SDL_PIXELFORMAT_ABGR8888
-#endif
+#include "sdl_misc.h"
 
 static void bitmap_mark(struct Bitmap *ptr);
 static void bitmap_free(struct Bitmap *ptr);
@@ -29,9 +16,7 @@ static VALUE bitmap_alloc(VALUE klass);
 VALUE rb_bitmap_new(int width, int height) {
   VALUE ret = bitmap_alloc(rb_cBitmap);
   struct Bitmap *ptr = rb_bitmap_data_mut(ret);
-  ptr->surface = SDL_CreateRGBSurface(
-      0, width, height, 32,
-      RMASK, GMASK, BMASK, AMASK);
+  ptr->surface = create_rgba_surface(width, height);
   if(!ptr->surface) {
     /* TODO: check error handling */
     rb_raise(rb_eRGSSError, "Could not create surface: %s", SDL_GetError());
@@ -207,13 +192,10 @@ static VALUE rb_bitmap_m_initialize(int argc, VALUE *argv, VALUE self) {
             StringValueCStr(argv[0]),
             IMG_GetError());
       }
-      ptr->surface = SDL_ConvertSurfaceFormat(img, PIXELFORMAT_RGBA32, 0);
-      SDL_FreeSurface(img);
+      ptr->surface = create_rgba_surface_from(img);
       break;
     case 2:
-      ptr->surface = SDL_CreateRGBSurface(
-          0, NUM2INT(argv[0]), NUM2INT(argv[1]), 32,
-          RMASK, GMASK, BMASK, AMASK);
+      ptr->surface = create_rgba_surface(NUM2INT(argv[0]), NUM2INT(argv[1]));
       if(!ptr->surface) {
         /* TODO: check error handling */
         rb_raise(rb_eRGSSError, "Could not create surface: %s", SDL_GetError());
@@ -231,9 +213,8 @@ static VALUE rb_bitmap_m_initialize_copy(VALUE self, VALUE orig) {
   struct Bitmap *ptr = rb_bitmap_data_mut(self);
   const struct Bitmap *orig_ptr = rb_bitmap_data(orig);
   if(orig_ptr->surface) {
-    ptr->surface = SDL_CreateRGBSurface(
-        0, orig_ptr->surface->w, orig_ptr->surface->h, 32,
-        RMASK, GMASK, BMASK, AMASK);
+    ptr->surface = create_rgba_surface(
+        orig_ptr->surface->w, orig_ptr->surface->h);
     SDL_BlitSurface(orig_ptr->surface, NULL, ptr->surface, NULL);
   } else {
     ptr->surface = NULL;
@@ -643,9 +624,7 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
     return Qnil;
   }
 
-  SDL_Surface *convert_src = fg_rendered;
-  fg_rendered = SDL_ConvertSurfaceFormat(convert_src, PIXELFORMAT_RGBA32, 0);
-  SDL_FreeSurface(convert_src);
+  fg_rendered = create_rgba_surface_from(fg_rendered);
 
   int fg_width = fg_rendered->w;
   int fg_height = fg_rendered->h;
@@ -682,10 +661,7 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
       SDL_FreeSurface(fg_rendered);
       return Qnil;
     }
-    SDL_Surface *convert_src = out_rendered;
-    out_rendered =
-      SDL_ConvertSurfaceFormat(convert_src, PIXELFORMAT_RGBA32, 0);
-    SDL_FreeSurface(convert_src);
+    out_rendered = create_rgba_surface_from(out_rendered);
 
     int out_width = out_rendered->w;
     int out_height = out_rendered->h;
@@ -717,10 +693,7 @@ static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
       SDL_FreeSurface(fg_rendered);
       return Qnil;
     }
-    SDL_Surface *convert_src = shadow_rendered;
-    shadow_rendered =
-      SDL_ConvertSurfaceFormat(convert_src, PIXELFORMAT_RGBA32, 0);
-    SDL_FreeSurface(convert_src);
+    shadow_rendered = create_rgba_surface_from(shadow_rendered);
 
     SDL_Rect shadow_rect = rect;
     ++shadow_rect.x;
