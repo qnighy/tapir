@@ -192,7 +192,11 @@ static VALUE rb_graphics_s_transition(int argc, VALUE *argv, VALUE klass) {
     rb_raise(rb_eArgError,
         "wrong number of arguments (%d for 0..3)", argc);
   }
+#if RGSS >= 2
   int duration = argc > 0 ? NUM2INT(argv[0]) : 10;
+#else
+  int duration = argc > 0 ? NUM2INT(argv[0]) : 8;
+#endif
   const char *filename = argc > 1 ? StringValueCStr(argv[1]) : NULL;
   int vague = argc > 2 ? NUM2INT(argv[2]) : 40;
   WARN_UNIMPLEMENTED("Graphics.transition");
