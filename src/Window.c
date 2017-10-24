@@ -830,7 +830,7 @@ static void renderWindow(
         -viewport->ox + adjusted_x,
         -viewport->oy + adjusted_y,
         -viewport->ox + adjusted_x + cursor_rect_ptr->width,
-        -viewport->ox + adjusted_y + cursor_rect_ptr->height,
+        -viewport->oy + adjusted_y + cursor_rect_ptr->height,
         0.0, 0.0, cursor_rect_ptr->width, cursor_rect_ptr->height);
   }
 
