@@ -199,10 +199,9 @@ static VALUE rb_graphics_s_transition(int argc, VALUE *argv, VALUE klass) {
   int duration = argc > 0 ? NUM2INT(argv[0]) : 8;
 #endif
   const char *filename = argc > 1 ? StringValueCStr(argv[1]) : NULL;
-  int vague = argc > 2 ? NUM2INT(argv[2]) : 40;
-  if(filename) {
-    WARN_UNIMPLEMENTED("Graphics.transition with filename");
-  }
+  int vague = argc > 2 ? saturateInt32(NUM2INT(argv[2]), 0, 255) : 40;
+
+  load_transition_image(filename, vague);
 
   for(int i = 0; i < duration; ++i) {
     window_brightness = i * 255 / duration;
@@ -210,6 +209,8 @@ static VALUE rb_graphics_s_transition(int argc, VALUE *argv, VALUE klass) {
   }
   window_brightness = 255;
   defreeze_screen();
+
+  load_transition_image(NULL, 255);
 
   (void) vague;
   (void) filename;
