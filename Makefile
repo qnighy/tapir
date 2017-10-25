@@ -21,14 +21,18 @@ test: test-accordion test-violin test-xylophone
 test-rgss: test-rgss-accordion test-rgss-violin test-rgss-xylophone
 
 install: all
+	mkdir -p $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/share/man/man1
 	$(INSTALL) -c bin/tapir-a bin/tapir-v bin/tapir-x bin/tapir \
 		$(DESTDIR)$(PREFIX)/bin
+	$(INSTALL) -c -m 644 -t $(DESTDIR)$(PREFIX)/share/man/man1 \
+		doc/man/tapir.1
 
 uninstall:
 	$(RM) $(DESTDIR)$(PREFIX)/bin/tapir-a
 	$(RM) $(DESTDIR)$(PREFIX)/bin/tapir-v
 	$(RM) $(DESTDIR)$(PREFIX)/bin/tapir-x
 	$(RM) $(DESTDIR)$(PREFIX)/bin/tapir
+	$(RM) $(DESTDIR)$(PREFIX)/share/man/man1/tapir.1
 
 all-accordion:
 	$(MAKE) all -C accordion
