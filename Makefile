@@ -9,6 +9,9 @@
 # option. This file may not be copied, modified, or distributed
 # except according to those terms.
 
+PREFIX ?= /usr/local
+INSTALL ?= install
+
 all: all-accordion all-violin all-xylophone all-launcher
 
 clean: clean-accordion clean-violin clean-xylophone clean-launcher
@@ -16,6 +19,16 @@ clean: clean-accordion clean-violin clean-xylophone clean-launcher
 test: test-accordion test-violin test-xylophone
 
 test-rgss: test-rgss-accordion test-rgss-violin test-rgss-xylophone
+
+install: all
+	$(INSTALL) -c bin/tapir-a bin/tapir-v bin/tapir-x bin/tapir \
+		$(DESTDIR)$(PREFIX)/bin
+
+uninstall:
+	$(RM) $(DESTDIR)$(PREFIX)/bin/tapir-a
+	$(RM) $(DESTDIR)$(PREFIX)/bin/tapir-v
+	$(RM) $(DESTDIR)$(PREFIX)/bin/tapir-x
+	$(RM) $(DESTDIR)$(PREFIX)/bin/tapir
 
 all-accordion:
 	$(MAKE) all -C accordion
