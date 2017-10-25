@@ -1,3 +1,12 @@
+// Copyright 2017 Masaki Hara. See the COPYRIGHT
+// file at the top-level directory of this distribution.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 #ifndef SDL_MISC_H
 #define SDL_MISC_H
 
@@ -53,5 +62,12 @@ void renderQueue(struct RenderQueue *queue,
     const struct RenderViewport *viewport);
 void queueRenderJob(VALUE viewport, struct RenderJob job);
 void deinitRenderQueue(struct RenderQueue *queue);
+
+void freeze_screen(void);
+void defreeze_screen(void);
+void load_transition_image(const char *filename, int vagueness);
+
+SDL_Surface *create_rgba_surface(int width, int height);
+SDL_Surface *create_rgba_surface_from(SDL_Surface *orig);
 
 #endif /* SDL_MISC_H */

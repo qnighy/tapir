@@ -1,3 +1,12 @@
+// Copyright 2017 Masaki Hara. See the COPYRIGHT
+// file at the top-level directory of this distribution.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 #include <SDL.h>
 #include "gl_misc.h"
 #include "Window.h"
@@ -830,7 +839,7 @@ static void renderWindow(
         -viewport->ox + adjusted_x,
         -viewport->oy + adjusted_y,
         -viewport->ox + adjusted_x + cursor_rect_ptr->width,
-        -viewport->ox + adjusted_y + cursor_rect_ptr->height,
+        -viewport->oy + adjusted_y + cursor_rect_ptr->height,
         0.0, 0.0, cursor_rect_ptr->width, cursor_rect_ptr->height);
   }
 

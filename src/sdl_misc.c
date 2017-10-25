@@ -1,16 +1,28 @@
+// Copyright 2017 Masaki Hara. See the COPYRIGHT
+// file at the top-level directory of this distribution.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
+#include "misc.h"
 #include "gl_misc.h"
 #include "sdl_misc.h"
+#include "openres.h"
 #include "Sprite.h"
 #include "Plane.h"
 #include "Window.h"
 #include "Input.h"
 #include "Audio.h"
+#include "RGSSError.h"
 #include "RGSSReset.h"
 #include "Tilemap.h"
 #include "Viewport.h"
@@ -46,6 +58,9 @@ static struct Renderable **registry;
 static struct RenderQueue main_queue;
 
 static GLuint transition_shader;
+static GLuint transition_texture;
+static GLuint transition_texture2;
+static int transition_vagueness = 255;
 
 static void initTransition(void);
 static void deinitTransition(void);
@@ -211,11 +226,34 @@ void renderSDL() {
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glBlendEquation(GL_FUNC_ADD);
 
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, transition_texture2);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, transition_texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
     glUseProgram(transition_shader);
+    glUniform1i(glGetUniformLocation(transition_shader, "tex"), 0);
+    glUniform1i(glGetUniformLocation(transition_shader, "tex2"), 1);
+    glUniform2f(glGetUniformLocation(transition_shader, "resolution"),
+        window_width, window_height);
     glUniform1f(glGetUniformLocation(transition_shader, "brightness"),
         window_brightness / 255.0);
+    glUniform1f(glGetUniformLocation(transition_shader, "vagueness"),
+        transition_vagueness / 255.0);
 
-    gl_draw_rect(-1.0, -1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+    gl_draw_rect(
+        0, 0, window_width, window_height, 0.0, 0.0, 1.0, 1.0);
 
     glUseProgram(0);
   }
@@ -317,12 +355,96 @@ void queueRenderJob(VALUE viewport, struct RenderJob job) {
   queue->queue[queue->size++] = job;
 }
 
+void freeze_screen(void) {
+  SDL_Surface *frozen = create_rgba_surface(window_width, window_height);
+  capturedRenderSDL(frozen);
+  glBindTexture(GL_TEXTURE_2D, transition_texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frozen->w, frozen->h,
+      0, GL_RGBA, GL_UNSIGNED_BYTE, frozen->pixels);
+  SDL_FreeSurface(frozen);
+}
+
+void defreeze_screen(void) {
+  SDL_Surface *frozen = create_rgba_surface(window_width, window_height);
+  SDL_FillRect(frozen, NULL, SDL_MapRGBA(frozen->format, 0, 0, 0, 255));
+  glBindTexture(GL_TEXTURE_2D, transition_texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frozen->w, frozen->h,
+      0, GL_RGBA, GL_UNSIGNED_BYTE, frozen->pixels);
+  SDL_FreeSurface(frozen);
+}
+
+SDL_Surface *create_rgba_surface(int width, int height) {
+  return SDL_CreateRGBSurface(
+      0, width, height, 32,
+      RMASK, GMASK, BMASK, AMASK);
+}
+
+SDL_Surface *create_rgba_surface_from(SDL_Surface *orig) {
+  SDL_Surface *ret =
+    SDL_ConvertSurfaceFormat(orig, PIXELFORMAT_RGBA32, 0);
+  SDL_FreeSurface(orig);
+  return ret;
+}
+
+void load_transition_image(const char *filename, int vagueness) {
+  if(!filename) {
+    SDL_Surface *img = create_rgba_surface(window_width, window_height);
+    SDL_FillRect(img, NULL, SDL_MapRGBA(img->format, 255, 255, 255, 255));
+    glBindTexture(GL_TEXTURE_2D, transition_texture2);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->w, img->h,
+        0, GL_RGBA, GL_UNSIGNED_BYTE, img->pixels);
+    SDL_FreeSurface(img);
+
+    transition_vagueness = 255;
+    return;
+  }
+
+  SDL_Surface *transition_image = NULL;
+
+  {
+    SDL_RWops *file = NULL;
+    for(int i = 0; i < 2; ++i) {
+      const char * const extensions[] = {"", ".png"};
+      VALUE filename2 = rb_str_new2(filename);
+      rb_str_cat2(filename2, extensions[i]);
+      file = openres(filename2, true);
+      if(file) break;
+    }
+    if(!file) {
+      /* TODO: check error handling */
+      rb_raise(rb_eRGSSError, "Error loading %s: %s",
+          filename, SDL_GetError());
+    }
+    /* TODO: limit file type */
+    SDL_Surface *img = IMG_Load_RW(file, true);
+    if(!img) {
+      /* TODO: check error handling */
+      rb_raise(rb_eRGSSError, "Error loading %s: %s",
+          filename, IMG_GetError());
+    }
+    transition_image = create_rgba_surface_from(img);
+  }
+
+  glBindTexture(GL_TEXTURE_2D, transition_texture2);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+      transition_image->w, transition_image->h,
+      0, GL_RGBA, GL_UNSIGNED_BYTE, transition_image->pixels);
+  SDL_FreeSurface(transition_image);
+
+  transition_vagueness = vagueness;
+}
+
 static void initTransition(void) {
   static const char *vsh_source =
     "#version 120\n"
     "\n"
+    "uniform vec2 resolution;\n"
+    "\n"
     "void main(void) {\n"
-    "    gl_Position = gl_Vertex;\n"
+    "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+    "    gl_Position.x = gl_Vertex.x / resolution.x * 2.0 - 1.0;\n"
+    "    gl_Position.y = 1.0 - gl_Vertex.y / resolution.y * 2.0;\n"
+    "    gl_Position.zw = vec2(0.0, 1.0);\n"
     "}\n";
 
   static const char *fsh_source =
@@ -332,16 +454,33 @@ static void initTransition(void) {
     "#define texture2DProj textureProj\n"
     "#endif\n"
     "\n"
+    "uniform sampler2D tex;\n"
+    "uniform sampler2D tex2;\n"
     "uniform float brightness;\n"
+    "uniform float vagueness;\n"
     "\n"
     "void main(void) {\n"
-    "    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0 - brightness);\n"
+    "    float tr = texture2D(tex2, gl_TexCoord[0].xy).r;\n"
+    "    float br = \n"
+    "      (brightness - (tr - vagueness)) / \n"
+    "      (vagueness + 0.0000001);\n"
+    "    br = max(min(br, 1.0), 0.0);\n"
+    "    gl_FragColor = texture2D(tex, gl_TexCoord[0].xy);\n"
+    "    gl_FragColor.a *= 1.0 - br;\n"
     "    /* premultiplication */\n"
     "    gl_FragColor.rgb *= gl_FragColor.a;\n"
     "}\n";
 
   transition_shader = compileShaders(vsh_source, fsh_source);
+
+  glGenTextures(1, &transition_texture);
+  glGenTextures(1, &transition_texture2);
+
+  defreeze_screen();
+  load_transition_image(NULL, 255);
 }
 static void deinitTransition(void) {
+  if(transition_texture2) glDeleteTextures(1, &transition_texture2);
+  if(transition_texture) glDeleteTextures(1, &transition_texture);
   if(transition_shader) glDeleteProgram(transition_shader);
 }

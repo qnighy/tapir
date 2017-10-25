@@ -1,3 +1,12 @@
+// Copyright 2017 Masaki Hara. See the COPYRIGHT
+// file at the top-level directory of this distribution.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "Graphics.h"
@@ -183,7 +192,8 @@ static VALUE rb_graphics_s_fadein(VALUE klass, VALUE duration) {
 
 static VALUE rb_graphics_s_freeze(VALUE klass) {
   (void) klass;
-  WARN_UNIMPLEMENTED("Graphics.freeze");
+  freeze_screen();
+  window_brightness = 0;
   return Qnil;
 }
 
@@ -192,16 +202,24 @@ static VALUE rb_graphics_s_transition(int argc, VALUE *argv, VALUE klass) {
     rb_raise(rb_eArgError,
         "wrong number of arguments (%d for 0..3)", argc);
   }
+#if RGSS >= 2
   int duration = argc > 0 ? NUM2INT(argv[0]) : 10;
+#else
+  int duration = argc > 0 ? NUM2INT(argv[0]) : 8;
+#endif
   const char *filename = argc > 1 ? StringValueCStr(argv[1]) : NULL;
-  int vague = argc > 2 ? NUM2INT(argv[2]) : 40;
-  WARN_UNIMPLEMENTED("Graphics.transition");
+  int vague = argc > 2 ? saturateInt32(NUM2INT(argv[2]), 0, 255) : 40;
+
+  load_transition_image(filename, vague);
 
   for(int i = 0; i < duration; ++i) {
-    window_brightness = duration * 255 / duration;
+    window_brightness = i * 255 / duration;
     rb_graphics_s_update(klass);
   }
   window_brightness = 255;
+  defreeze_screen();
+
+  load_transition_image(NULL, 255);
 
   (void) vague;
   (void) filename;

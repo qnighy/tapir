@@ -1,3 +1,12 @@
+# Copyright 2017 Masaki Hara. See the COPYRIGHT
+# file at the top-level directory of this distribution.
+#
+# Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+# http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+# <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+# option. This file may not be copied, modified, or distributed
+# except according to those terms.
+
 module RGSSTest
   class TestSprite
     include RGSSTest
@@ -456,6 +465,74 @@ module RGSSTest
 
         snap = Graphics.snap_to_bitmap
         assert_bitmap_equal2("test_sprite_blend_type_2", snap)
+      end
+    end
+
+    def test_auto_src_rect_1
+      cleaned do
+        s1 = register(Sprite.new)
+
+        s1.bitmap = nil
+        s1.src_rect = Rect.new(1, 3, 5, 7)
+        s1.bitmap = nil
+        assert_equal(s1.src_rect, Rect.new(1, 3, 5, 7))
+      end
+    end
+
+    def test_auto_src_rect_2
+      cleaned do
+        s1 = register(Sprite.new)
+
+        s1.bitmap = nil
+        s1.src_rect = Rect.new(1, 3, 5, 7)
+        s1.bitmap = Bitmap.new(33, 27)
+        assert_equal(s1.src_rect, Rect.new(0, 0, 33, 27))
+      end
+    end
+
+    def test_auto_src_rect_3
+      cleaned do
+        s1 = register(Sprite.new)
+
+        s1.bitmap = Bitmap.new(51, 2)
+        s1.src_rect = Rect.new(1, 3, 5, 7)
+        s1.bitmap = nil
+        assert_equal(s1.src_rect, Rect.new(1, 3, 5, 7))
+      end
+    end
+
+    def test_auto_src_rect_4
+      cleaned do
+        s1 = register(Sprite.new)
+
+        s1.bitmap = Bitmap.new(1, 1)
+        s1.src_rect = Rect.new(1, 3, 5, 7)
+        s1.bitmap = Bitmap.new(311, 12)
+        assert_equal(s1.src_rect, Rect.new(0, 0, 311, 12))
+      end
+    end
+
+    def test_auto_src_rect_5
+      cleaned do
+        s1 = register(Sprite.new)
+
+        s1.bitmap = Bitmap.new(15, 24)
+        s1.src_rect = Rect.new(1, 3, 5, 7)
+        s1.bitmap = Bitmap.new(15, 24)
+        assert_equal(s1.src_rect, Rect.new(0, 0, 15, 24))
+      end
+    end
+
+    def test_auto_src_rect_6
+      cleaned do
+        s1 = register(Sprite.new)
+
+        b = Bitmap.new(15, 24)
+
+        s1.bitmap = b
+        s1.src_rect = Rect.new(1, 3, 5, 7)
+        s1.bitmap = b
+        assert_equal(s1.src_rect, Rect.new(1, 3, 5, 7))
       end
     end
   end
