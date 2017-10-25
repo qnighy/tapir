@@ -18,7 +18,7 @@ OBJS = launcher.o ini.o
 all: $(EXEC)
 
 clean:
-	$(RM) $(EXEC) $(OBJS)
+	$(RM) $(EXEC) $(OBJS) $(wildcard *.d)
 
 $(EXEC): $(OBJS)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LDLIBS)

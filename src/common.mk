@@ -59,7 +59,7 @@ LDLIBS += $(RUBY_SRC_DIR)/ext/zlib/zlib.a -lz \
 all: $(EXEC)
 
 clean:
-	$(RM) $(EXEC) $(OBJS)
+	$(RM) $(EXEC) $(OBJS) $(wildcard *.d)
 
 test: all
 	mkdir -p test
