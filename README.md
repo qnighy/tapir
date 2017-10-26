@@ -42,6 +42,10 @@ This will make three binaries: `accordion/tapir-a`, `violin/tapir-v`, and `xylop
 
 # Install RTPs / RTPのインストール
 
+There are two ways to install RTP. / RTPのインストールには2つの方法があります。
+
+## Installation using Windows or Wine / WindowsまたはWineを用いたインストール
+
 In Windows, RTPs will be installed to these directories by default:
 
 Windowsでは、RTPはデフォルトで以下のディレクトリにインストールされます:
@@ -59,6 +63,20 @@ Tapirは今のところ、以下のディレクトリを探索します。
 - `/usr/local/share/Enterbrain/RGSS/Standard`
 - `/usr/local/share/Enterbrain/RGSS2/RPGVX`
 - `/usr/local/share/Enterbrain/RGSS3/RPGVXAce`
+
+## Installation using scripts / スクリプトを用いたインストール
+
+You can even install RTPs without Windows or Wine. / WindowsやWineがなくてもRTPをインストールすることができます。
+
+Use the script at your own risk. / このスクリプトは自己責任で使ってください。
+
+```
+$ sudo apt install innoextract
+$ cd rtp
+$ ./install1.sh
+$ ./install2.sh
+$ ./install3.sh
+```
 
 # Run tapir / tapirの実行
 
