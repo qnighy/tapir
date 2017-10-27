@@ -13,6 +13,11 @@ set -ue
 
 cd "$(dirname "$0")"
 dir="$(pwd)"
+
+if [ -e .git ]; then
+  git submodule update --init ruby192
+fi
+
 cd ruby192
 if [ ! -e configure ]; then
   autoconf

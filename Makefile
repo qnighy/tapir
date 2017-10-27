@@ -34,15 +34,29 @@ uninstall:
 	$(RM) $(DESTDIR)$(PREFIX)/bin/tapir
 	$(RM) $(DESTDIR)$(PREFIX)/share/man/man1/tapir.1
 
-all-accordion:
+distclean: clean
+	$(RM) -r ruby181-build
+	(cd ruby181; git checkout .) || true
+	make distclean -C ruby181 || true
+	$(RM) -r ruby192-build
+	(cd ruby192; git checkout .) || true
+	make distclean -C ruby192 || true
+
+ruby181-build:
+	./build-ruby181.sh
+
+ruby192-build:
+	./build-ruby192.sh
+
+all-accordion: ruby192-build
 	$(MAKE) all -C accordion
 	cp accordion/tapir-a bin/tapir-a
 
-all-violin:
+all-violin: ruby181-build
 	$(MAKE) all -C violin
 	cp violin/tapir-v bin/tapir-v
 
-all-xylophone:
+all-xylophone: ruby181-build
 	$(MAKE) all -C xylophone
 	cp xylophone/tapir-x bin/tapir-x
 
@@ -66,13 +80,13 @@ clean-launcher:
 	$(RM) bin/tapir
 	$(MAKE) clean -C launcher
 
-test-accordion:
+test-accordion: all-accordion
 	$(MAKE) test -C accordion
 
-test-violin:
+test-violin: all-violin
 	$(MAKE) test -C violin
 
-test-xylophone:
+test-xylophone: all-xylophone
 	$(MAKE) test -C xylophone
 
 test-rgss-accordion:
@@ -89,4 +103,5 @@ test-rgss-xylophone:
 	clean clean-accordion clean-violin clean-xylophone \
 	test test-accordion test-violin test-xylophone \
 	test-rgss test-rgss-accordion test-rgss-violin test-rgss-xylophone \
-	launcher clean-launcher
+	launcher clean-launcher \
+	install uninstall distclean
