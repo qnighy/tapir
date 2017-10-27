@@ -15,6 +15,11 @@ if [ ! -e "$RTP_FILENAME" ]; then
   wget "$RTP_URL" -O "$RTP_FILENAME"
 fi
 
+echo "Checking integrity of $RTP_FILENAME..." >&2
+sha256sum -c - <<EOD
+7e93d0ead93a686218b7c671bf099ef42f09f536083bd0b2f0fa6423a39fc19b  $RTP_FILENAME
+EOD
+
 echo "Extracting $RTP_FILENAME..." >&2
 unzip -o "$RTP_FILENAME"
 
