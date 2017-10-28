@@ -15,7 +15,6 @@ RUBY_DIR = ../ruby192-build
 EXEC = tapir-a
 CPPFLAGS += -I$(RUBY_DIR)/include/ruby-1.9.1/$(RUBY_PLATFORM) \
 	    -I$(RUBY_DIR)/include/ruby-1.9.1 \
-	    $(shell pkg-config $(PC_LIBS) --cflags-only-I) \
 	    -DRGSS=$(RGSS)
 LDLIBS = $(RUBY_SRC_DIR)/enc/trans/single_byte.o \
 	 $(RUBY_SRC_DIR)/enc/trans/utf_16_32.o \

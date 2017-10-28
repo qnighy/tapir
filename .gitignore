@@ -3,6 +3,10 @@
 /ruby181-build
 /ruby192-build
 
+/accordion/Makefile
+/violin/Makefile
+/xylophone/Makefile
+/launcher/Makefile
 
 # Created by https://www.gitignore.io/api/autotools
 

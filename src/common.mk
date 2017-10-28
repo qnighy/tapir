@@ -7,9 +7,7 @@
 # option. This file may not be copied, modified, or distributed
 # except according to those terms.
 
-PC_LIBS = sdl2 SDL2_image SDL2_mixer SDL2_ttf gl fontconfig libconfig
-
-RUBY_PLATFORM = $(shell $(RUBY_DIR)/bin/ruby -e 'print RUBY_PLATFORM')
+RUBY_PLATFORM := $(shell $(RUBY_DIR)/bin/ruby -e 'print RUBY_PLATFORM')
 
 OBJS = main.o main_rb.o archive.o openres.o gl_misc.o sdl_misc.o misc.o \
        font_lookup.o ini.o config.o \
@@ -17,12 +15,12 @@ OBJS = main.o main_rb.o archive.o openres.o gl_misc.o sdl_misc.o misc.o \
        Audio.o Color.o Font.o Graphics.o Input.o Plane.o \
        RGSSError.o RGSSReset.o Rect.o Sprite.o Table.o Tilemap.o Tone.o \
        Viewport.o Win32APIFake.o Window.o
-CFLAGS += -g -O2 -Wall -Wextra
-LDFLAGS += -L$(RUBY_DIR)/lib \
-	   $(shell pkg-config $(PC_LIBS) --libs-only-L --libs-only-other)
+CFLAGS += -g -O2 -Wall -Wextra \
+	  $(SDL_CFLAGS) $(GL_CFLAGS) $(FONTCONFIG_CFLAGS) $(LIBCONFIG_CFLAGS)
+LDFLAGS += -L$(RUBY_DIR)/lib
 LDLIBS += $(RUBY_SRC_DIR)/ext/zlib/zlib.a -lz \
 	  -lruby-static -lpthread -lrt -ldl -lcrypt -lm \
-	  $(shell pkg-config $(PC_LIBS) --libs-only-l)
+	  $(SDL_LIBS) $(GL_LIBS) $(FONTCONFIG_LIBS) $(LIBCONFIG_LIBS)
 
 all: $(EXEC)
 
