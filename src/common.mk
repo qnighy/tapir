@@ -17,8 +17,7 @@ tapir_SOURCES = main.c main_rb.c archive.c openres.c gl_misc.c sdl_misc.c \
 		RGSSError.c RGSSReset.c Rect.c Sprite.c Table.c Tilemap.c \
 		Tone.c Viewport.c Win32APIFake.c Window.c
 
-CFLAGS += -g -O2 -Wall -Wextra \
-	  $(SDL_CFLAGS) $(GL_CFLAGS) $(FONTCONFIG_CFLAGS) $(LIBCONFIG_CFLAGS) \
+CFLAGS += $(SDL_CFLAGS) $(GL_CFLAGS) $(FONTCONFIG_CFLAGS) $(LIBCONFIG_CFLAGS) \
 	  -DDATA_DIR='"$(datadir)"'
 LDFLAGS += -L$(RUBY_DIR)/lib
 LIBS += $(RUBY_SRC_DIR)/ext/zlib/zlib.a -lz \

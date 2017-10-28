@@ -13,8 +13,6 @@ EXEC = tapir
 bin_PROGRAMS = $(EXEC)
 tapir_SOURCES = launcher.c ini.c
 
-CFLAGS += -g -O2 -Wall -Wextra
-
 
 all-local: $(EXEC)
 	cp $(EXEC) ../bin/$(EXEC)
