@@ -1,6 +1,8 @@
 # Tapir
 
-<img src="imgs/vx-title.png" height="150">
+<img src="imgs/vxace-title.png" height="150"><img src="imgs/vx-title.png" height="150"><img src="imgs/xp-title.png" height="150">
+
+<img src="imgs/talk1.png" height="150"><img src="imgs/enter-battle1.png" height="150"><img src="imgs/battle1.png" height="150"><img src="imgs/talk2.png" height="150">
 
 Tapir is a re-implementation project of RGSS/RGSS2/RGSS3 game runtimes. In other words, Tapir aims to run RPG Maker XP/VX/VX Ace games on Linux (and other platforms).
 
