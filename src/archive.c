@@ -9,9 +9,9 @@
 
 // Note: archive.c is intentionally left unimplemented.
 
+#include "archive.h"
 #include <stdlib.h>
 #include <stdint.h>
-#include "archive.h"
 
 #if RGSS == 3
 #define RGSS_ARCHIVE_NAME "Game.rgss3a"

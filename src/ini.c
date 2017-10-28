@@ -7,12 +7,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "ini.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <iconv.h>
-#include "ini.h"
 
 // 932 is the default code page for Japanese Windows environment.
 int ansi_code_page = 932;

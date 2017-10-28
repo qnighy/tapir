@@ -7,9 +7,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "Bitmap.h"
 #include <SDL.h>
 #include <SDL_image.h>
-#include "Bitmap.h"
 #include "RGSSError.h"
 #include "Color.h"
 #include "Rect.h"

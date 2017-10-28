@@ -7,6 +7,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "sdl_misc.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -15,7 +16,6 @@
 #include <SDL_ttf.h>
 #include "misc.h"
 #include "gl_misc.h"
-#include "sdl_misc.h"
 #include "openres.h"
 #include "Sprite.h"
 #include "Plane.h"

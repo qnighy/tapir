@@ -7,11 +7,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "Audio.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL.h>
 #include <SDL_mixer.h>
-#include "Audio.h"
 #include "RGSSError.h"
 #include "misc.h"
 #include "sdl_misc.h"

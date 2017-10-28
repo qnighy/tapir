@@ -7,10 +7,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "Sprite.h"
 #include <math.h>
 #include <SDL.h>
 #include "gl_misc.h"
-#include "Sprite.h"
 #include "Bitmap.h"
 #include "Viewport.h"
 #include "Rect.h"

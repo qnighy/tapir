@@ -7,9 +7,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "openres.h"
 #include <sys/types.h>
 #include <dirent.h>
-#include "openres.h"
 #include "archive.h"
 #include "misc.h"
 #include "RGSSError.h"

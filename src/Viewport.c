@@ -7,10 +7,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "Viewport.h"
 #define GL_GLEXT_PROTOTYPES
 #include <SDL.h>
 #include <SDL_opengl.h>
-#include "Viewport.h"
 #include "Rect.h"
 #include "Tone.h"
 #include "Color.h"

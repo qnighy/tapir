@@ -7,9 +7,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "main_rb.h"
 #include <stdbool.h>
 #include <ruby.h>
-#include "main_rb.h"
 #include "sdl_misc.h"
 #include "RGSSReset.h"
 

@@ -7,10 +7,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "font_lookup.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <fontconfig/fontconfig.h>
-#include "font_lookup.h"
 #include "openres.h"
 
 static FcConfig *config = NULL;
