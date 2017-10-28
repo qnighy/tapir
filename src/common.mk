@@ -10,7 +10,7 @@
 RUBY_PLATFORM := $(shell $(RUBY_DIR)/bin/ruby -e 'print RUBY_PLATFORM')
 
 OBJS = main.o main_rb.o archive.o openres.o gl_misc.o sdl_misc.o misc.o \
-       font_lookup.o ini.o config.o \
+       font_lookup.o ini.o tapir_config.o \
        Bitmap.o BitmapArray.o \
        Audio.o Color.o Font.o Graphics.o Input.o Plane.o \
        RGSSError.o RGSSReset.o Rect.o Sprite.o Table.o Tilemap.o Tone.o \

@@ -7,7 +7,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#include "config.h"
+#include "tapir_config.h"
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
