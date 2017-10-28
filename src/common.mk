@@ -9,7 +9,7 @@
 
 RUBY_PLATFORM := $(shell $(RUBY_DIR)/bin/ruby -e 'print RUBY_PLATFORM')
 
-bin_PROGRAMS = tapir
+bin_PROGRAMS = $(EXEC)
 tapir_SOURCES = main.c main_rb.c archive.c openres.c gl_misc.c sdl_misc.c \
 		misc.c font_lookup.c ini.c tapir_config.c \
 		Bitmap.c BitmapArray.c \
@@ -24,15 +24,15 @@ LIBS += $(RUBY_SRC_DIR)/ext/zlib/zlib.a -lz \
 	-lruby-static -lpthread -lrt -ldl -lcrypt -lm \
 	$(SDL_LIBS) $(GL_LIBS) $(FONTCONFIG_LIBS) $(LIBCONFIG_LIBS)
 
-all-local: tapir
-	cp tapir $(EXEC)
+all-local: $(EXEC)
+	cp $(EXEC) ../bin/$(EXEC)
 
 clean-local:
 	$(RM) $(EXEC)
 
 test: all
 	mkdir -p test
-	cd test; ruby ../../src/test/test.rb $(RGSS) ../$(EXEC)
+	cd test; ruby ../../src/test/test.rb $(RGSS) ../../bin/$(EXEC)
 
 test-rgss:
 	mkdir -p test

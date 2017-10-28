@@ -9,15 +9,15 @@
 # option. This file may not be copied, modified, or distributed
 # except according to those terms.
 
-EXEC = ../bin/tapir
-bin_PROGRAMS = tapir
+EXEC = tapir
+bin_PROGRAMS = $(EXEC)
 tapir_SOURCES = launcher.c ini.c
 
 CFLAGS += -g -O2 -Wall -Wextra
 
 
-all-local: tapir
-	cp tapir $(EXEC)
+all-local: $(EXEC)
+	cp $(EXEC) ../bin/$(EXEC)
 
 clean-local:
 	$(RM) $(EXEC)

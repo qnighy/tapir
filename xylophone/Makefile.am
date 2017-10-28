@@ -12,7 +12,8 @@
 RGSS = 1
 RUBY_SRC_DIR = ../ruby181
 RUBY_DIR = ../ruby181-build
-EXEC = ../bin/tapir-x
+EXEC = tapir-x
+tapir_x_SOURCES = $(tapir_SOURCES)
 CPPFLAGS += -I$(RUBY_DIR)/lib/ruby/1.8/$(RUBY_PLATFORM) \
 	    -DRGSS=$(RGSS)
 

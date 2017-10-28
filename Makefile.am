@@ -9,9 +9,6 @@
 # option. This file may not be copied, modified, or distributed
 # except according to those terms.
 
-PREFIX ?= /usr/local
-INSTALL ?= install
-
 SUBDIRS = accordion violin xylophone launcher
 
 test: test-accordion test-violin test-xylophone

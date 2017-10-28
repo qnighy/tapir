@@ -12,7 +12,8 @@
 RGSS = 3
 RUBY_SRC_DIR = ../ruby192
 RUBY_DIR = ../ruby192-build
-EXEC = ../bin/tapir-a
+EXEC = tapir-a
+tapir_a_SOURCES = $(tapir_SOURCES)
 CPPFLAGS += -I$(RUBY_DIR)/include/ruby-1.9.1/$(RUBY_PLATFORM) \
 	    -I$(RUBY_DIR)/include/ruby-1.9.1 \
 	    -DRGSS=$(RGSS)
