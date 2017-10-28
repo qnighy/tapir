@@ -30,7 +30,7 @@ all-local: tapir
 clean-local:
 	$(RM) $(EXEC)
 
-test-local: all
+test: all
 	mkdir -p test
 	cd test; ruby ../../src/test/test.rb $(RGSS) ../$(EXEC)
 
@@ -38,6 +38,6 @@ test-rgss:
 	mkdir -p test
 	cd test; ruby ../../src/test/test.rb $(RGSS) ./Game
 
-.PHONY: test-rgss
+.PHONY: test test-rgss
 
 VPATH += ../src

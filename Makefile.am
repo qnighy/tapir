@@ -14,6 +14,8 @@ INSTALL ?= install
 
 SUBDIRS = accordion violin xylophone launcher
 
+test: test-accordion test-violin test-xylophone
+
 test-rgss: test-rgss-accordion test-rgss-violin test-rgss-xylophone
 
 install-exec-local:
@@ -46,6 +48,15 @@ ruby181-build:
 ruby192-build:
 	./build-ruby192.sh
 
+test-accordion:
+	$(MAKE) test -C accordion
+
+test-violin:
+	$(MAKE) test -C violin
+
+test-xylophone:
+	$(MAKE) test -C xylophone
+
 test-rgss-accordion:
 	$(MAKE) test-rgss -C accordion
 
@@ -56,4 +67,5 @@ test-rgss-xylophone:
 	$(MAKE) test-rgss -C xylophone
 
 .PHONY: \
+	test test-accordion test-violin test-xylophone \
 	test-rgss test-rgss-accordion test-rgss-violin test-rgss-xylophone
