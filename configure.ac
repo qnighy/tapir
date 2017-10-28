@@ -23,6 +23,7 @@ AC_FUNC_ALLOCA
 AC_CHECK_HEADERS([inttypes.h limits.h stddef.h stdint.h stdio_ext.h stdlib.h string.h strings.h sys/socket.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
+AC_PROG_CC_C99
 AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_INT16_T
