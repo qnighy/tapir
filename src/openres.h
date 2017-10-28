@@ -18,11 +18,11 @@
 // TODO: Make RTP name configurable (Game.ini)
 // TODO: Support multiple RTPs (Game.ini)
 #if RGSS == 3
-#define RTP_PATH "/usr/local/share/Enterbrain/RGSS3/RPGVXAce"
+#define RTP_PATH DATA_DIR "/Enterbrain/RGSS3/RPGVXAce"
 #elif RGSS == 2
-#define RTP_PATH "/usr/local/share/Enterbrain/RGSS2/RPGVX"
+#define RTP_PATH DATA_DIR "/Enterbrain/RGSS2/RPGVX"
 #else
-#define RTP_PATH "/usr/local/share/Enterbrain/RGSS/Standard"
+#define RTP_PATH DATA_DIR "/Enterbrain/RGSS/Standard"
 #endif
 
 SDL_RWops *openres(VALUE path, bool use_archive);
