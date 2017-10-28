@@ -14,6 +14,7 @@ Following is the instruction for Ubuntu 16.04. It may also work on another platf
 
 ```
 $ sudo apt install build-essential autoconf bison flex libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libfontconfig1-dev libconfig-dev
+$ ./autogen.sh
 $ ./configure
 $ make
 $ sudo make install
