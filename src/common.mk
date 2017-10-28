@@ -28,7 +28,7 @@ all-local: tapir
 	cp tapir $(EXEC)
 
 clean-local:
-	$(RM) $(tapir_SOURCES) $(EXEC)
+	$(RM) $(EXEC)
 
 test-local: all
 	mkdir -p test

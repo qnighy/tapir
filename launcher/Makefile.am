@@ -9,21 +9,17 @@
 # option. This file may not be copied, modified, or distributed
 # except according to those terms.
 
+EXEC = ../bin/tapir
+bin_PROGRAMS = tapir
+tapir_SOURCES = launcher.c ini.c
+
 CFLAGS += -g -O2 -Wall -Wextra
 
-EXEC = ../bin/tapir
-OBJS = launcher.o ini.o
 
+all-local: tapir
+	cp tapir $(EXEC)
 
-all: $(EXEC)
+clean-local:
+	$(RM) $(EXEC)
 
-clean:
-	$(RM) $(EXEC) $(OBJS) $(wildcard *.d)
-
-$(EXEC): $(OBJS)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LDLIBS)
-
-%.o: ../src/%.c
-	$(CC) -MMD $(CPPFLAGS) $(CFLAGS) -c $< -o $@
-
--include $(wildcard *.d)
+VPATH += ../src
