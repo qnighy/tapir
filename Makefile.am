@@ -10,26 +10,11 @@
 # except according to those terms.
 
 SUBDIRS = accordion violin xylophone launcher
+man1_MANS = doc/man/tapir.1
 
 test: test-accordion test-violin test-xylophone
 
 test-rgss: test-rgss-accordion test-rgss-violin test-rgss-xylophone
-
-install-exec-local:
-	mkdir -p $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/share/man/man1
-	$(INSTALL) -c bin/tapir-a bin/tapir-v bin/tapir-x bin/tapir \
-		$(DESTDIR)$(PREFIX)/bin
-
-install-data-local:
-	$(INSTALL) -c -m 644 -t $(DESTDIR)$(PREFIX)/share/man/man1 \
-		doc/man/tapir.1
-
-uninstall-local:
-	$(RM) $(DESTDIR)$(PREFIX)/bin/tapir-a
-	$(RM) $(DESTDIR)$(PREFIX)/bin/tapir-v
-	$(RM) $(DESTDIR)$(PREFIX)/bin/tapir-x
-	$(RM) $(DESTDIR)$(PREFIX)/bin/tapir
-	$(RM) $(DESTDIR)$(PREFIX)/share/man/man1/tapir.1
 
 distclean-local:
 	$(RM) -r ruby181-build
