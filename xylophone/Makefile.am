@@ -9,5 +9,12 @@
 # option. This file may not be copied, modified, or distributed
 # except according to those terms.
 
-RGSS := 3
+RGSS = 1
+RUBY_SRC_DIR = ../ruby181
+RUBY_DIR = ../ruby181-build
+EXEC = tapir-x
+CPPFLAGS += -I$(RUBY_DIR)/lib/ruby/1.8/$(RUBY_PLATFORM) \
+	    $(shell pkg-config $(PC_LIBS) --cflags-only-I) \
+	    -DRGSS=$(RGSS)
+LDLIBS =
 include ../src/common.mk
