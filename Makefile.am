@@ -50,34 +50,26 @@ ruby192-build:
 
 all-accordion: ruby192-build
 	$(MAKE) all -C accordion
-	cp accordion/tapir-a bin/tapir-a
 
 all-violin: ruby181-build
 	$(MAKE) all -C violin
-	cp violin/tapir-v bin/tapir-v
 
 all-xylophone: ruby181-build
 	$(MAKE) all -C xylophone
-	cp xylophone/tapir-x bin/tapir-x
 
 all-launcher:
 	$(MAKE) all -C launcher
-	cp launcher/tapir bin/tapir
 
 clean-accordion:
-	$(RM) bin/tapir-a
 	$(MAKE) clean -C accordion
 
 clean-violin:
-	$(RM) bin/tapir-v
 	$(MAKE) clean -C violin
 
 clean-xylophone:
-	$(RM) bin/tapir-x
 	$(MAKE) clean -C xylophone
 
 clean-launcher:
-	$(RM) bin/tapir
 	$(MAKE) clean -C launcher
 
 test-accordion: all-accordion

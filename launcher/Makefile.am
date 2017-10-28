@@ -11,7 +11,7 @@
 
 CFLAGS += -g -O2 -Wall -Wextra
 
-EXEC = tapir
+EXEC = ../bin/tapir
 OBJS = launcher.o ini.o
 
 
