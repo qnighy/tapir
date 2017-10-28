@@ -9,25 +9,28 @@
 
 RUBY_PLATFORM := $(shell $(RUBY_DIR)/bin/ruby -e 'print RUBY_PLATFORM')
 
-OBJS = main.o main_rb.o archive.o openres.o gl_misc.o sdl_misc.o misc.o \
-       font_lookup.o ini.o tapir_config.o \
-       Bitmap.o BitmapArray.o \
-       Audio.o Color.o Font.o Graphics.o Input.o Plane.o \
-       RGSSError.o RGSSReset.o Rect.o Sprite.o Table.o Tilemap.o Tone.o \
-       Viewport.o Win32APIFake.o Window.o
+bin_PROGRAMS = tapir
+tapir_SOURCES = main.c main_rb.c archive.c openres.c gl_misc.c sdl_misc.c \
+		misc.c font_lookup.c ini.c tapir_config.c \
+		Bitmap.c BitmapArray.c \
+		Audio.c Color.c Font.c Graphics.c Input.c Plane.c \
+		RGSSError.c RGSSReset.c Rect.c Sprite.c Table.c Tilemap.c \
+		Tone.c Viewport.c Win32APIFake.c Window.c
+
 CFLAGS += -g -O2 -Wall -Wextra \
 	  $(SDL_CFLAGS) $(GL_CFLAGS) $(FONTCONFIG_CFLAGS) $(LIBCONFIG_CFLAGS)
 LDFLAGS += -L$(RUBY_DIR)/lib
-LDLIBS += $(RUBY_SRC_DIR)/ext/zlib/zlib.a -lz \
-	  -lruby-static -lpthread -lrt -ldl -lcrypt -lm \
-	  $(SDL_LIBS) $(GL_LIBS) $(FONTCONFIG_LIBS) $(LIBCONFIG_LIBS)
+LIBS += $(RUBY_SRC_DIR)/ext/zlib/zlib.a -lz \
+	-lruby-static -lpthread -lrt -ldl -lcrypt -lm \
+	$(SDL_LIBS) $(GL_LIBS) $(FONTCONFIG_LIBS) $(LIBCONFIG_LIBS)
 
-all: $(EXEC)
+all-local: tapir
+	cp tapir $(EXEC)
 
-clean:
-	$(RM) $(EXEC) $(OBJS) $(wildcard *.d)
+clean-local:
+	$(RM) $(tapir_SOURCES) $(EXEC)
 
-test: all
+test-local: all
 	mkdir -p test
 	cd test; ruby ../../src/test/test.rb $(RGSS) ../$(EXEC)
 
@@ -35,12 +38,6 @@ test-rgss:
 	mkdir -p test
 	cd test; ruby ../../src/test/test.rb $(RGSS) ./Game
 
-.PHONY: all clean test test-rgss
+.PHONY: test-rgss
 
-$(EXEC): $(OBJS)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LDLIBS)
-
-%.o: ../src/%.c
-	$(CC) -MMD $(CPPFLAGS) $(CFLAGS) -c $< -o $@
-
--include $(wildcard *.d)
+VPATH += ../src

@@ -16,7 +16,7 @@ EXEC = ../bin/tapir-a
 CPPFLAGS += -I$(RUBY_DIR)/include/ruby-1.9.1/$(RUBY_PLATFORM) \
 	    -I$(RUBY_DIR)/include/ruby-1.9.1 \
 	    -DRGSS=$(RGSS)
-LDLIBS = $(RUBY_SRC_DIR)/enc/trans/single_byte.o \
-	 $(RUBY_SRC_DIR)/enc/trans/utf_16_32.o \
-	 $(RUBY_SRC_DIR)/enc/trans/japanese_sjis.o
+LIBS = $(RUBY_SRC_DIR)/enc/trans/single_byte.o \
+       $(RUBY_SRC_DIR)/enc/trans/utf_16_32.o \
+       $(RUBY_SRC_DIR)/enc/trans/japanese_sjis.o
 include ../src/common.mk

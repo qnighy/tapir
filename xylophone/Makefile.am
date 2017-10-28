@@ -15,5 +15,4 @@ RUBY_DIR = ../ruby181-build
 EXEC = ../bin/tapir-x
 CPPFLAGS += -I$(RUBY_DIR)/lib/ruby/1.8/$(RUBY_PLATFORM) \
 	    -DRGSS=$(RGSS)
-LDLIBS =
 include ../src/common.mk

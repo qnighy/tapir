@@ -15,5 +15,5 @@ RUBY_DIR = ../ruby181-build
 EXEC = ../bin/tapir-v
 CPPFLAGS += -I$(RUBY_DIR)/lib/ruby/1.8/$(RUBY_PLATFORM) \
 	    -DRGSS=$(RGSS)
-LDLIBS = $(RUBY_SRC_DIR)/ext/nkf/nkf.a
+LIBS += $(RUBY_SRC_DIR)/ext/nkf/nkf.a
 include ../src/common.mk
