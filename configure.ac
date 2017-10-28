@@ -5,7 +5,7 @@ AC_PREREQ([2.69])
 AC_INIT(tapir, 0.0.1, ackie.h.gmai@gmail.com)
 AC_CONFIG_SRCDIR([src/main.c])
 AM_INIT_AUTOMAKE([foreign std-options])
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER(src/config.h)
 
 # Checks for programs.
 AC_PROG_CC
