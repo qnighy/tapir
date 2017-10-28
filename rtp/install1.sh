@@ -9,9 +9,50 @@ RTP_FILENAME="xp_rtp104e.exe"
 RTP_EXTRACT_DIR="xp_rtp"
 RTP_INSTALL_DIR="$PREFIX/share/Enterbrain/RGSS/Standard"
 
-if [ ! -e "$RTP_FILENAME" ]; then
+fetch_license() {
+  echo "Downloading the license term..." >&2
+  wget -q http://www.rpgmakerweb.com/download/additional/run-time-packages -O - \
+    | sed -n -e '/ON-CLICK LICENSE AGREEMENT FOR RPG MAKER RUNTIME PACKAGE 05\.10\.8/,/^<\/div>/p' \
+    | sed -e 's/<\/\(p\|h4\)>/\n/; s/<[^>]*>\|^ \+//g' \
+    > license1.txt
+  if ! sha256sum -c - >/dev/null <<EOD
+837e180eee2c2373dedf8c2a1674a9e88c2b5d0f248959420b1d7b5208600b90  license1.txt
+EOD
+  then
+    echo "Could not extract the license term." >&2
+    return 1
+  fi
+}
+
+check_license() {
+  if [ -e rgss1_rtp_2005_10_08_agreed ]; then
+    echo "Already agreed to RTP 2005-10-08 License" >&2
+    return 0
+  fi
+  fetch_license
+  while true; do
+    echo
+    cat license1.txt
+    echo
+    echo "Agree? [y/n]"
+    read answer
+    case "$answer" in
+      y*|Y*)
+        touch rgss1_rtp_2005_10_08_agreed
+        break;;
+      n*|N*)
+        exit 1;;
+    esac
+  done
+}
+
+
+if [ -e "$RTP_FILENAME" ]; then
+  echo "Already downloaded $RTP_FILENAME" >&2
+else
+  check_license
   echo "Downloading $RTP_FILENAME..." >&2
-  wget "$RTP_URL" -O "$RTP_FILENAME"
+  wget -q "$RTP_URL" -O "$RTP_FILENAME"
 fi
 
 echo "Checking integrity of $RTP_FILENAME..." >&2

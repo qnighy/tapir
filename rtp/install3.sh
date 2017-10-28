@@ -10,9 +10,50 @@ RTP_FILENAME2="RTP100/Setup.exe"
 RTP_EXTRACT_DIR="vxace_rtp"
 RTP_INSTALL_DIR="$PREFIX/share/Enterbrain/RGSS3/RPGVXAce"
 
-if [ ! -e "$RTP_FILENAME" ]; then
+fetch_license() {
+  echo "Downloading the license term..." >&2
+  wget -q http://www.rpgmakerweb.com/download/additional/run-time-packages -O - \
+    | sed -n -e '/RPG MAKER VX Ace Runtime Package - End User License Agreement (Mar\. 15th, 2012)/,/^<\/div>/p' \
+    | sed -e '4s/<li>/1. /; 5s/<li>/2. /; 6s/<li>/3. /; 7s/<li>/4. /; 8s/<li>/5. /; 9s/<li>/6. /; 10s/<li>/7. /; s/<\/\(p\|h4\)>/\n/; s/<[^>]*>\|^ \+//g' \
+    > license3.txt
+  if ! sha256sum -c - >/dev/null <<EOD
+25f0e90d5b540df453a2eeffae0d513173f9942c1f6df3f1eac661be3b719fd2  license3.txt
+EOD
+  then
+    echo "Could not extract the license term." >&2
+    return 1
+  fi
+}
+
+check_license() {
+  if [ -e rgss3_rtp_2012_03_15_agreed ]; then
+    echo "Already agreed to RTP 2012-03-15 License" >&2
+    return 0
+  fi
+  fetch_license
+  while true; do
+    echo
+    cat license2.txt
+    echo
+    echo "Agree? [y/n]"
+    read answer
+    case "$answer" in
+      y*|Y*)
+        touch rgss3_rtp_2012_03_15_agreed
+        break;;
+      n*|N*)
+        exit 1;;
+    esac
+  done
+}
+
+
+if [ -e "$RTP_FILENAME" ]; then
+  echo "Already downloaded $RTP_FILENAME" >&2
+else
+  check_license
   echo "Downloading $RTP_FILENAME..." >&2
-  wget "$RTP_URL" -O "$RTP_FILENAME"
+  wget -q "$RTP_URL" -O "$RTP_FILENAME"
 fi
 
 echo "Checking integrity of $RTP_FILENAME..." >&2
@@ -22,20 +63,6 @@ EOD
 
 echo "Extracting $RTP_FILENAME..." >&2
 unzip -o "$RTP_FILENAME"
-
-while true; do
-  cat RTP100/ReadMe.txt
-  echo
-  echo
-  echo "Agree? [y/n]"
-  read answer
-  case "$answer" in
-    y*|Y*)
-      break;;
-    n*|N*)
-      exit 1;;
-  esac
-done
 
 echo "Extracting $RTP_FILENAME2..." >&2
 mkdir -p "$RTP_EXTRACT_DIR"
