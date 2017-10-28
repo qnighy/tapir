@@ -31,8 +31,15 @@ if [ ! -e Makefile ]; then
 
 fi
 
-echo "option nodynamic" > ext/Setup
-echo "zlib" >> ext/Setup
+echo "option nodynamic" > ext/Setup.tapir
+echo "zlib" >> ext/Setup.tapir
+
+sed -i.bak -e 's/"Setup"/"Setup.tapir"/' config.status
+rm -f config.status.bak
+if [ -e rbconfig.rb ]; then
+  sed -i.bak -e 's/"Setup"/"Setup.tapir"/' rbconfig.rb
+  rm -f rbconfig.rb.bak
+fi
 
 make "$@"
 make install

@@ -18,10 +18,10 @@ test-rgss: test-rgss-accordion test-rgss-violin test-rgss-xylophone
 
 distclean-local:
 	$(RM) -r ruby181-build
-	(cd ruby181; git checkout .) || true
+	$(RM) ruby181/ext/Setup.tapir
 	make distclean -C ruby181 || true
 	$(RM) -r ruby192-build
-	(cd ruby192; git checkout .) || true
+	$(RM) ruby192/ext/Setup.tapir
 	make distclean -C ruby192 || true
 
 ruby181-build:
