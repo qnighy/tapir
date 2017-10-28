@@ -19,4 +19,10 @@ CPPFLAGS += -I$(RUBY_DIR)/include/ruby-1.9.1/$(RUBY_PLATFORM) \
 LIBS = $(RUBY_SRC_DIR)/enc/trans/single_byte.o \
        $(RUBY_SRC_DIR)/enc/trans/utf_16_32.o \
        $(RUBY_SRC_DIR)/enc/trans/japanese_sjis.o
+
+BUILT_SOURCES = ../ruby192-build
+
+../ruby192-build:
+	make ruby192-build -C ..
+
 include ../src/common.mk

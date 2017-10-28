@@ -15,4 +15,10 @@ RUBY_DIR = ../ruby181-build
 EXEC = ../bin/tapir-x
 CPPFLAGS += -I$(RUBY_DIR)/lib/ruby/1.8/$(RUBY_PLATFORM) \
 	    -DRGSS=$(RGSS)
+
+BUILT_SOURCES = ../ruby181-build
+
+../ruby181-build:
+	make ruby181-build -C ..
+
 include ../src/common.mk

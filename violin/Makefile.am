@@ -16,4 +16,10 @@ EXEC = ../bin/tapir-v
 CPPFLAGS += -I$(RUBY_DIR)/lib/ruby/1.8/$(RUBY_PLATFORM) \
 	    -DRGSS=$(RGSS)
 LIBS += $(RUBY_SRC_DIR)/ext/nkf/nkf.a
+
+BUILT_SOURCES = ../ruby181-build
+
+../ruby181-build:
+	make ruby181-build -C ..
+
 include ../src/common.mk
