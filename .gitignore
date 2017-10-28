@@ -30,6 +30,7 @@ Makefile.in
 /config.guess
 /src/config.h
 /src/config.h.in
+/src/config.h.in~
 /config.sub
 /config.log
 /config.status
