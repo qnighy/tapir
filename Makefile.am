@@ -39,15 +39,5 @@ test-violin:
 test-xylophone:
 	$(MAKE) test -C xylophone
 
-test-rgss-accordion:
-	$(MAKE) test-rgss -C accordion
-
-test-rgss-violin:
-	$(MAKE) test-rgss -C violin
-
-test-rgss-xylophone:
-	$(MAKE) test-rgss -C xylophone
-
 .PHONY: \
-	test test-accordion test-violin test-xylophone \
-	test-rgss test-rgss-accordion test-rgss-violin test-rgss-xylophone
+	test test-accordion test-violin test-xylophone

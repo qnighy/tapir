@@ -34,10 +34,6 @@ test: all
 	mkdir -p test
 	cd test; ruby ../../src/test/test.rb $(RGSS) ../../bin/$(EXEC)
 
-test-rgss:
-	mkdir -p test
-	cd test; ruby ../../src/test/test.rb $(RGSS) ./Game
-
-.PHONY: test test-rgss
+.PHONY: test
 
 VPATH += ../src
