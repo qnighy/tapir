@@ -139,3 +139,15 @@ rgss3:
   key_c = "";
 };
 ```
+
+# Extracting a game archive / ゲームアーカイブの展開
+
+Often a game is provided in a self-extracting form (i.e. `*.exe). / RPGツクールのゲームは自己展開書庫形式 (`*.exe`) で提供される場合があります。
+
+If the archive was packed by RPG Maker, it can be extracted by cabextract. / RPGツクール標準の自己展開書庫の場合は、cabextractにより展開できます。
+
+```
+$ sudo apt install cabextract
+$ cabextract -dSakusaku Sakusaku.exe
+(it will extract the game to Sakusaku/ directory.)
+```
