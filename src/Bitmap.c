@@ -40,6 +40,7 @@ static VALUE rb_bitmap_m_dispose(VALUE self);
 static VALUE rb_bitmap_m_disposed_p(VALUE self);
 static VALUE rb_bitmap_m_width(VALUE self);
 static VALUE rb_bitmap_m_height(VALUE self);
+static VALUE rb_bitmap_m_rect(VALUE self);
 static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self);
 static VALUE rb_bitmap_m_stretch_blt(int argc, VALUE *argv, VALUE self);
 static VALUE rb_bitmap_m_fill_rect(int argc, VALUE *argv, VALUE self);
@@ -52,6 +53,11 @@ static VALUE rb_bitmap_m_clear_rect(int argc, VALUE *argv, VALUE self);
 #endif
 static VALUE rb_bitmap_m_get_pixel(VALUE self, VALUE x, VALUE y);
 static VALUE rb_bitmap_m_set_pixel(VALUE self, VALUE x, VALUE y, VALUE color);
+static VALUE rb_bitmap_m_hue_change(VALUE self, VALUE hue);
+#if RGSS >= 2
+static VALUE rb_bitmap_m_blur(VALUE self);
+static VALUE rb_bitmap_m_radial_blur(VALUE self, VALUE angle, VALUE division);
+#endif
 static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self);
 static VALUE rb_bitmap_m_text_size(VALUE self, VALUE str);
 static VALUE rb_bitmap_m_font(VALUE self);
@@ -94,6 +100,7 @@ void Init_Bitmap(void) {
   rb_define_method(rb_cBitmap, "disposed?", rb_bitmap_m_disposed_p, 0);
   rb_define_method(rb_cBitmap, "width", rb_bitmap_m_width, 0);
   rb_define_method(rb_cBitmap, "height", rb_bitmap_m_height, 0);
+  rb_define_method(rb_cBitmap, "rect", rb_bitmap_m_rect, 0);
   rb_define_method(rb_cBitmap, "blt", rb_bitmap_m_blt, -1);
   rb_define_method(rb_cBitmap, "stretch_blt", rb_bitmap_m_stretch_blt, -1);
   rb_define_method(rb_cBitmap, "fill_rect", rb_bitmap_m_fill_rect, -1);
@@ -107,14 +114,15 @@ void Init_Bitmap(void) {
 #endif
   rb_define_method(rb_cBitmap, "get_pixel", rb_bitmap_m_get_pixel, 2);
   rb_define_method(rb_cBitmap, "set_pixel", rb_bitmap_m_set_pixel, 3);
+  rb_define_method(rb_cBitmap, "hue_change", rb_bitmap_m_hue_change, 1);
+#if RGSS >= 2
+  rb_define_method(rb_cBitmap, "blur", rb_bitmap_m_blur, 0);
+  rb_define_method(rb_cBitmap, "radial_blur", rb_bitmap_m_radial_blur, 2);
+#endif
   rb_define_method(rb_cBitmap, "draw_text", rb_bitmap_m_draw_text, -1);
   rb_define_method(rb_cBitmap, "text_size", rb_bitmap_m_text_size, 1);
   rb_define_method(rb_cBitmap, "font", rb_bitmap_m_font, 0);
   rb_define_method(rb_cBitmap, "font=", rb_bitmap_m_set_font, 1);
-  // TODO: implement Bitmap#rect
-  // TODO: implement Bitmap#hue_change
-  // TODO: implement Bitmap#blur
-  // TODO: implement Bitmap#radial_blur
 }
 
 bool rb_bitmap_data_p(VALUE obj) {
@@ -264,6 +272,12 @@ static VALUE rb_bitmap_m_height(VALUE self) {
   const struct Bitmap *ptr = rb_bitmap_data(self);
   if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
   return INT2NUM(ptr->surface->h);
+}
+
+static VALUE rb_bitmap_m_rect(VALUE self) {
+  const struct Bitmap *ptr = rb_bitmap_data(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  return rb_rect_new(0, 0, ptr->surface->w, ptr->surface->h);
 }
 
 static void blt(
@@ -575,6 +589,29 @@ static VALUE rb_bitmap_m_set_pixel(VALUE self, VALUE x, VALUE y, VALUE color) {
   SDL_UnlockSurface(ptr->surface);
   return Qnil;
 }
+
+static VALUE rb_bitmap_m_hue_change(VALUE self, VALUE hue) {
+  (void) self;
+  (void) hue;
+  WARN_UNIMPLEMENTED("Bitmap#hue_change");
+  return Qnil;
+}
+
+#if RGSS >= 2
+static VALUE rb_bitmap_m_blur(VALUE self) {
+  (void) self;
+  WARN_UNIMPLEMENTED("Bitmap#blur");
+  return Qnil;
+}
+
+static VALUE rb_bitmap_m_radial_blur(VALUE self, VALUE angle, VALUE division) {
+  (void) self;
+  (void) angle;
+  (void) division;
+  WARN_UNIMPLEMENTED("Bitmap#radial_blur");
+  return Qnil;
+}
+#endif
 
 static VALUE rb_bitmap_m_draw_text(int argc, VALUE *argv, VALUE self) {
   struct Bitmap *ptr = rb_bitmap_data_mut(self);
