@@ -1,0 +1,2 @@
+# For now, rgss3-rtp-installer only contains maintainer scripts.
+rgss3-rtp-installer: empty-binary-package
