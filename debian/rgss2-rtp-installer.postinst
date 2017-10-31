@@ -1,11 +1,13 @@
 #!/bin/sh
 set -e
 
+tmpdir="$(mktemp -d -t rgss2-rtp-installer.XXXXXXXXXX)"
+
 RTP_STAMP="/usr/lib/rgss2-rtp-installer/rtp102e.stamp"
 RTP_URL="https://s3-ap-northeast-1.amazonaws.com/degica-prod.product-files/19/vx_rtp102e.zip"
 RTP_FILENAME="/var/cache/rgss2-rtp-installer/vx_rtp102e.zip"
-RTP_FILENAME2="/tmp/rgss2-rtp-installer/RPGVX_RTP/Setup.exe"
-RTP_EXTRACT_DIR="/tmp/rgss2-rtp-installer/vx_rtp"
+RTP_FILENAME2="$tmpdir/RPGVX_RTP/Setup.exe"
+RTP_EXTRACT_DIR="$tmpdir/vx_rtp"
 RTP_INSTALL_DIR="/usr/share/Enterbrain/RGSS2/RPGVX"
 
 install_rtp() {
@@ -45,7 +47,7 @@ EOD
 EOD
 
   echo "Extracting $RTP_FILENAME..." >&2
-  unzip -d /tmp/rgss2-rtp-installer -o "$RTP_FILENAME"
+  unzip -d "$tmpdir" -o "$RTP_FILENAME"
 
   echo "Extracting $RTP_FILENAME2..." >&2
   mkdir -p "$RTP_EXTRACT_DIR"
@@ -67,7 +69,7 @@ EOD
 
   echo "Removing extracted files..." >&2
   rm -rf "$RTP_EXTRACT_DIR"
-  rm -rf /tmp/rgss2-rtp-installer/RPGVX_RTP
+  rm -rf "$tmpdir/RPGVX_RTP"
 
   echo "Removing downloaded files..." >&2
   # rm -f "$RTP_FILENAME"
@@ -91,6 +93,8 @@ case "$1" in
     exit 1
     ;;
 esac
+
+rm -rf $tmpdir || true
 
 #DEBHELPER#
 

@@ -1,11 +1,13 @@
 #!/bin/sh
 set -e
 
+tmpdir="$(mktemp -d -t rgss3-rtp-installer.XXXXXXXXXX)"
+
 RTP_STAMP="/usr/lib/rgss3-rtp-installer/rtp100.stamp"
 RTP_URL="http://cached-downloads.degica.com/degica-downloads/RPGVXAce_RTP.zip"
 RTP_FILENAME="/var/cache/rgss3-rtp-installer/RPGVXAce_RTP.zip"
-RTP_FILENAME2="/tmp/rgss3-rtp-installer/RTP100/Setup.exe"
-RTP_EXTRACT_DIR="/tmp/rgss3-rtp-installer/vxace_rtp"
+RTP_FILENAME2="$tmpdir/RTP100/Setup.exe"
+RTP_EXTRACT_DIR="$tmpdir/vxace_rtp"
 RTP_INSTALL_DIR="/usr/share/Enterbrain/RGSS3/RPGVXAce"
 
 install_rtp() {
@@ -45,7 +47,7 @@ EOD
 EOD
 
   echo "Extracting $RTP_FILENAME..." >&2
-  unzip -d /tmp/rgss3-rtp-installer -o "$RTP_FILENAME"
+  unzip -d "$tmpdir" -o "$RTP_FILENAME"
 
   echo "Extracting $RTP_FILENAME2..." >&2
   mkdir -p "$RTP_EXTRACT_DIR"
@@ -69,7 +71,7 @@ EOD
 
   echo "Removing extracted files..." >&2
   rm -rf "$RTP_EXTRACT_DIR"
-  rm -rf /tmp/rgss3-rtp-installer/RTP100
+  rm -rf "$tmpdir/RTP100"
 
   echo "Removing downloaded files..." >&2
   # rm -f "$RTP_FILENAME"
@@ -93,6 +95,8 @@ case "$1" in
     exit 1
     ;;
 esac
+
+rm -rf $tmpdir || true
 
 #DEBHELPER#
 

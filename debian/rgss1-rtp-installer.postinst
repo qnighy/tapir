@@ -1,10 +1,12 @@
 #!/bin/sh
 set -e
 
+tmpdir="$(mktemp -d -t rgss1-rtp-installer.XXXXXXXXXX)"
+
 RTP_STAMP="/usr/lib/rgss1-rtp-installer/rtp104e.stamp"
 RTP_URL="https://s3-ap-northeast-1.amazonaws.com/degica-prod.product-files/20/xp_rtp104e.exe"
 RTP_FILENAME="/var/cache/rgss1-rtp-installer/xp_rtp104e.exe"
-RTP_EXTRACT_DIR="/tmp/rgss1-rtp-installer/xp_rtp"
+RTP_EXTRACT_DIR="$tmpdir/xp_rtp"
 RTP_INSTALL_DIR="/usr/share/Enterbrain/RGSS/Standard"
 
 install_rtp() {
@@ -88,6 +90,8 @@ case "$1" in
     exit 1
     ;;
 esac
+
+rm -rf $tmpdir || true
 
 #DEBHELPER#
 
