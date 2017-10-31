@@ -1,0 +1,7 @@
+The Debian Package tapir
+----------------------------
+
+This is a debian package for Tapir, the RGSS compatible game runtime
+(emulator).
+
+ -- Masaki Hara <ackie.h.gmai@gmail.com>  Thu, 26 Oct 2017 18:12:40 +0900

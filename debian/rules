@@ -1,0 +1,20 @@
+#!/usr/bin/make -f
+
+#export DH_VERBOSE = 1
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_CFLAGS_MAINT_APPEND  = -Wall -Wextra
+
+override_dh_auto_configure:
+	./autogen.sh
+	dh_auto_configure
+
+override_dh_auto_clean:
+	dh_auto_clean
+	$(RM) aclocal.m4 configure config.log config.status
+	$(RM) compile depcomp install-sh missing
+
+override_dh_auto_test:
+	# dh_auto_test
+
+%:
+	dh $@
