@@ -22,6 +22,7 @@ install_rtp() {
   if [ "$RET" = false ]; then
     rm -f "$RTP_STAMP"
     rm -rf "$RTP_INSTALL_DIR"/*
+    mkdir -p "$RTP_INSTALL_DIR"
     cat > "$RTP_INSTALL_DIR"/README <<EOD
 License refused.
 
