@@ -16,5 +16,12 @@ override_dh_auto_clean:
 override_dh_auto_test:
 	# dh_auto_test
 
+override_dh_gencontrol:
+	# Add results from du -k /usr/share/Enterbrain/RGSS.
+	echo "Extra-Size=22808" >> debian/rgss1-rtp-installer.substvars
+	echo "Extra-Size=43484" >> debian/rgss2-rtp-installer.substvars
+	echo "Extra-Size=199640" >> debian/rgss3-rtp-installer.substvars
+	dh_gencontrol
+
 %:
 	dh $@
