@@ -7,6 +7,8 @@ export DEB_CFLAGS_MAINT_APPEND  = -Wall -Wextra
 override_dh_auto_configure:
 	./autogen.sh
 	dh_auto_configure -- --bindir=/usr/games
+	# this is to ensure mtime(lex.c) >= mtime(keywords).
+	touch ruby181/lex.c
 
 override_dh_auto_test:
 	# dh_auto_test
