@@ -1,4 +1,4 @@
-.TH TAPIR "1" "October 2017" "tapir 0.0.1" "User Commands"
+.TH TAPIR "1" "October 2017" "tapir @PACKAGE_VERSION@" "User Commands"
 .SH NAME
 tapir \- RPG Maker emulator
 .SH SYNOPSIS

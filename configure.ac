@@ -41,5 +41,6 @@ AC_CONFIG_FILES([Makefile
                  accordion/Makefile
                  launcher/Makefile
                  violin/Makefile
-                 xylophone/Makefile])
+                 xylophone/Makefile
+                 doc/man/tapir.1])
 AC_OUTPUT
