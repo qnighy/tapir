@@ -2,7 +2,7 @@ Source: tapir
 Section: games
 Priority: optional
 Maintainer: Masaki Hara <ackie.h.gmai@gmail.com>
-Build-Depends: debhelper (>=9), autoconf, bison, flex, libsdl2-dev (>=2.0.4), libsdl2-image-dev (>=2.0.0), libsdl2-mixer-dev (>=2.0.1), libsdl2-ttf-dev (>=2.0.14), libfontconfig1-dev, libconfig-dev
+Build-Depends: debhelper (>=9), autoconf (>= 2.69), automake (>= 1.15), bison (>= 2:3.0.0), flex (>= 2.6.0), libsdl2-dev (>=2.0.4), libsdl2-image-dev (>=2.0.0), libsdl2-mixer-dev (>=2.0.1), libsdl2-ttf-dev (>=2.0.14), libfontconfig1-dev (>= 2.11.0), libconfig-dev (>= 1.5)
 Standards-Version: 3.9.6
 Homepage: https://github.com/qnighy/tapir
 
