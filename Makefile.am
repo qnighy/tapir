@@ -10,7 +10,8 @@
 # except according to those terms.
 
 SUBDIRS = accordion violin xylophone launcher
-man1_MANS = doc/man/tapir.1
+man1_MANS = doc/man/tapir-x.1 doc/man/tapir-v.1 doc/man/tapir-a.1 \
+	    doc/man/tapir.1
 
 test: test-accordion test-violin test-xylophone
 
