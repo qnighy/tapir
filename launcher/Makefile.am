@@ -18,6 +18,6 @@ all-local: $(EXEC)
 	cp $(EXEC) ../bin/$(EXEC)
 
 clean-local:
-	$(RM) $(EXEC)
+	$(RM) ../bin/$(EXEC)
 
 VPATH += ../src

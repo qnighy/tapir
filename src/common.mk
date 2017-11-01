@@ -28,7 +28,7 @@ all-local: $(EXEC)
 	cp $(EXEC) ../bin/$(EXEC)
 
 clean-local:
-	$(RM) $(EXEC)
+	$(RM) ../bin/$(EXEC)
 
 test: all
 	mkdir -p test
