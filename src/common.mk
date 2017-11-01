@@ -29,6 +29,8 @@ all-local: $(EXEC)
 
 clean-local:
 	$(RM) ../bin/$(EXEC)
+	cd test; $(RM) *actual.png *expected.png stderr.txt stdout.txt \
+		Game.ini Data/Scripts.*
 
 test: all
 	mkdir -p test
