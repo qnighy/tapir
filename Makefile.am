@@ -20,12 +20,12 @@ test-rgss: test-rgss-accordion test-rgss-violin test-rgss-xylophone
 distclean-local:
 	$(RM) -r ruby181-build
 	$(RM) ruby181/ext/Setup.tapir
-	make realclean -C ruby181 || true
+	make distclean -C ruby181 || true
 	$(RM) -r ruby192-build
 	$(RM) ruby192/ext/Setup.tapir
 	make realclean -C ruby192 || true
 	$(RM) -r autom4te.cache
-	$(RM) -r ruby181/autom4te.cache
+	$(RM) -r ruby181/autom4te.cache ruby181/parse.c
 	$(RM) -r ruby192/autom4te.cache ruby192/.ext ruby192/ext/zlib/zlib.a
 
 ruby181-build:
