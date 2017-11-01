@@ -3,6 +3,8 @@
 /*.debhelper.log
 /debhelper-build-stamp
 
+/files
+
 /*.substvars
 /substvars
 
