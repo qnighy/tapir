@@ -8,11 +8,6 @@ override_dh_auto_configure:
 	./autogen.sh
 	dh_auto_configure -- --bindir=/usr/games
 
-override_dh_auto_clean:
-	dh_auto_clean
-	$(RM) aclocal.m4 configure config.log config.status
-	$(RM) compile depcomp install-sh missing
-
 override_dh_auto_test:
 	# dh_auto_test
 
