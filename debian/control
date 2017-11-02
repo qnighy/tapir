@@ -8,7 +8,7 @@ Homepage: https://github.com/qnighy/tapir
 
 Package: rgss1-rtp-installer
 Architecture: all
-Pre-Depends: ${misc:Pre-Depends}, debconf (>= 1.5.0), wget (>= 1.17.0)
+Pre-Depends: ${misc:Pre-Depends}, wget (>= 1.17.0)
 Depends: ${misc:Depends}, unzip (>= 6.0), innoextract (>= 1.5)
 Description: Installer for RPG Maker XP RTP
  This package allows for easy installation of RPG Maker XP RTP
@@ -19,7 +19,7 @@ Description: Installer for RPG Maker XP RTP
 
 Package: rgss2-rtp-installer
 Architecture: all
-Pre-Depends: ${misc:Pre-Depends}, debconf (>= 1.5.0), wget (>= 1.17.0)
+Pre-Depends: ${misc:Pre-Depends}, wget (>= 1.17.0)
 Depends: ${misc:Depends}, unzip (>= 6.0), innoextract (>= 1.5)
 Description: Installer for RPG Maker VX RTP
  This package allows for easy installation of RPG Maker VX RTP
@@ -30,7 +30,7 @@ Description: Installer for RPG Maker VX RTP
 
 Package: rgss3-rtp-installer
 Architecture: all
-Pre-Depends: ${misc:Pre-Depends}, debconf (>= 1.5.0), wget (>= 1.17.0)
+Pre-Depends: ${misc:Pre-Depends}, wget (>= 1.17.0)
 Depends: ${misc:Depends}, unzip (>= 6.0), innoextract (>= 1.5)
 Description: Installer for RPG Maker VX Ace RTP
  This package allows for easy installation of RPG Maker VX Ace RTP
