@@ -1,0 +1,6 @@
+Template: rgss3-rtp-installer/accepted-license-2012-03-15
+Type: boolean
+Default: false
+_Description: Do you accept the RTP 2012-03-15 License?
+ .
+ ${LICENSE}

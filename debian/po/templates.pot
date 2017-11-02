@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tapir\n"
 "Report-Msgid-Bugs-To: tapir@packages.debian.org\n"
-"POT-Creation-Date: 2017-10-31 17:36+0900\n"
+"POT-Creation-Date: 2017-11-02 23:35+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,28 +19,25 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../templates:1001
+#: ../rgss1-rtp-installer.templates:1001
 msgid "Do you accept the RTP 2005-10-08 License?"
 msgstr ""
 
 #. Type: boolean
 #. Description
-#. Type: boolean
-#. Description
-#. Type: boolean
-#. Description
-#: ../templates:1001 ../templates:2001 ../templates:3001
+#: ../rgss1-rtp-installer.templates:1001 ../rgss2-rtp-installer.templates:1001
+#: ../rgss3-rtp-installer.templates:1001
 msgid "${LICENSE}"
 msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../templates:2001
+#: ../rgss2-rtp-installer.templates:1001
 msgid "Do you accept the RTP 2008-02-09 License?"
 msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../templates:3001
+#: ../rgss3-rtp-installer.templates:1001
 msgid "Do you accept the RTP 2012-03-15 License?"
 msgstr ""
