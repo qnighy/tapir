@@ -402,14 +402,9 @@ void load_transition_image(const char *filename, int vagueness) {
   SDL_Surface *transition_image = NULL;
 
   {
-    SDL_RWops *file = NULL;
-    for(int i = 0; i < 2; ++i) {
-      const char * const extensions[] = {"", ".png"};
-      VALUE filename2 = rb_str_new2(filename);
-      rb_str_cat2(filename2, extensions[i]);
-      file = openres(filename2, true);
-      if(file) break;
-    }
+    const char * const extensions[] = {"", ".png", NULL};
+    VALUE filename2 = rb_str_new2(filename);
+    SDL_RWops *file = openres_ext(filename2, true, extensions);
     if(!file) {
       /* TODO: check error handling */
       rb_raise(rb_eRGSSError, "Error loading %s: %s",

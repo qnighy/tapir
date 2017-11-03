@@ -26,6 +26,8 @@
 #endif
 
 SDL_RWops *openres(VALUE path, bool use_archive);
+SDL_RWops *openres_ext(VALUE path, bool use_archive,
+    const char * const exts[]);
 VALUE rb_load_data(VALUE self, VALUE path);
 
 #endif /* OPENRES_H */

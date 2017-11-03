@@ -106,16 +106,10 @@ static VALUE rb_audio_s_bgm_play(int argc, VALUE *argv, VALUE klass) {
     bgm = NULL;
   }
 
-  SDL_RWops *file = NULL;
-  VALUE filename = Qnil;
-  for(int i = 0; i < 6; ++i) {
-    const char * const extensions[] = {
-      "", ".ogg", ".wma", ".mp3", ".wav", ".mid"};
-    filename = rb_str_new(RSTRING_PTR(argv[0]), RSTRING_LEN(argv[0]));
-    rb_str_cat2(filename, extensions[i]);
-    file = openres(filename, false);
-    if(file) break;
-  }
+  const char * const extensions[] = {
+    "", ".ogg", ".wma", ".mp3", ".wav", ".mid", NULL};
+  VALUE filename = rb_str_new(RSTRING_PTR(argv[0]), RSTRING_LEN(argv[0]));
+  SDL_RWops *file = openres_ext(filename, false, extensions);
   if(!file) {
     /* TODO: check error handling */
     rb_raise(rb_eRGSSError, "Error loading %s: %s",

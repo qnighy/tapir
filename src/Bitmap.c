@@ -187,14 +187,9 @@ static VALUE rb_bitmap_m_initialize(int argc, VALUE *argv, VALUE self) {
       StringValue(argv[0]);
       Check_Type(argv[0], T_STRING);
 
-      SDL_RWops *file = NULL;
-      for(int i = 0; i < 4; ++i) {
-        const char * const extensions[] = {"", ".png", ".jpg", ".bmp"};
-        VALUE filename = rb_str_new(RSTRING_PTR(argv[0]), RSTRING_LEN(argv[0]));
-        rb_str_cat2(filename, extensions[i]);
-        file = openres(filename, true);
-        if(file) break;
-      }
+      const char * const extensions[] = {"", ".png", ".jpg", ".bmp", NULL};
+      VALUE filename = rb_str_new(RSTRING_PTR(argv[0]), RSTRING_LEN(argv[0]));
+      SDL_RWops *file = openres_ext(filename, true, extensions);
       if(!file) {
         /* TODO: check error handling */
         rb_raise(rb_eRGSSError, "Error loading %s: %s",
