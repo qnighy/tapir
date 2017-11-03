@@ -95,10 +95,19 @@ void initSDL(const char *window_title) {
     fprintf(stderr, "Mix_Init warning: could not init OGG\n");
   }
 
+  // TODO: in some environment, SDL_mixer produces unignorable latency...
   if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) < 0) {
     printf("Mix_OpenAudio Error: %s\n", Mix_GetError());
     exit(1);
   }
+
+  Mix_AllocateChannels(16);
+
+  // int mix_frequency, mix_channels;
+  // Uint16 mix_format;
+  // Mix_QuerySpec(&mix_frequency, &mix_format, &mix_channels);
+  // fprintf(stderr, "frequency = %d, format = %d, channels = %d\n",
+  //     mix_frequency, (int)mix_format, mix_channels);
 
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
