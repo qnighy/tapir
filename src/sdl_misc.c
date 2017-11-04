@@ -396,7 +396,7 @@ SDL_Surface *create_rgba_surface_from(SDL_Surface *orig) {
 }
 
 void load_transition_image(const char *filename, int vagueness) {
-  if(!filename) {
+  if(!filename || !strcmp(filename, "")) {
     SDL_Surface *img = create_rgba_surface(window_width, window_height);
     SDL_FillRect(img, NULL, SDL_MapRGBA(img->format, 255, 255, 255, 255));
     glBindTexture(GL_TEXTURE_2D, transition_texture2);
