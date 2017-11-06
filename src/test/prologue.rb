@@ -7,10 +7,12 @@
 # option. This file may not be copied, modified, or distributed
 # except according to those terms.
 
-$stdout.reopen("stdout.txt", "w")
-$stderr.reopen("stderr.txt", "w")
-
 module RGSSTest
+  if RGSS_VARIANT == "rgss"
+    $stdout.reopen("stdout.txt", "w")
+    $stderr.reopen("stderr.txt", "w")
+  end
+
   class AssertionFailedError < StandardError
   end
 

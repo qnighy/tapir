@@ -88,6 +88,8 @@ end
 begin
   system(ARGV[2]) or raise "#{ARGV[2]} failed: #$?"
 ensure
-  $stdout.print(File.read("stdout.txt"))
-  $stderr.print(File.read("stderr.txt"))
+  if RGSS_VARIANT == "rgss"
+    $stdout.print(File.read("stdout.txt"))
+    $stderr.print(File.read("stderr.txt"))
+  end
 end
