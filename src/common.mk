@@ -34,7 +34,7 @@ clean-local:
 
 test: all
 	mkdir -p test
-	cd test; ruby ../../src/test/test.rb $(RGSS) ../../bin/$(EXEC)
+	cd test; ruby ../../src/test/test.rb tapir $(RGSS) ../../bin/$(EXEC)
 
 .PHONY: test
 

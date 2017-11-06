@@ -5,13 +5,13 @@ test: test-rgss3 test-rgss2 test-rgss1
 clean: clean-rgss3 clean-rgss2 clean-rgss1
 
 test-rgss3:
-	cd rgss3; ruby ../../src/test/test.rb 3 ./Game.exe
+	cd rgss3; ruby ../../src/test/test.rb rgss 3 ./Game.exe
 
 test-rgss2:
-	cd rgss2; ruby ../../src/test/test.rb 2 ./Game.exe
+	cd rgss2; ruby ../../src/test/test.rb rgss 2 ./Game.exe
 
 test-rgss1:
-	cd rgss1; ruby ../../src/test/test.rb 1 ./Game.exe
+	cd rgss1; ruby ../../src/test/test.rb rgss 1 ./Game.exe
 
 clean-rgss3:
 	cd rgss3; $(RM) Game.ini Data/Scripts.rvdata2 stderr.txt stdout.txt

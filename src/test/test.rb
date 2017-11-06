@@ -13,7 +13,8 @@
 require "fileutils"
 require "zlib"
 
-RGSS = ARGV[0].to_i
+RGSS_VARIANT = ARGV[0]
+RGSS = ARGV[1].to_i
 TEST_SRC = "../../src/test"
 
 data_ext = ["rxdata", "rvdata", "rvdata2"][RGSS-1]
@@ -45,7 +46,21 @@ scripts << "#{TEST_SRC}/test_rpg_weather.rb"
 scripts << "#{TEST_SRC}/epilogue.rb"
 
 scripts_data = scripts.map {|script_path|
-  zscript = Zlib::Deflate::deflate(File.read(script_path))
+  [script_path, File.read(script_path)]
+}
+
+scripts_data.unshift(["test_params", <<EOD])
+# PROLOGUE
+
+module RGSSTest
+  RGSS = #{RGSS.inspect}
+  RGSS_VARIANT = #{RGSS_VARIANT.inspect}
+  TEST_SRC = #{TEST_SRC.inspect}
+end
+EOD
+
+scripts_data.map! {|script_path, script|
+  zscript = Zlib::Deflate::deflate(script)
   [rand(100000000), script_path, zscript]
 }
 
@@ -71,7 +86,7 @@ File.open("Game.ini", "wb:cp932") do|file|
 end
 
 begin
-  system(ARGV[1]) or raise "#{ARGV[1]} failed: #$?"
+  system(ARGV[2]) or raise "#{ARGV[2]} failed: #$?"
 ensure
   $stdout.print(File.read("stdout.txt"))
   $stderr.print(File.read("stderr.txt"))

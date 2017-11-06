@@ -1,5 +1,3 @@
-# PROLOGUE
-
 # Copyright 2017 Masaki Hara. See the COPYRIGHT
 # file at the top-level directory of this distribution.
 #
@@ -13,16 +11,6 @@ $stdout.reopen("stdout.txt", "w")
 $stderr.reopen("stderr.txt", "w")
 
 module RGSSTest
-  if File.exist?("Data/Scripts.rxdata")
-    RGSS = 1
-  elsif File.exist?("Data/Scripts.rvdata")
-    RGSS = 2
-  elsif File.exist?("Data/Scripts.rvdata2")
-    RGSS = 3
-  else
-    raise "Could not determine RGSS version"
-  end
-
   class AssertionFailedError < StandardError
   end
 
