@@ -85,11 +85,4 @@ File.open("Game.ini", "wb:cp932") do|file|
   end
 end
 
-begin
-  system(ARGV[2]) or raise "#{ARGV[2]} failed: #$?"
-ensure
-  if RGSS_VARIANT == "rgss"
-    $stdout.print(File.read("stdout.txt"))
-    $stderr.print(File.read("stderr.txt"))
-  end
-end
+system(ARGV[2]) or raise "#{ARGV[2]} failed: #$?"

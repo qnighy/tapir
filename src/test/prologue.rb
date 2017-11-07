@@ -8,11 +8,6 @@
 # except according to those terms.
 
 module RGSSTest
-  if RGSS_VARIANT == "rgss"
-    $stdout.reopen("stdout.txt", "w")
-    $stderr.reopen("stderr.txt", "w")
-  end
-
   class AssertionFailedError < StandardError
   end
 
