@@ -8,7 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestSprite
+  class TestSprite < Test
     include RGSSTest
 
     @@imgdir = "../../src/test/Graphics"

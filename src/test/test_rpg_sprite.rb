@@ -41,7 +41,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGSprite
+  class TestRPGSprite < Test
     include RGSSTest
     include MockSprite
 

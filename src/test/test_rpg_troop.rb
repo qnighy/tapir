@@ -8,7 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGTroop
+  class TestRPGTroop < Test
     include RGSSTest
 
     @@klass = RPG::Troop
@@ -72,7 +72,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGTroopMember
+  class TestRPGTroopMember < Test
     include RGSSTest
 
     @@klass = RPG::Troop::Member
@@ -128,7 +128,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGTroopPage
+  class TestRPGTroopPage < Test
     include RGSSTest
 
     @@klass = RPG::Troop::Page
@@ -187,7 +187,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGTroopPageCondition
+  class TestRPGTroopPageCondition < Test
     include RGSSTest
 
     @@klass = RPG::Troop::Page::Condition

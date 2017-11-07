@@ -8,7 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRGSSReset
+  class TestRGSSReset < Test
     include RGSSTest
 
     def test_class

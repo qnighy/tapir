@@ -8,7 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGAnimation
+  class TestRPGAnimation < Test
     include RGSSTest
 
     @@klass = RPG::Animation
@@ -106,7 +106,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGAnimationFrame
+  class TestRPGAnimationFrame < Test
     include RGSSTest
 
     @@klass = RPG::Animation::Frame
@@ -147,7 +147,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGAnimationTiming
+  class TestRPGAnimationTiming < Test
     include RGSSTest
 
     @@klass = RPG::Animation::Timing

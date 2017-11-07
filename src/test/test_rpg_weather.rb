@@ -8,7 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGWeather
+  class TestRPGWeather < Test
     include RGSSTest
 
     @@klass = RPG::Weather if RGSS == 1

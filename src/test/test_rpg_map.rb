@@ -8,7 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGMap
+  class TestRPGMap < Test
     include RGSSTest
 
     @@klass = RPG::Map
@@ -179,7 +179,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGMapEncounter
+  class TestRPGMapEncounter < Test
     include RGSSTest
 
     @@klass = RPG::Map::Encounter if RGSS == 3
@@ -223,7 +223,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGMapInfo
+  class TestRPGMapInfo < Test
     include RGSSTest
 
     @@klass = RPG::MapInfo
@@ -270,7 +270,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGArea
+  class TestRPGArea < Test
     include RGSSTest
 
     @@klass = RPG::Area if RGSS == 2

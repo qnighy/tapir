@@ -8,7 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGSystem
+  class TestRPGSystem < Test
     include RGSSTest
 
     @@klass = RPG::System
@@ -431,7 +431,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGSystemVehicle
+  class TestRPGSystemVehicle < Test
     include RGSSTest
 
     @@klass = RPG::System::Vehicle if RGSS >= 2
@@ -482,7 +482,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGSystemTerms
+  class TestRPGSystemTerms < Test
     include RGSSTest
 
     if RGSS >= 2
@@ -621,7 +621,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGSystemTestBattler
+  class TestRPGSystemTestBattler < Test
     include RGSSTest
 
     @@klass = RPG::System::TestBattler

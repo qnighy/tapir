@@ -8,7 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestGeneral
+  class TestGeneral < Test
     include RGSSTest
 
     def test_global_variables

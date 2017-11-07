@@ -8,7 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGBaseItem
+  class TestRPGBaseItem < Test
     include RGSSTest
 
     @@klass = RPG::BaseItem if RGSS >= 2
@@ -70,7 +70,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGBaseItemFeature
+  class TestRPGBaseItemFeature < Test
     include RGSSTest
 
     @@klass = RPG::BaseItem::Feature if RGSS == 3
@@ -126,7 +126,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGActor
+  class TestRPGActor < Test
     include RGSSTest
 
     @@klass = RPG::Actor
@@ -303,7 +303,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGClass
+  class TestRPGClass < Test
     include RGSSTest
 
     @@klass = RPG::Class
@@ -644,7 +644,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGClassLearning
+  class TestRPGClassLearning < Test
     include RGSSTest
 
     @@klass = RPG::Class::Learning
@@ -695,7 +695,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGUsableItem
+  class TestRPGUsableItem < Test
     include RGSSTest
 
     @@klass = RPG::UsableItem if RGSS >= 2
@@ -944,7 +944,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGUsableItemDamage
+  class TestRPGUsableItemDamage < Test
     include RGSSTest
 
     @@klass = RPG::UsableItem::Damage if RGSS == 3
@@ -1109,7 +1109,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGUsableItemEffect
+  class TestRPGUsableItemEffect < Test
     include RGSSTest
 
     @@klass = RPG::UsableItem::Effect if RGSS == 3
@@ -1179,7 +1179,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGSkill
+  class TestRPGSkill < Test
     include RGSSTest
 
     @@klass = RPG::Skill
@@ -1355,7 +1355,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGItem
+  class TestRPGItem < Test
     include RGSSTest
 
     @@klass = RPG::Item
@@ -1536,7 +1536,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGEquipItem
+  class TestRPGEquipItem < Test
     include RGSSTest
 
     @@klass = RPG::EquipItem if RGSS == 3
@@ -1591,7 +1591,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGWeapon
+  class TestRPGWeapon < Test
     include RGSSTest
 
     @@klass = RPG::Weapon
@@ -1746,7 +1746,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGArmor
+  class TestRPGArmor < Test
     include RGSSTest
 
     @@klass = RPG::Armor
@@ -1894,7 +1894,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGEnemy
+  class TestRPGEnemy < Test
     include RGSSTest
 
     @@klass = RPG::Enemy
@@ -2111,7 +2111,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGEnemyDropItem
+  class TestRPGEnemyDropItem < Test
     include RGSSTest
 
     @@klass = RPG::Enemy::DropItem if RGSS >= 2
@@ -2172,7 +2172,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGEnemyAction
+  class TestRPGEnemyAction < Test
     include RGSSTest
 
     @@klass = RPG::Enemy::Action
@@ -2274,7 +2274,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGState
+  class TestRPGState < Test
     include RGSSTest
 
     @@klass = RPG::State

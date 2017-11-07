@@ -38,7 +38,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGAudioFile
+  class TestRPGAudioFile < Test
     include RGSSTest
 
     @@klass = RPG::AudioFile
@@ -116,7 +116,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGBGM
+  class TestRPGBGM < Test
     include RGSSTest
     include MockAudio
 
@@ -294,7 +294,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGBGS
+  class TestRPGBGS < Test
     include RGSSTest
     include MockAudio
 
@@ -472,7 +472,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGME
+  class TestRPGME < Test
     include RGSSTest
     include MockAudio
 
@@ -558,7 +558,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGSE
+  class TestRPGSE < Test
     include RGSSTest
     include MockAudio
 

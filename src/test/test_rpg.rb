@@ -8,7 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPG
+  class TestRPG < Test
     include RGSSTest
 
     @@klass = RPG

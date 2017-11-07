@@ -8,7 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGCommonEvent
+  class TestRPGCommonEvent < Test
     include RGSSTest
 
     @@klass = RPG::CommonEvent

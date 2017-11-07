@@ -8,7 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGEvent
+  class TestRPGEvent < Test
     include RGSSTest
 
     @@klass = RPG::Event
@@ -55,7 +55,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGEventPage
+  class TestRPGEventPage < Test
     include RGSSTest
 
     @@klass = RPG::Event::Page
@@ -148,7 +148,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGEventPageCondition
+  class TestRPGEventPageCondition < Test
     include RGSSTest
 
     @@klass = RPG::Event::Page::Condition
@@ -236,7 +236,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGEventPageGraphic
+  class TestRPGEventPageGraphic < Test
     include RGSSTest
 
     @@klass = RPG::Event::Page::Graphic
@@ -307,7 +307,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGEventCommand
+  class TestRPGEventCommand < Test
     include RGSSTest
 
     @@klass = RPG::EventCommand
@@ -365,7 +365,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGMoveRoute
+  class TestRPGMoveRoute < Test
     include RGSSTest
 
     @@klass = RPG::MoveRoute
@@ -422,7 +422,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGMoveCommand
+  class TestRPGMoveCommand < Test
     include RGSSTest
 
     @@klass = RPG::MoveCommand

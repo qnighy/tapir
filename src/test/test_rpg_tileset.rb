@@ -8,7 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGTileset
+  class TestRPGTileset < Test
     include RGSSTest
 
     @@klass = RPG::Tileset if RGSS == 1 || RGSS == 3
