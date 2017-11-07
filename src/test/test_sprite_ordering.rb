@@ -9,8 +9,6 @@
 
 module RGSSTest
   class TestSpriteOrdering < Test
-    include RGSSTest
-
     @@imgdir = "../../src/test/Graphics"
 
     def register(obj)

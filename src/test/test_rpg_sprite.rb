@@ -42,7 +42,6 @@ module RGSSTest
   end
 
   class TestRPGSprite < Test
-    include RGSSTest
     include MockSprite
 
     @@klass = RPG::Sprite if RGSS == 1

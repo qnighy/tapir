@@ -9,8 +9,6 @@
 
 module RGSSTest
   class TestRGSSReset < Test
-    include RGSSTest
-
     def test_class
       # TODO: in RGSS1/2, hidden class Reset is generated on-demand.
       RGSSTest::RGSS == 3 or return

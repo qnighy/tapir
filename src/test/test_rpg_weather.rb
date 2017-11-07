@@ -9,8 +9,6 @@
 
 module RGSSTest
   class TestRPGWeather < Test
-    include RGSSTest
-
     @@klass = RPG::Weather if RGSS == 1
 
     def test_superclass

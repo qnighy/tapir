@@ -9,8 +9,6 @@
 
 module RGSSTest
   class TestRPGBaseItem < Test
-    include RGSSTest
-
     @@klass = RPG::BaseItem if RGSS >= 2
 
     def test_superclass
@@ -71,8 +69,6 @@ module RGSSTest
   end
 
   class TestRPGBaseItemFeature < Test
-    include RGSSTest
-
     @@klass = RPG::BaseItem::Feature if RGSS == 3
 
     def test_superclass
@@ -127,8 +123,6 @@ module RGSSTest
   end
 
   class TestRPGActor < Test
-    include RGSSTest
-
     @@klass = RPG::Actor
 
     def test_superclass
@@ -304,8 +298,6 @@ module RGSSTest
   end
 
   class TestRPGClass < Test
-    include RGSSTest
-
     @@klass = RPG::Class
 
     def test_superclass
@@ -645,8 +637,6 @@ module RGSSTest
   end
 
   class TestRPGClassLearning < Test
-    include RGSSTest
-
     @@klass = RPG::Class::Learning
 
     def test_superclass
@@ -696,8 +686,6 @@ module RGSSTest
   end
 
   class TestRPGUsableItem < Test
-    include RGSSTest
-
     @@klass = RPG::UsableItem if RGSS >= 2
 
     def test_superclass
@@ -945,8 +933,6 @@ module RGSSTest
   end
 
   class TestRPGUsableItemDamage < Test
-    include RGSSTest
-
     @@klass = RPG::UsableItem::Damage if RGSS == 3
 
     def test_superclass
@@ -1110,8 +1096,6 @@ module RGSSTest
   end
 
   class TestRPGUsableItemEffect < Test
-    include RGSSTest
-
     @@klass = RPG::UsableItem::Effect if RGSS == 3
 
     def test_superclass
@@ -1180,8 +1164,6 @@ module RGSSTest
   end
 
   class TestRPGSkill < Test
-    include RGSSTest
-
     @@klass = RPG::Skill
 
     def test_superclass
@@ -1356,8 +1338,6 @@ module RGSSTest
   end
 
   class TestRPGItem < Test
-    include RGSSTest
-
     @@klass = RPG::Item
 
     def test_superclass
@@ -1537,8 +1517,6 @@ module RGSSTest
   end
 
   class TestRPGEquipItem < Test
-    include RGSSTest
-
     @@klass = RPG::EquipItem if RGSS == 3
 
     def test_superclass
@@ -1592,8 +1570,6 @@ module RGSSTest
   end
 
   class TestRPGWeapon < Test
-    include RGSSTest
-
     @@klass = RPG::Weapon
 
     def test_superclass
@@ -1747,8 +1723,6 @@ module RGSSTest
   end
 
   class TestRPGArmor < Test
-    include RGSSTest
-
     @@klass = RPG::Armor
 
     def test_superclass
@@ -1895,8 +1869,6 @@ module RGSSTest
   end
 
   class TestRPGEnemy < Test
-    include RGSSTest
-
     @@klass = RPG::Enemy
 
     def test_superclass
@@ -2112,8 +2084,6 @@ module RGSSTest
   end
 
   class TestRPGEnemyDropItem < Test
-    include RGSSTest
-
     @@klass = RPG::Enemy::DropItem if RGSS >= 2
 
     def test_superclass
@@ -2173,8 +2143,6 @@ module RGSSTest
   end
 
   class TestRPGEnemyAction < Test
-    include RGSSTest
-
     @@klass = RPG::Enemy::Action
 
     def test_superclass
@@ -2275,8 +2243,6 @@ module RGSSTest
   end
 
   class TestRPGState < Test
-    include RGSSTest
-
     @@klass = RPG::State
 
     def test_superclass

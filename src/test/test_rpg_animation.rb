@@ -9,8 +9,6 @@
 
 module RGSSTest
   class TestRPGAnimation < Test
-    include RGSSTest
-
     @@klass = RPG::Animation
 
     def test_superclass
@@ -107,8 +105,6 @@ module RGSSTest
   end
 
   class TestRPGAnimationFrame < Test
-    include RGSSTest
-
     @@klass = RPG::Animation::Frame
 
     def test_superclass
@@ -148,8 +144,6 @@ module RGSSTest
   end
 
   class TestRPGAnimationTiming < Test
-    include RGSSTest
-
     @@klass = RPG::Animation::Timing
 
     def test_superclass

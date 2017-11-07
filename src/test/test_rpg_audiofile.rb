@@ -39,8 +39,6 @@ module RGSSTest
   end
 
   class TestRPGAudioFile < Test
-    include RGSSTest
-
     @@klass = RPG::AudioFile
 
     def test_superclass
@@ -117,7 +115,6 @@ module RGSSTest
   end
 
   class TestRPGBGM < Test
-    include RGSSTest
     include MockAudio
 
     @@klass = RPG::BGM if RGSS >= 2
@@ -295,7 +292,6 @@ module RGSSTest
   end
 
   class TestRPGBGS < Test
-    include RGSSTest
     include MockAudio
 
     @@klass = RPG::BGS if RGSS >= 2
@@ -473,7 +469,6 @@ module RGSSTest
   end
 
   class TestRPGME < Test
-    include RGSSTest
     include MockAudio
 
     @@klass = RPG::ME if RGSS >= 2
@@ -559,7 +554,6 @@ module RGSSTest
   end
 
   class TestRPGSE < Test
-    include RGSSTest
     include MockAudio
 
     @@klass = RPG::SE if RGSS >= 2

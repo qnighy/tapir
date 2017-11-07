@@ -9,8 +9,6 @@
 
 module RGSSTest
   class TestRPGTroop < Test
-    include RGSSTest
-
     @@klass = RPG::Troop
 
     def test_superclass
@@ -73,8 +71,6 @@ module RGSSTest
   end
 
   class TestRPGTroopMember < Test
-    include RGSSTest
-
     @@klass = RPG::Troop::Member
 
     def test_superclass
@@ -129,8 +125,6 @@ module RGSSTest
   end
 
   class TestRPGTroopPage < Test
-    include RGSSTest
-
     @@klass = RPG::Troop::Page
 
     def test_superclass
@@ -188,8 +182,6 @@ module RGSSTest
   end
 
   class TestRPGTroopPageCondition < Test
-    include RGSSTest
-
     @@klass = RPG::Troop::Page::Condition
 
     def test_superclass

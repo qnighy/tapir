@@ -9,8 +9,6 @@
 
 module RGSSTest
   class TestRPGSystem < Test
-    include RGSSTest
-
     @@klass = RPG::System
 
     def test_superclass
@@ -432,8 +430,6 @@ module RGSSTest
   end
 
   class TestRPGSystemVehicle < Test
-    include RGSSTest
-
     @@klass = RPG::System::Vehicle if RGSS >= 2
 
     def test_superclass
@@ -483,8 +479,6 @@ module RGSSTest
   end
 
   class TestRPGSystemTerms < Test
-    include RGSSTest
-
     if RGSS >= 2
       @@klass = RPG::System::Terms
     else
@@ -622,8 +616,6 @@ module RGSSTest
   end
 
   class TestRPGSystemTestBattler < Test
-    include RGSSTest
-
     @@klass = RPG::System::TestBattler
 
     def test_superclass

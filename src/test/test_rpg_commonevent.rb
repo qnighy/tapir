@@ -9,8 +9,6 @@
 
 module RGSSTest
   class TestRPGCommonEvent < Test
-    include RGSSTest
-
     @@klass = RPG::CommonEvent
 
     def test_superclass

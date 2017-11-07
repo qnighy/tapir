@@ -9,8 +9,6 @@
 
 module RGSSTest
   class TestRPGMap < Test
-    include RGSSTest
-
     @@klass = RPG::Map
 
     def test_superclass
@@ -180,8 +178,6 @@ module RGSSTest
   end
 
   class TestRPGMapEncounter < Test
-    include RGSSTest
-
     @@klass = RPG::Map::Encounter if RGSS == 3
 
     def test_superclass
@@ -224,8 +220,6 @@ module RGSSTest
   end
 
   class TestRPGMapInfo < Test
-    include RGSSTest
-
     @@klass = RPG::MapInfo
 
     def test_superclass
@@ -271,8 +265,6 @@ module RGSSTest
   end
 
   class TestRPGArea < Test
-    include RGSSTest
-
     @@klass = RPG::Area if RGSS == 2
 
     def test_superclass

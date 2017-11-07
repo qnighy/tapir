@@ -9,8 +9,6 @@
 
 module RGSSTest
   class TestRGSSError < Test
-    include RGSSTest
-
     def test_class
       assert_equal(RGSSError.superclass, StandardError)
       assert_symset_equal(RGSSError.constants, [])

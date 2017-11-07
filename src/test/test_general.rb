@@ -9,8 +9,6 @@
 
 module RGSSTest
   class TestGeneral < Test
-    include RGSSTest
-
     def test_global_variables
       if RGSSTest::RGSS == 3
         assert_symset_equal(global_variables, [

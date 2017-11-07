@@ -9,8 +9,6 @@
 
 module RGSSTest
   class TestRPGEvent < Test
-    include RGSSTest
-
     @@klass = RPG::Event
 
     def test_superclass
@@ -56,8 +54,6 @@ module RGSSTest
   end
 
   class TestRPGEventPage < Test
-    include RGSSTest
-
     @@klass = RPG::Event::Page
 
     def test_superclass
@@ -149,8 +145,6 @@ module RGSSTest
   end
 
   class TestRPGEventPageCondition < Test
-    include RGSSTest
-
     @@klass = RPG::Event::Page::Condition
 
     def test_superclass
@@ -237,8 +231,6 @@ module RGSSTest
   end
 
   class TestRPGEventPageGraphic < Test
-    include RGSSTest
-
     @@klass = RPG::Event::Page::Graphic
 
     def test_superclass
@@ -308,8 +300,6 @@ module RGSSTest
   end
 
   class TestRPGEventCommand < Test
-    include RGSSTest
-
     @@klass = RPG::EventCommand
 
     def test_superclass
@@ -366,8 +356,6 @@ module RGSSTest
   end
 
   class TestRPGMoveRoute < Test
-    include RGSSTest
-
     @@klass = RPG::MoveRoute
 
     def test_superclass
@@ -423,8 +411,6 @@ module RGSSTest
   end
 
   class TestRPGMoveCommand < Test
-    include RGSSTest
-
     @@klass = RPG::MoveCommand
 
     def test_superclass

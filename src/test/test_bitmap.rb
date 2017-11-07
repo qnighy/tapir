@@ -9,8 +9,6 @@
 
 module RGSSTest
   class TestBitmap < Test
-    include RGSSTest
-
     @@imgdir = "../../src/test/Graphics"
 
     def test_superclass

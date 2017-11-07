@@ -9,8 +9,6 @@
 
 module RGSSTest
   class TestRPG < Test
-    include RGSSTest
-
     @@klass = RPG
 
     def test_is_module
