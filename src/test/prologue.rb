@@ -11,7 +11,7 @@ module RGSSTest
   class AssertionFailedError < StandardError
   end
 
-  class Test
+  module Assertions
     def assert_block(message = "assert_block failed.", &b)
       if !b.call then
         raise AssertionFailedError, message
@@ -122,6 +122,10 @@ module RGSSTest
         end
       }
     end
+  end
+
+  module BitmapUtil
+    @@imgdir = "../../src/test/Graphics"
 
     def assert_bitmap_equal(expected, actual, message = nil)
       comparison = compare_bitmap(expected, actual)
@@ -134,8 +138,6 @@ module RGSSTest
         raise AssertionFailedError, message
       end
     end
-
-    @@imgdir = "../../src/test/Graphics"
 
     def assert_bitmap_equal2(name, actual, save = false, message = nil)
       if save
@@ -212,6 +214,11 @@ module RGSSTest
         write_chunk.call("IEND", "")
       end
     end
+  end
+
+  class Test
+    include Assertions
+    include BitmapUtil
   end
 
   def self.run_test(klass)
