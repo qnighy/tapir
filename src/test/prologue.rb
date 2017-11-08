@@ -219,18 +219,21 @@ module RGSSTest
   class Test
     include Assertions
     include BitmapUtil
+
+    attr_accessor :name
   end
 
   def self.run_test(klass)
     puts "Running tests #{klass.name}..."
-    i = klass.new
     allcnt = 0
     successcnt = 0
-    i.methods.grep(/\Atest_/).each do|method_name|
+    klass.instance_methods.grep(/\Atest_/).each do|method_name|
       ok = true
       message = ""
       begin
-        i.send(method_name)
+        obj = klass.new
+        obj.name = method_name.to_s
+        obj.send(method_name)
       rescue
         ok = false
         backtrace = \
