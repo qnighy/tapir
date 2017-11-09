@@ -41,10 +41,11 @@ module RGSSTest
     end
   end
 
+  if RGSS == 1
   class TestRPGSprite < Test
     include MockSprite
 
-    @@klass = RPG::Sprite if RGSS == 1
+    @@klass = RPG::Sprite
 
     def test_superclass
       assert_equal(@@klass.superclass, ::Sprite)
@@ -451,6 +452,7 @@ module RGSSTest
     # def test_update
     # end
   end
+  end # if RGSS == 1
 
   if RGSS == 1
     run_test(TestRPGSprite)

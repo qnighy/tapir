@@ -8,8 +8,9 @@
 # except according to those terms.
 
 module RGSSTest
+  if RGSS >= 2
   class TestRPGBaseItem < Test
-    @@klass = RPG::BaseItem if RGSS >= 2
+    @@klass = RPG::BaseItem
 
     def test_superclass
       assert_equal(@@klass.superclass, Object)
@@ -67,9 +68,11 @@ module RGSSTest
       assert_equal(obj.note, "")
     end
   end
+  end # if RGSS >= 2
 
+  if RGSS == 3
   class TestRPGBaseItemFeature < Test
-    @@klass = RPG::BaseItem::Feature if RGSS == 3
+    @@klass = RPG::BaseItem::Feature
 
     def test_superclass
       assert_equal(@@klass.superclass, Object)
@@ -121,6 +124,7 @@ module RGSSTest
       assert_raise(ArgumentError) { @@klass.new(:hoge, :fuga, :piyo, :quux) }
     end
   end
+  end # if RGSS == 3
 
   class TestRPGActor < Test
     @@klass = RPG::Actor
@@ -685,8 +689,9 @@ module RGSSTest
     end
   end
 
+  if RGSS >= 2
   class TestRPGUsableItem < Test
-    @@klass = RPG::UsableItem if RGSS >= 2
+    @@klass = RPG::UsableItem
 
     def test_superclass
       assert_equal(@@klass.superclass, RPG::BaseItem)
@@ -931,9 +936,11 @@ module RGSSTest
       assert_equal((0..2).select {|x| obj.hit_type = x; obj.physical? }, [1])
     end
   end
+  end # if RGSS >= 2
 
+  if RGSS == 3
   class TestRPGUsableItemDamage < Test
-    @@klass = RPG::UsableItem::Damage if RGSS == 3
+    @@klass = RPG::UsableItem::Damage
 
     def test_superclass
       assert_equal(@@klass.superclass, Object)
@@ -1094,9 +1101,11 @@ module RGSSTest
       assert_equal(obj.eval(100, 200, 300), 277)
     end
   end
+  end # if RGSS == 3
 
+  if RGSS == 3
   class TestRPGUsableItemEffect < Test
-    @@klass = RPG::UsableItem::Effect if RGSS == 3
+    @@klass = RPG::UsableItem::Effect
 
     def test_superclass
       assert_equal(@@klass.superclass, Object)
@@ -1162,6 +1171,7 @@ module RGSSTest
       }
     end
   end
+  end # if RGSS == 3
 
   class TestRPGSkill < Test
     @@klass = RPG::Skill
@@ -1516,8 +1526,9 @@ module RGSSTest
     end
   end
 
+  if RGSS == 3
   class TestRPGEquipItem < Test
-    @@klass = RPG::EquipItem if RGSS == 3
+    @@klass = RPG::EquipItem
 
     def test_superclass
       assert_equal(@@klass.superclass, RPG::BaseItem)
@@ -1568,6 +1579,7 @@ module RGSSTest
       assert_equal(obj.price, 0)
     end
   end
+  end # if RGSS == 3
 
   class TestRPGWeapon < Test
     @@klass = RPG::Weapon
@@ -2083,8 +2095,9 @@ module RGSSTest
     end
   end
 
+  if RGSS >= 2
   class TestRPGEnemyDropItem < Test
-    @@klass = RPG::Enemy::DropItem if RGSS >= 2
+    @@klass = RPG::Enemy::DropItem
 
     def test_superclass
       assert_equal(@@klass.superclass, Object)
@@ -2141,6 +2154,7 @@ module RGSSTest
       assert_raise(ArgumentError) { @@klass.new(:hoge) }
     end
   end
+  end # if RGSS >= 2
 
   class TestRPGEnemyAction < Test
     @@klass = RPG::Enemy::Action

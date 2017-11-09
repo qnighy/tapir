@@ -8,6 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
+  if RGSS >= 2
   class TestSprite < Test
     @@imgdir = "../../src/test/Graphics"
 
@@ -534,6 +535,7 @@ module RGSSTest
       end
     end
   end
+  end # if RGSS >= 2
 
   if RGSS >= 2
     run_test(TestSprite)

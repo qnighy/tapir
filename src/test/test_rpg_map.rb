@@ -177,8 +177,9 @@ module RGSSTest
     end
   end
 
+  if RGSS == 3
   class TestRPGMapEncounter < Test
-    @@klass = RPG::Map::Encounter if RGSS == 3
+    @@klass = RPG::Map::Encounter
 
     def test_superclass
       assert_equal(@@klass.superclass, Object)
@@ -218,6 +219,7 @@ module RGSSTest
       assert_equal(obj.weight, 10)
     end
   end
+  end # if RGSS == 3
 
   class TestRPGMapInfo < Test
     @@klass = RPG::MapInfo
@@ -264,8 +266,9 @@ module RGSSTest
     end
   end
 
+  if RGSS == 2
   class TestRPGArea < Test
-    @@klass = RPG::Area if RGSS == 2
+    @@klass = RPG::Area
 
     def test_superclass
       assert_equal(@@klass.superclass, Object)
@@ -308,6 +311,7 @@ module RGSSTest
       assert_equal(obj.rect, Rect.new(0, 0, 0, 0))
     end
   end
+  end # if RGSS == 2
 
   run_test(TestRPGMap)
   run_test(TestRPGMapEncounter) if RGSS == 3

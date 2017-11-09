@@ -429,8 +429,9 @@ module RGSSTest
     end
   end
 
+  if RGSS >= 2
   class TestRPGSystemVehicle < Test
-    @@klass = RPG::System::Vehicle if RGSS >= 2
+    @@klass = RPG::System::Vehicle
 
     def test_superclass
       assert_equal(@@klass.superclass, Object)
@@ -477,6 +478,7 @@ module RGSSTest
       assert_equal(obj.start_y, 0)
     end
   end
+  end # if RGSS >= 2
 
   class TestRPGSystemTerms < Test
     if RGSS >= 2
