@@ -1,9 +1,9 @@
 #!/bin/sh
 set -ue
 
-aclocal
+aclocal-1.15
 autoheader
-automake --force-missing --add-missing --copy
+automake-1.15 --force-missing --add-missing --copy
 autoconf
 
 if [ -e .git ]; then
