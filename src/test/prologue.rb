@@ -241,33 +241,42 @@ module RGSSTest
     def passed?
       !@failure
     end
+
+    def result_code
+      if passed?
+        '.'
+      elsif AssertionFailedError === @failure
+        'F'
+      else
+        'E'
+      end
+    end
   end
 
   def self.run_test(klass)
     puts "Running tests #{klass.name}..."
-    allcnt = 0
-    successcnt = 0
+    run_tests = []
     klass.instance_methods.grep(/\Atest_/).each do|method_name|
       ok = true
       message = ""
       obj = klass.new
       obj.name = method_name.to_s
       obj.run
-      if obj.passed?
-        puts "  #{method_name}: OK"
-        successcnt += 1
-      else
-        failure = obj.failure
-        backtrace = \
-          failure.kind_of?(AssertionFailedError) ?
-            failure.backtrace[1] : failure.backtrace[0]
-        message = "#{failure.class}: #{failure.message} (at #{backtrace})"
-        puts "  #{method_name}: Failed: #{message}"
-      end
-      allcnt += 1
-      $stderr.flush
-      $stdout.flush
+      print(obj.result_code)
+      run_tests << obj
     end
+    puts ""
+    run_tests.select {|test| !test.passed?}.each do|test|
+      failure = test.failure
+      backtrace = \
+        failure.kind_of?(AssertionFailedError) ?
+          failure.backtrace[1] : failure.backtrace[0]
+      message = "#{failure.class}: #{failure.message} (at #{backtrace})"
+      puts "#{test.class}\##{test.name}: Failed: #{message}"
+    end
+    successcnt = run_tests.select {|test| test.passed?}.size
+    allcnt = run_tests.size
+    puts ""
     puts "Summary: #{successcnt} / #{allcnt}"
     puts ""
   end
