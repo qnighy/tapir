@@ -444,44 +444,48 @@ module RGSSTest
       end
     end
 
+    if RGSS == 3
     def test_exp_for_level_1
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [0, 0, 25, 1.0/0.0]
       assert_equal(obj.exp_for_level(2), 0)
       assert_equal(obj.exp_for_level(50), 0)
       assert_equal(obj.exp_for_level(99), 0)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_exp_for_level_2
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [0, 1, 25, 1.0/0.0]
       assert_equal(obj.exp_for_level(2), 1)
       assert_equal(obj.exp_for_level(50), 49)
       assert_equal(obj.exp_for_level(99), 98)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_exp_for_level_3
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [0, 10, 25, 1.0/0.0]
       assert_equal(obj.exp_for_level(2), 10)
       assert_equal(obj.exp_for_level(50), 490)
       assert_equal(obj.exp_for_level(99), 980)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_exp_for_level_4
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [0, 0.999, 25, 1.0/0.0]
       assert_equal(obj.exp_for_level(2), 1)
       assert_equal(obj.exp_for_level(50), 49)
       assert_equal(obj.exp_for_level(99), 98)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_exp_for_level_5
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [1, 0, 25, 1.0/0.0]
       assert_equal(obj.exp_for_level(2), 1)
@@ -493,9 +497,10 @@ module RGSSTest
       assert_equal(obj.exp_for_level(8), 84)
       assert_equal(obj.exp_for_level(9), 120)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_exp_for_level_6
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [6, 0, 25, 1.0/0.0]
       assert_equal(obj.exp_for_level(2), 6)
@@ -508,9 +513,10 @@ module RGSSTest
       assert_equal(obj.exp_for_level(9), 720)
       assert_equal(obj.exp_for_level(10), 990)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_exp_for_level_7
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [6, 0, -225, 1.0/0.0]
       assert_equal(obj.exp_for_level(2), 6)
@@ -522,9 +528,10 @@ module RGSSTest
       assert_equal(obj.exp_for_level(8), 72)
       assert_equal(obj.exp_for_level(9), 90)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_exp_for_level_8
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [6, 0, 275, 1.0/0.0]
       assert_equal(obj.exp_for_level(2), 6)
@@ -536,9 +543,10 @@ module RGSSTest
       assert_equal(obj.exp_for_level(8), 3528)
       assert_equal(obj.exp_for_level(9), 5760)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_exp_for_level_9
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [30, 0, 30, 1.0/0.0]
       assert_equal(obj.exp_for_level(2), 30)
@@ -551,9 +559,10 @@ module RGSSTest
       assert_equal(obj.exp_for_level(64), 1423609)
       assert_equal(obj.exp_for_level(99), 5316867)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_exp_for_level_10
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [10000, 0, 25, 1.0/0.0]
       assert_equal(obj.exp_for_level(2), 10000)
@@ -565,9 +574,10 @@ module RGSSTest
       assert_equal(obj.exp_for_level(8), 840000)
       assert_equal(obj.exp_for_level(9), 1200000)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_exp_for_level_11
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [10000, 0, 25, 0.02]
       assert_equal(obj.exp_for_level(2), 6000)
@@ -579,9 +589,10 @@ module RGSSTest
       assert_equal(obj.exp_for_level(8), 72000)
       assert_equal(obj.exp_for_level(9), 82759)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_exp_for_level_12
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [10000, 0, 25, 0.01]
       assert_equal(obj.exp_for_level(2), 4286)
@@ -593,9 +604,10 @@ module RGSSTest
       assert_equal(obj.exp_for_level(8), 37612)
       assert_equal(obj.exp_for_level(9), 42857)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_exp_for_level_13
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [30, 0, 30, 30]
       assert_equal(obj.exp_for_level(2), 30)
@@ -608,9 +620,10 @@ module RGSSTest
       assert_equal(obj.exp_for_level(78), 1543968)
       assert_equal(obj.exp_for_level(99), 2545173)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_exp_for_level_14
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [0, 20, 30, 30]
       assert_equal(obj.exp_for_level(2), 20)
@@ -623,9 +636,10 @@ module RGSSTest
       assert_equal(obj.exp_for_level(56), 1100)
       assert_equal(obj.exp_for_level(99), 1960)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_exp_for_level_15
-      RGSS == 3 or return
       obj = @@klass.new
       obj.exp_params = [30, 20, 30, 30]
       assert_equal(obj.exp_for_level(2), 50)
@@ -638,6 +652,7 @@ module RGSSTest
       assert_equal(obj.exp_for_level(80), 1634055)
       assert_equal(obj.exp_for_level(99), 2547133)
     end
+    end # if RGSS == 3
   end
 
   class TestRPGClassLearning < Test
@@ -815,17 +830,19 @@ module RGSSTest
         [0, 1])
     end
 
+    if RGSS == 3
     def test_certain_p
-      RGSS == 3 or return
       obj = @@klass.new
       assert_equal((0..2).select {|x| obj.hit_type = x; obj.certain? }, [0])
     end
+    end # if RGSS == 3
 
+    if RGSS == 2
     def test_dual_p
-      RGSS == 2 or return
       obj = @@klass.new
       assert_equal((0..11).select {|x| obj.scope = x; obj.dual? }, [3])
     end
+    end # if RGSS == 2
 
     def test_for_all_p
       obj = @@klass.new
@@ -881,28 +898,31 @@ module RGSSTest
       end
     end
 
+    if RGSS == 2
     def test_for_three_p
-      RGSS == 2 or return
       obj = @@klass.new
       assert_equal((0..11).select {|x| obj.scope = x; obj.for_three? }, [6])
     end
+    end # if RGSS == 2
 
+    if RGSS == 2
     def test_for_two_p
-      RGSS == 2 or return
       obj = @@klass.new
       assert_equal((0..11).select {|x| obj.scope = x; obj.for_two? }, [5])
     end
+    end # if RGSS == 2
 
     def test_for_user_p
       obj = @@klass.new
       assert_equal((0..11).select {|x| obj.scope = x; obj.for_user? }, [11])
     end
 
+    if RGSS == 3
     def test_magical_p
-      RGSS == 3 or return
       obj = @@klass.new
       assert_equal((0..2).select {|x| obj.hit_type = x; obj.magical? }, [2])
     end
+    end # if RGSS == 3
 
     def test_menu_ok_p
       obj = @@klass.new
@@ -922,19 +942,21 @@ module RGSSTest
       end
     end
 
+    if RGSS == 3
     def test_number_of_targets
-      RGSS == 3 or return
       obj = @@klass.new
       assert_equal(
         (0..11).map {|x| obj.scope = x; obj.number_of_targets },
         [0, 0, 0, 1, 2, 3, 4, 0, 0, 0, 0, 0])
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_physical_p
-      RGSS == 3 or return
       obj = @@klass.new
       assert_equal((0..2).select {|x| obj.hit_type = x; obj.physical? }, [1])
     end
+    end # if RGSS == 3
   end
   end # if RGSS >= 2
 
@@ -1719,19 +1741,21 @@ module RGSSTest
       end
     end
 
+    if RGSS == 3
     def test_performance_1
-      RGSS == 3 or return
       obj = @@klass.new
       obj.params = [639, 384, 103, 898, 904, 945, 110, 227]
       assert_equal(obj.performance, 5217)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_performance_2
-      RGSS == 3 or return
       obj = @@klass.new
       obj.params = [996, 76, 970, 365, 477, 718, 994, 721]
       assert_equal(obj.performance, 6764)
     end
+    end # if RGSS == 3
   end
 
   class TestRPGArmor < Test
@@ -1865,19 +1889,21 @@ module RGSSTest
       end
     end
 
+    if RGSS == 3
     def test_performance_1
-      RGSS == 3 or return
       obj = @@klass.new
       obj.params = [639, 384, 103, 898, 904, 945, 110, 227]
       assert_equal(obj.performance, 6053)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_performance_2
-      RGSS == 3 or return
       obj = @@klass.new
       obj.params = [996, 76, 970, 365, 477, 718, 994, 721]
       assert_equal(obj.performance, 6400)
     end
+    end # if RGSS == 3
   end
 
   class TestRPGEnemy < Test
@@ -2246,14 +2272,15 @@ module RGSSTest
       assert_raise(ArgumentError) { @@klass.new(:hoge) }
     end
 
+    if RGSS == 2
     def test_skill_p
-      RGSS == 2 or return
       obj = @@klass.new
       obj.kind = 0
       assert_equal(obj.skill?, false)
       obj.kind = 1
       assert_equal(obj.skill?, true)
     end
+    end # if RGSS == 2
   end
 
   class TestRPGState < Test

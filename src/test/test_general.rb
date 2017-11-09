@@ -94,11 +94,12 @@ module RGSSTest
       end
     end
 
+    if RGSS == 3
     def test_transcode
-      RGSSTest::RGSS == 3 or return
       assert_equal(
         "ほげ".encode("Shift_JIS"),
         "\x82\xD9\x82\xB0".force_encoding("Shift_JIS"))
     end
+    end # if RGSS == 3
   end
 end

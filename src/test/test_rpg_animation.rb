@@ -89,9 +89,8 @@ module RGSSTest
       assert_equal(obj.timings, [])
     end
 
+    if RGSS == 3
     def test_to_screen_p
-      RGSS == 3 or return
-
       obj = @@klass.new
       obj.position = 0
       assert_equal(obj.to_screen?, false)
@@ -102,6 +101,7 @@ module RGSSTest
       obj.position = 3
       assert_equal(obj.to_screen?, true)
     end
+    end # if RGSS == 3
   end
 
   class TestRPGAnimationFrame < Test
