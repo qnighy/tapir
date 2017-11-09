@@ -679,9 +679,4 @@ module RGSSTest
       end
     end
   end
-
-  run_test(TestRPGSystem)
-  run_test(TestRPGSystemVehicle) if RGSS >= 2
-  run_test(TestRPGSystemTerms)
-  run_test(TestRPGSystemTestBattler)
 end

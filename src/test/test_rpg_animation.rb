@@ -209,8 +209,4 @@ module RGSSTest
       end
     end
   end
-
-  run_test(TestRPGAnimation)
-  run_test(TestRPGAnimationFrame)
-  run_test(TestRPGAnimationTiming)
 end

@@ -338,8 +338,4 @@ module RGSSTest
     end
   end
   end # if RGSS >= 2
-
-  if RGSS >= 2
-    run_test(TestSpriteOrdering)
-  end
 end

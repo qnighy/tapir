@@ -554,6 +554,4 @@ module RGSSTest
       assert_bitmap_equal2("test_gradient_fill_rect_10", b0)
     end
   end
-
-  run_test(TestBitmap)
 end

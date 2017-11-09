@@ -82,6 +82,4 @@ module RGSSTest
       assert_equal(obj.parallel?, true)
     end
   end
-
-  run_test(TestRPGCommonEvent)
 end

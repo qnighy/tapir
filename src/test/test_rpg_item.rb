@@ -2438,22 +2438,4 @@ module RGSSTest
       end
     end
   end
-
-  run_test(TestRPGBaseItem) if RGSS >= 2
-  run_test(TestRPGBaseItemFeature) if RGSS == 3
-  run_test(TestRPGActor)
-  run_test(TestRPGClass)
-  run_test(TestRPGClassLearning)
-  run_test(TestRPGUsableItem) if RGSS >= 2
-  run_test(TestRPGUsableItemDamage) if RGSS == 3
-  run_test(TestRPGUsableItemEffect) if RGSS == 3
-  run_test(TestRPGSkill)
-  run_test(TestRPGItem)
-  run_test(TestRPGEquipItem) if RGSS == 3
-  run_test(TestRPGWeapon)
-  run_test(TestRPGArmor)
-  run_test(TestRPGEnemy)
-  run_test(TestRPGEnemyDropItem) if RGSS >= 2
-  run_test(TestRPGEnemyAction)
-  run_test(TestRPGState)
 end

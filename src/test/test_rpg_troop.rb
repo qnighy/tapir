@@ -252,9 +252,4 @@ module RGSSTest
       assert_equal(obj.turn_valid, false)
     end
   end
-
-  run_test(TestRPGTroop)
-  run_test(TestRPGTroopMember)
-  run_test(TestRPGTroopPage)
-  run_test(TestRPGTroopPageCondition)
 end

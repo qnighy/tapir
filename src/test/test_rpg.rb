@@ -45,6 +45,4 @@ module RGSSTest
       assert_symset_equal(@@klass.methods - Object.methods, [])
     end
   end
-
-  run_test(TestRPG)
 end

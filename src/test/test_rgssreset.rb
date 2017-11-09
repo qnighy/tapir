@@ -19,6 +19,4 @@ module RGSSTest
       assert_symset_equal(owned_instance_methods(RGSSReset), [])
     end
   end
-
-  run_test(TestRGSSReset)
 end

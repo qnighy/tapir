@@ -312,9 +312,4 @@ module RGSSTest
     end
   end
   end # if RGSS == 2
-
-  run_test(TestRPGMap)
-  run_test(TestRPGMapEncounter) if RGSS == 3
-  run_test(TestRPGMapInfo)
-  run_test(TestRPGArea) if RGSS == 2
 end

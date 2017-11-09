@@ -638,13 +638,4 @@ module RGSSTest
     end
   end
   end # if RGSS >= 2
-
-  run_test(TestRPGAudioFile)
-
-  if RGSS >= 2
-    run_test(TestRPGBGM)
-    run_test(TestRPGBGS)
-    run_test(TestRPGME)
-    run_test(TestRPGSE)
-  end
 end

@@ -456,12 +456,4 @@ module RGSSTest
       assert_raise(ArgumentError) { @@klass.new(:hoge, :fuga, :piyo) }
     end
   end
-
-  run_test(TestRPGEvent)
-  run_test(TestRPGEventPage)
-  run_test(TestRPGEventPageCondition)
-  run_test(TestRPGEventPageGraphic)
-  run_test(TestRPGEventCommand)
-  run_test(TestRPGMoveRoute)
-  run_test(TestRPGMoveCommand)
 end

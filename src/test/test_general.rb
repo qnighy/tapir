@@ -101,6 +101,4 @@ module RGSSTest
         "\x82\xD9\x82\xB0".force_encoding("Shift_JIS"))
     end
   end
-
-  run_test(TestGeneral)
 end

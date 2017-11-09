@@ -251,19 +251,30 @@ module RGSSTest
         'E'
       end
     end
+
+    @@tests = []
+
+    def self.tests
+      @@tests
+    end
+
+    def self.inherited(klass)
+      @@tests << klass
+    end
   end
 
-  def self.run_test(klass)
-    puts "Running tests #{klass.name}..."
+  def self.run
     run_tests = []
-    klass.instance_methods.grep(/\Atest_/).each do|method_name|
-      ok = true
-      message = ""
-      obj = klass.new
-      obj.name = method_name.to_s
-      obj.run
-      print(obj.result_code)
-      run_tests << obj
+    Test.tests.each do|klass|
+      klass.instance_methods.grep(/\Atest_/).each do|method_name|
+        ok = true
+        message = ""
+        obj = klass.new
+        obj.name = method_name.to_s
+        obj.run
+        print(obj.result_code)
+        run_tests << obj
+      end
     end
     puts ""
     run_tests.select {|test| !test.passed?}.each do|test|

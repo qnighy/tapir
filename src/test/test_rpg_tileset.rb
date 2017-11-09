@@ -105,6 +105,4 @@ module RGSSTest
     end
   end
   end # if RGSS == 1 || RGSS == 3
-
-  run_test(TestRPGTileset) if RGSS == 1 || RGSS == 3
 end

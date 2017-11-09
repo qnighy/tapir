@@ -453,8 +453,4 @@ module RGSSTest
     # end
   end
   end # if RGSS == 1
-
-  if RGSS == 1
-    run_test(TestRPGSprite)
-  end
 end
