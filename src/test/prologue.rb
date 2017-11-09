@@ -221,6 +221,10 @@ module RGSSTest
     include BitmapUtil
 
     attr_accessor :name
+
+    def setup; end
+
+    def teardown; end
   end
 
   def self.run_test(klass)
@@ -230,15 +234,19 @@ module RGSSTest
     klass.instance_methods.grep(/\Atest_/).each do|method_name|
       ok = true
       message = ""
+      obj = nil
       begin
         obj = klass.new
         obj.name = method_name.to_s
+        obj.setup
         obj.send(method_name)
       rescue
         ok = false
         backtrace = \
           $!.kind_of?(AssertionFailedError) ? $!.backtrace[1] : $!.backtrace[0]
         message = "#{$!.class}: #{$!.message} (at #{backtrace})"
+      ensure
+        obj.teardown rescue nil
       end
       if ok
         puts "  #{method_name}: OK"
