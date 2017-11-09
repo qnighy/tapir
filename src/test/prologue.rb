@@ -273,6 +273,7 @@ module RGSSTest
         obj.name = method_name.to_s
         obj.run
         $stdout.print(obj.result_code)
+        $stdout.flush
         run_tests << obj
       end
     end
