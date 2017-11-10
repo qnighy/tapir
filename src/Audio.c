@@ -243,9 +243,6 @@ static VALUE rb_audio_s_se_play(int argc, VALUE *argv, VALUE klass) {
   Mix_Chunk *chunk = load_chunk_cached(argv[0]);
   if(!chunk) return Qnil;
 
-  fprintf(stderr, "Audio.se_play(\"%s\", %d, %d)\n",
-      StringValueCStr(argv[0]), volume, pitch);
-
   Mix_VolumeChunk(chunk, volume * MIX_MAX_VOLUME / 100);
   Mix_PlayChannel(-1, chunk, 0);
 
