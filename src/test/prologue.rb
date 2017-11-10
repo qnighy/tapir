@@ -19,10 +19,20 @@ module RGSSTest
     FILTER = nil
   end
 
-  class AssertionFailedError < StandardError
+  class Assertion < Exception
+  end
+
+  class Skip < Assertion
+  end
+
+  class AssertionFailedError < Assertion
   end
 
   module Assertions
+    def skip
+      raise Skip
+    end
+
     def assert_block(message = "assert_block failed.", &b)
       if !b.call then
         raise AssertionFailedError, message
@@ -242,7 +252,9 @@ module RGSSTest
       begin
         setup
         send(name)
-      rescue
+      rescue Skip
+        @skipped = true
+      rescue Exception
         @failure = $!
       ensure
         teardown
@@ -255,7 +267,7 @@ module RGSSTest
 
     def result_code
       if passed?
-        '.'
+        @skipped ? 'S' : '.'
       elsif AssertionFailedError === @failure
         'F'
       else
