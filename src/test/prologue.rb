@@ -8,6 +8,17 @@
 # except according to those terms.
 
 module RGSSTest
+  test_name = ENV['TEST_NAME']
+  if test_name
+    if test_name[0..0] == '/' && test_name[-1..-1] == '/'
+      FILTER = Regexp.new(test_name[1..-2])
+    else
+      FILTER = test_name
+    end
+  else
+    FILTER = nil
+  end
+
   class AssertionFailedError < StandardError
   end
 
@@ -267,14 +278,15 @@ module RGSSTest
     run_tests = []
     Test.tests.each do|klass|
       klass.instance_methods.grep(/\Atest_/).each do|method_name|
-        ok = true
-        message = ""
-        obj = klass.new
-        obj.name = method_name.to_s
-        obj.run
-        $stdout.print(obj.result_code)
-        $stdout.flush
-        run_tests << obj
+        if FILTER.nil? || \
+            FILTER === "#{method_name}" || FILTER === "#{klass}##{method_name}"
+          obj = klass.new
+          obj.name = method_name.to_s
+          obj.run
+          $stdout.print(obj.result_code)
+          $stdout.flush
+          run_tests << obj
+        end
       end
     end
     puts ""
