@@ -33,6 +33,10 @@ module RGSSTest
       raise Skip
     end
 
+    def skip_default
+      skip if FILTER.nil?
+    end
+
     def assert_block(message = "assert_block failed.", &b)
       if !b.call then
         raise AssertionFailedError, message
