@@ -80,8 +80,8 @@ File.open("Game.ini", "wb:cp932") do|file|
     file.print "RTP=RPGVX\r\n"
   else
     file.print "RTP1=Standard\r\n"
-    file.print "RTP2\r\n"
-    file.print "RTP3\r\n"
+    file.print "RTP2=\r\n"
+    file.print "RTP3=\r\n"
   end
 end
 
