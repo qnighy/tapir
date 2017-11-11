@@ -240,6 +240,24 @@ module RGSSTest
     end
   end
 
+  module WithClean
+    def register(obj)
+      @objects << obj
+      obj
+    end
+
+    def cleaned(&b)
+      begin
+        @objects = []
+        b.call
+      ensure
+        @objects.each do|obj|
+          obj.dispose
+        end
+      end
+    end
+  end
+
   class Test
     include Assertions
     include BitmapUtil

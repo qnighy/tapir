@@ -12,21 +12,7 @@ module RGSSTest
   class TestSprite < Test
     @@imgdir = "../../src/test/Graphics"
 
-    def register(obj)
-      @objects << obj
-      obj
-    end
-
-    def cleaned(&b)
-      begin
-        @objects = []
-        b.call
-      ensure
-        @objects.each do|obj|
-          obj.dispose
-        end
-      end
-    end
+    include WithClean
 
     def test_positioning_1
       skip_default

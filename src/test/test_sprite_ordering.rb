@@ -12,21 +12,7 @@ module RGSSTest
   class TestSpriteOrdering < Test
     @@imgdir = "../../src/test/Graphics"
 
-    def register(obj)
-      @objects << obj
-      obj
-    end
-
-    def cleaned(&b)
-      begin
-        @objects = []
-        b.call
-      ensure
-        @objects.each do|obj|
-          obj.dispose
-        end
-      end
-    end
+    include WithClean
 
     def filled_bitmap(w, h, color)
       b = Bitmap.new(w, h)
