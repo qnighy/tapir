@@ -8,12 +8,11 @@
 # except according to those terms.
 
 module RGSSTest
-  test_name = ENV['TEST_NAME']
-  if test_name
-    if test_name[0..0] == '/' && test_name[-1..-1] == '/'
-      FILTER = Regexp.new(test_name[1..-2])
+  if TEST_NAME
+    if TEST_NAME[0..0] == '/' && TEST_NAME[-1..-1] == '/'
+      FILTER = Regexp.new(TEST_NAME[1..-2])
     else
-      FILTER = test_name
+      FILTER = TEST_NAME
     end
   else
     FILTER = nil

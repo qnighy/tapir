@@ -56,6 +56,7 @@ module RGSSTest
   RGSS = #{RGSS.inspect}
   RGSS_VARIANT = #{RGSS_VARIANT.inspect}
   TEST_SRC = #{TEST_SRC.inspect}
+  TEST_NAME = #{ENV['TEST_NAME'].inspect}
 end
 EOD
 
