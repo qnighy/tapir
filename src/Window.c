@@ -280,6 +280,7 @@ static VALUE window_alloc(VALUE klass) {
   ptr->tone = Qnil;
 #endif
   ptr->cursor_tick = 0;
+  ptr->pause_tick = 0;
 
   VALUE ret = Data_Wrap_Struct(klass, window_mark, window_free, ptr);
   ptr->contents = rb_bitmap_new(1, 1);
@@ -351,6 +352,7 @@ static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
   ptr->tone = orig_ptr->tone;
 #endif
   ptr->cursor_tick = orig_ptr->cursor_tick;
+  ptr->pause_tick = orig_ptr->pause_tick;
   return Qnil;
 }
 
@@ -367,9 +369,11 @@ static VALUE rb_window_m_disposed_p(VALUE self) {
 
 static VALUE rb_window_m_update(VALUE self) {
   struct Window *ptr = rb_window_data_mut(self);
-  (void) ptr;
-  WARN_UNIMPLEMENTED("Window#update");
   ptr->cursor_tick = (ptr->cursor_tick + 1) % 40;
+  if(ptr->pause) {
+    ++ptr->pause_tick;
+    if(ptr->pause_tick >= 64 + 16) ptr->pause_tick -= 64;
+  }
   return Qnil;
 }
 
@@ -499,9 +503,9 @@ static VALUE rb_window_m_pause(VALUE self) {
 }
 
 static VALUE rb_window_m_set_pause(VALUE self, VALUE newval) {
-  WARN_UNIMPLEMENTED("Window#pause");
   struct Window *ptr = rb_window_data_mut(self);
   ptr->pause = RTEST(newval);
+  if(!ptr->pause) ptr->pause_tick = 0;
   return newval;
 }
 
@@ -879,6 +883,38 @@ static void renderWindow(
             (src_center_x + 8) / src_width,
             (src_center_y + 16) / src_height);
       }
+    }
+
+    if(openness == 255 && ptr->pause) {
+#if RGSS >= 2
+      double src_x = 64 + 32;
+      double src_y = 64;
+      double src_width = 128;
+      double src_height = 128;
+#else
+      double src_x = 128 + 32;
+      double src_y = 64;
+      double src_width = 192;
+      double src_height = 128;
+#endif
+
+      int pause_opacity = ptr->pause_tick > 16 ? 16 : ptr->pause_tick;
+      glUniform1f(glGetUniformLocation(shader4, "opacity"),
+          ptr->opacity * pause_opacity / (255.0 * 16.0));
+
+      int pause_anim = ptr->pause_tick % 64 / 16;
+      double src_x2 = pause_anim % 2 * 16;
+      double src_y2 = pause_anim / 2 * 16;
+
+      gl_draw_rect(
+          -viewport->ox + ptr->x + ptr->width * 0.5 - 8,
+          -viewport->oy + ptr->y + ptr->height - 16,
+          -viewport->ox + ptr->x + ptr->width * 0.5 + 8,
+          -viewport->oy + ptr->y + ptr->height,
+          (src_x + src_x2) / src_width,
+          (src_y + src_y2) / src_height,
+          (src_x + src_x2 + 16) / src_width,
+          (src_y + src_y2 + 16) / src_height);
     }
   }
 

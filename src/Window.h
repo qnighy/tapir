@@ -41,6 +41,7 @@ struct Window {
   int openness;
 #endif
   int cursor_tick;
+  int pause_tick;
 };
 
 bool rb_window_data_p(VALUE obj);
