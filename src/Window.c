@@ -487,7 +487,6 @@ static VALUE rb_window_m_arrows_visible(VALUE self) {
 }
 
 static VALUE rb_window_m_set_arrows_visible(VALUE self, VALUE newval) {
-  WARN_UNIMPLEMENTED("Window#arrows_visible");
   struct Window *ptr = rb_window_data_mut(self);
   ptr->arrows_visible = RTEST(newval);
   return newval;
@@ -705,15 +704,40 @@ static void renderWindow(
   int open_height = ptr->height * openness / 255;
   int open_y = ptr->y + (ptr->height - open_height) / 2;
 
+#if RGSS == 3
+  int padding = ptr->padding;
+  int padding_bottom = ptr->padding_bottom;
+#else
+  // TODO: is the padding correct?
+  int padding = 16;
+  int padding_bottom = 16;
+#endif
+
+#if RGSS == 3
+  bool arrows_visible = ptr->arrows_visible;
+#else
+  bool arrows_visible = true;
+#endif
+
+  const struct Bitmap *skin_bitmap_ptr = NULL;
+  SDL_Surface *skin_surface = NULL;
+  if(ptr->windowskin != Qnil) {
+    skin_bitmap_ptr = rb_bitmap_data(ptr->windowskin);
+    skin_surface = skin_bitmap_ptr->surface;
+  }
+
+  const struct Bitmap *contents_bitmap_ptr = NULL;
+  SDL_Surface *contents_surface = NULL;
+  if(ptr->windowskin != Qnil) {
+    contents_bitmap_ptr = rb_bitmap_data(ptr->contents);
+    contents_surface = contents_bitmap_ptr->surface;
+  }
+
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
   glBlendEquation(GL_FUNC_ADD);
 
-  if(ptr->windowskin != Qnil && job->aux[0] == 0) {
-    const struct Bitmap *skin_bitmap_ptr = rb_bitmap_data(ptr->windowskin);
-    SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
-    if(!skin_surface) return;
-
+  if(skin_surface && job->aux[0] == 0) {
 #if RGSS == 3
     const struct Tone *tone_ptr = rb_tone_data(ptr->tone);
 #endif
@@ -791,26 +815,78 @@ static void renderWindow(
         -viewport->ox + ptr->x + ptr->width,
         -viewport->oy + open_y + open_height,
         0.0, 0.0, ptr->width, open_height);
-  }
 
-#if RGSS == 3
-  int padding = ptr->padding;
-  int padding_bottom = ptr->padding_bottom;
+    glUseProgram(shader4);
+    glUniform1i(glGetUniformLocation(shader4, "contents"), 0);
+    glUniform2f(glGetUniformLocation(shader4, "resolution"),
+        viewport->width, viewport->height);
+    glUniform1f(glGetUniformLocation(shader4, "opacity"),
+        ptr->opacity / 255.0);
+
+    if(openness == 255 && contents_bitmap_ptr != NULL && arrows_visible) {
+#if RGSS >= 2
+      double src_center_x = 64 + 32;
+      double src_center_y = 32;
+      double src_width = 128;
+      double src_height = 128;
 #else
-  // TODO: is the padding correct?
-  int padding = 16;
-  int padding_bottom = 16;
+      double src_center_x = 128 + 32;
+      double src_center_y = 32;
+      double src_width = 192;
+      double src_height = 128;
 #endif
+      if(ptr->ox > 0) {
+        gl_draw_rect(
+            -viewport->ox + ptr->x + 4,
+            -viewport->oy + ptr->y + ptr->height * 0.5 - 8,
+            -viewport->ox + ptr->x + 12,
+            -viewport->oy + ptr->y + ptr->height * 0.5 + 8,
+            (src_center_x - 16) / src_width,
+            (src_center_y - 8) / src_height,
+            (src_center_x - 8) / src_width,
+            (src_center_y + 8) / src_height);
+      }
+      if(ptr->oy > 0) {
+        gl_draw_rect(
+            -viewport->ox + ptr->x + ptr->width * 0.5 - 8,
+            -viewport->oy + ptr->y + 4,
+            -viewport->ox + ptr->x + ptr->width * 0.5 + 8,
+            -viewport->oy + ptr->y + 12,
+            (src_center_x - 8) / src_width,
+            (src_center_y - 16) / src_height,
+            (src_center_x + 8) / src_width,
+            (src_center_y - 8) / src_height);
+      }
+      if(contents_surface->w - ptr->ox > ptr->width - padding * 2) {
+        gl_draw_rect(
+            -viewport->ox + ptr->x + ptr->width - 12,
+            -viewport->oy + ptr->y + ptr->height * 0.5 - 8,
+            -viewport->ox + ptr->x + ptr->width - 4,
+            -viewport->oy + ptr->y + ptr->height * 0.5 + 8,
+            (src_center_x + 8) / src_width,
+            (src_center_y - 8) / src_height,
+            (src_center_x + 16) / src_width,
+            (src_center_y + 8) / src_height);
+      }
+      if(contents_surface->h - ptr->oy > ptr->height - padding - padding_bottom) {
+        gl_draw_rect(
+            -viewport->ox + ptr->x + ptr->width * 0.5 - 8,
+            -viewport->oy + ptr->y + ptr->height - 12,
+            -viewport->ox + ptr->x + ptr->width * 0.5 + 8,
+            -viewport->oy + ptr->y + ptr->height - 4,
+            (src_center_x - 8) / src_width,
+            (src_center_y + 8) / src_height,
+            (src_center_x + 8) / src_width,
+            (src_center_y + 16) / src_height);
+      }
+    }
+  }
 
   const struct Rect *cursor_rect_ptr = rb_rect_data(ptr->cursor_rect);
 
-  if(ptr->windowskin != Qnil && openness == 255 &&
+  if(skin_surface && openness == 255 &&
       job->aux[0] == content_job_no &&
       cursor_rect_ptr->width > 0 && cursor_rect_ptr->height > 0) {
-    const struct Bitmap *skin_bitmap_ptr = rb_bitmap_data(ptr->windowskin);
-    SDL_Surface *skin_surface = skin_bitmap_ptr->surface;
-    if(!skin_surface) return;
-
     glActiveTexture(GL_TEXTURE0);
     bitmapBindTexture((struct Bitmap *)skin_bitmap_ptr);
 
@@ -850,12 +926,8 @@ static void renderWindow(
         0.0, 0.0, cursor_rect_ptr->width, cursor_rect_ptr->height);
   }
 
-  if(ptr->contents != Qnil && openness == 255 &&
+  if(contents_surface && openness == 255 &&
       job->aux[0] == content_job_no) {
-    const struct Bitmap *contents_bitmap_ptr = rb_bitmap_data(ptr->contents);
-    SDL_Surface *contents_surface = contents_bitmap_ptr->surface;
-    if(!contents_surface) return;
-
     int wcontent_width = ptr->width - padding * 2;
     int wcontent_height = ptr->height - padding - padding_bottom;
     int content_width = contents_surface->w;
