@@ -40,6 +40,7 @@ struct Window {
 #if RGSS >= 2
   int openness;
 #endif
+  int cursor_tick;
 };
 
 bool rb_window_data_p(VALUE obj);

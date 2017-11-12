@@ -279,6 +279,7 @@ static VALUE window_alloc(VALUE klass) {
 #if RGSS == 3
   ptr->tone = Qnil;
 #endif
+  ptr->cursor_tick = 0;
 
   VALUE ret = Data_Wrap_Struct(klass, window_mark, window_free, ptr);
   ptr->contents = rb_bitmap_new(1, 1);
@@ -349,6 +350,7 @@ static VALUE rb_window_m_initialize_copy(VALUE self, VALUE orig) {
 #if RGSS == 3
   ptr->tone = orig_ptr->tone;
 #endif
+  ptr->cursor_tick = orig_ptr->cursor_tick;
   return Qnil;
 }
 
@@ -367,6 +369,7 @@ static VALUE rb_window_m_update(VALUE self) {
   struct Window *ptr = rb_window_data_mut(self);
   (void) ptr;
   WARN_UNIMPLEMENTED("Window#update");
+  ptr->cursor_tick = (ptr->cursor_tick + 1) % 40;
   return Qnil;
 }
 
@@ -461,7 +464,6 @@ static VALUE rb_window_m_active(VALUE self) {
 }
 
 static VALUE rb_window_m_set_active(VALUE self, VALUE newval) {
-  WARN_UNIMPLEMENTED("Window#active");
   struct Window *ptr = rb_window_data_mut(self);
   ptr->active = RTEST(newval);
   return newval;
@@ -826,12 +828,17 @@ static void renderWindow(
     int adjusted_y = ptr->y + cursor_rect_ptr->y + padding;
 #endif
 
+    int cursor_opacity = 128;
+    if(ptr->active) {
+      cursor_opacity = 255 - (20 - abs(ptr->cursor_tick - 20)) * 8;
+    }
+
     glUseProgram(cursor_shader);
     glUniform1i(glGetUniformLocation(cursor_shader, "windowskin"), 0);
     glUniform2f(glGetUniformLocation(cursor_shader, "resolution"),
         viewport->width, viewport->height);
     glUniform1f(glGetUniformLocation(cursor_shader, "opacity"),
-        ptr->contents_opacity / 255.0);
+        ptr->contents_opacity * cursor_opacity / (255.0 * 255.0));
     glUniform2f(glGetUniformLocation(cursor_shader, "cursor_size"),
         cursor_rect_ptr->width, cursor_rect_ptr->height);
 
