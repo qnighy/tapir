@@ -18,9 +18,7 @@
 #include "misc.h"
 
 static GLuint shader1;
-#if RGSS >= 2
 static GLuint shader2;
-#endif
 static GLuint shader3;
 static GLuint shader4;
 static GLuint cursor_shader;
@@ -430,7 +428,6 @@ static VALUE rb_window_m_stretch(VALUE self) {
 }
 
 static VALUE rb_window_m_set_stretch(VALUE self, VALUE newval) {
-  WARN_UNIMPLEMENTED("Window#stretch");
   struct Window *ptr = rb_window_data_mut(self);
   ptr->stretch = RTEST(newval);
   return newval;
@@ -663,7 +660,6 @@ static VALUE rb_window_m_tone(VALUE self) {
 }
 
 static VALUE rb_window_m_set_tone(VALUE self, VALUE newval) {
-  WARN_UNIMPLEMENTED("Window#tone");
   struct Window *ptr = rb_window_data_mut(self);
   rb_tone_set2(ptr->tone, newval);
   return newval;
@@ -754,55 +750,65 @@ static void renderWindow(
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glUseProgram(shader1);
-    glUniform1i(glGetUniformLocation(shader1, "windowskin"), 0);
-    glUniform2f(glGetUniformLocation(shader1, "resolution"),
-        viewport->width, viewport->height);
-    glUniform1f(glGetUniformLocation(shader1, "opacity"),
-        ptr->opacity * ptr->back_opacity / (255.0 * 255.0));
-#if RGSS == 3
-    glUniform4f(glGetUniformLocation(shader1, "window_tone"),
-        tone_ptr->red / 255.0,
-        tone_ptr->green / 255.0,
-        tone_ptr->blue / 255.0,
-        tone_ptr->gray / 255.0);
-#else
-    glUniform4f(glGetUniformLocation(shader1, "window_tone"),
-        0.0, 0.0, 0.0, 0.0);
-#endif
-
-    gl_draw_rect(
-        -viewport->ox + ptr->x + 2,
-        -viewport->oy + open_y + 2,
-        -viewport->ox + ptr->x + ptr->width - 2,
-        -viewport->oy + open_y + open_height - 2,
-        0.0, 0.0, 1.0, 1.0);
-
 #if RGSS >= 2
-    glUseProgram(shader2);
-    glUniform1i(glGetUniformLocation(shader2, "windowskin"), 0);
-    glUniform2f(glGetUniformLocation(shader2, "resolution"),
-        viewport->width, viewport->height);
-    glUniform1f(glGetUniformLocation(shader2, "opacity"),
-        ptr->opacity * ptr->back_opacity / (255.0 * 255.0));
-#if RGSS == 3
-    glUniform4f(glGetUniformLocation(shader2, "window_tone"),
-        tone_ptr->red / 255.0,
-        tone_ptr->green / 255.0,
-        tone_ptr->blue / 255.0,
-        tone_ptr->gray / 255.0);
+    bool use_stretched_background = true;
+    bool use_tiled_background = true;
 #else
-    glUniform4f(glGetUniformLocation(shader2, "window_tone"),
-        0.0, 0.0, 0.0, 0.0);
+    bool use_stretched_background = ptr->stretch;
+    bool use_tiled_background = !ptr->stretch;
 #endif
 
-    gl_draw_rect(
-        -viewport->ox + ptr->x + 2,
-        -viewport->oy + open_y + 2,
-        -viewport->ox + ptr->x + ptr->width - 2,
-        -viewport->oy + open_y + open_height - 2,
-        0.0, 0.0, (ptr->width - 4) / 64.0, (open_height - 4) / 64.0);
+    if(use_stretched_background) {
+      glUseProgram(shader1);
+      glUniform1i(glGetUniformLocation(shader1, "windowskin"), 0);
+      glUniform2f(glGetUniformLocation(shader1, "resolution"),
+          viewport->width, viewport->height);
+      glUniform1f(glGetUniformLocation(shader1, "opacity"),
+          ptr->opacity * ptr->back_opacity / (255.0 * 255.0));
+#if RGSS == 3
+      glUniform4f(glGetUniformLocation(shader1, "window_tone"),
+          tone_ptr->red / 255.0,
+          tone_ptr->green / 255.0,
+          tone_ptr->blue / 255.0,
+          tone_ptr->gray / 255.0);
+#else
+      glUniform4f(glGetUniformLocation(shader1, "window_tone"),
+          0.0, 0.0, 0.0, 0.0);
 #endif
+
+      gl_draw_rect(
+          -viewport->ox + ptr->x + 2,
+          -viewport->oy + open_y + 2,
+          -viewport->ox + ptr->x + ptr->width - 2,
+          -viewport->oy + open_y + open_height - 2,
+          0.0, 0.0, 1.0, 1.0);
+    }
+
+    if(use_tiled_background) {
+      glUseProgram(shader2);
+      glUniform1i(glGetUniformLocation(shader2, "windowskin"), 0);
+      glUniform2f(glGetUniformLocation(shader2, "resolution"),
+          viewport->width, viewport->height);
+      glUniform1f(glGetUniformLocation(shader2, "opacity"),
+          ptr->opacity * ptr->back_opacity / (255.0 * 255.0));
+#if RGSS == 3
+      glUniform4f(glGetUniformLocation(shader2, "window_tone"),
+          tone_ptr->red / 255.0,
+          tone_ptr->green / 255.0,
+          tone_ptr->blue / 255.0,
+          tone_ptr->gray / 255.0);
+#else
+      glUniform4f(glGetUniformLocation(shader2, "window_tone"),
+          0.0, 0.0, 0.0, 0.0);
+#endif
+
+      gl_draw_rect(
+          -viewport->ox + ptr->x + 2,
+          -viewport->oy + open_y + 2,
+          -viewport->ox + ptr->x + ptr->width - 2,
+          -viewport->oy + open_y + open_height - 2,
+          0.0, 0.0, (ptr->width - 4) / 64.0, (open_height - 4) / 64.0);
+    }
 
     glUseProgram(shader3);
     glUniform1i(glGetUniformLocation(shader3, "windowskin"), 0);
@@ -1050,7 +1056,6 @@ void initWindowSDL() {
 
   shader1 = compileShaders(vsh1_source, fsh1_source);
 
-#if RGSS >= 2
   static const char *vsh2_source =
     "#version 120\n"
     "\n"
@@ -1094,7 +1099,6 @@ void initWindowSDL() {
     "}\n";
 
   shader2 = compileShaders(vsh2_source, fsh2_source);
-#endif
 
   static const char *vsh3_source =
     "#version 120\n"
@@ -1255,8 +1259,6 @@ void deinitWindowSDL() {
   if(cursor_shader) glDeleteProgram(cursor_shader);
   if(shader4) glDeleteProgram(shader4);
   if(shader3) glDeleteProgram(shader3);
-#if RGSS >= 2
   if(shader2) glDeleteProgram(shader2);
-#endif
   if(shader1) glDeleteProgram(shader1);
 }
