@@ -771,7 +771,7 @@ static void renderWindow(
         -viewport->oy + open_y + 2,
         -viewport->ox + ptr->x + ptr->width - 2,
         -viewport->oy + open_y + open_height - 2,
-        0.0, 0.0, (ptr->width - 2) / 64.0, (open_height - 2) / 64.0);
+        0.0, 0.0, (ptr->width - 4) / 64.0, (open_height - 4) / 64.0);
 #endif
 
     glUseProgram(shader3);
