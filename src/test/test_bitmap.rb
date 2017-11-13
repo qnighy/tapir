@@ -566,5 +566,75 @@ module RGSSTest
       assert_bitmap_equal2("test_gradient_fill_rect_10", b0)
     end
     end # if RGSS >= 2
+
+    def test_hue_change_1
+      b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
+      b0.hue_change(100)
+      assert_bitmap_equal2("test_hue_change_1", b0)
+    end
+
+    def test_hue_change_2
+      b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
+      b0.hue_change(411)
+      assert_bitmap_equal2("test_hue_change_2", b0)
+    end
+
+    if RGSS >= 2
+    def test_blur_1
+      b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
+      b0.blur
+      assert_bitmap_equal2("test_blur_1", b0)
+    end
+    end # if RGSS >= 2
+
+    if RGSS >= 2
+    def test_blur_2
+      b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
+      b0.blur
+      assert_bitmap_equal2("test_blur_2", b0)
+    end
+    end # if RGSS >= 2
+
+    # def test_generate_checkered
+    #   b0 = Bitmap.new(41, 33)
+    #   9.times do|xx|
+    #     7.times do|yy|
+    #       b0.fill_rect(xx*5, yy*5, 5, 5, Color.new(rand(256), rand(256), rand(256), 255))
+    #     end
+    #   end
+    #   save_bitmap(b0, "#@@imgdir/checkered_41x33.png")
+    # end
+
+    if RGSS >= 2
+    def test_radial_blur_1
+      b0 = Bitmap.new("#@@imgdir/checkered_41x33.png")
+      b0.radial_blur(90, 2)
+      assert_bitmap_equal2("test_radial_blur_1", b0)
+    end
+    end # if RGSS >= 2
+
+    if RGSS >= 2
+    def test_radial_blur_2
+      b0 = Bitmap.new("#@@imgdir/checkered_41x33.png")
+      b0.radial_blur(60, 3)
+      assert_bitmap_equal2("test_radial_blur_2", b0)
+    end
+    end # if RGSS >= 2
+
+    if RGSS >= 2
+    def test_radial_blur_3
+      b0 = Bitmap.new("#@@imgdir/checkered_41x33.png")
+      b0.radial_blur(60, 4)
+      assert_bitmap_equal2("test_radial_blur_3", b0)
+    end
+    end # if RGSS >= 2
+
+    if RGSS >= 2
+    def test_radial_blur_4
+      b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
+      b0.radial_blur(59, 5)
+      assert_bitmap_equal2("test_radial_blur_4", b0)
+    end
+    end # if RGSS >= 2
   end
 end
