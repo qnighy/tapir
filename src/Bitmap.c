@@ -594,8 +594,55 @@ static VALUE rb_bitmap_m_hue_change(VALUE self, VALUE hue) {
 
 #if RGSS >= 2
 static VALUE rb_bitmap_m_blur(VALUE self) {
-  (void) self;
-  WARN_UNIMPLEMENTED("Bitmap#blur");
+  struct Bitmap *ptr = rb_bitmap_data_mut(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  ptr->texture_invalidated = true;
+
+  SDL_Surface *orig = ptr->surface;
+  int w = orig->w;
+  int h = orig->h;
+  SDL_Surface *dest = create_rgba_surface(w, h);
+
+  Uint32 *orig_pixels = orig->pixels;
+  Uint32 *dest_pixels = dest->pixels;
+  for(int y = 0; y < h; ++y) {
+    for(int x = 0; x < w; ++x) {
+      int sum_r = 0, sum_g = 0, sum_b = 0, sum_a = 0;
+      for(int yp = -1; yp <= 1; ++yp) {
+        for(int xp = -1; xp <= 1; ++xp) {
+          int ys = y + yp;
+          int xs = x + xp;
+          ys = ys < 0 ? 0 : ys >= h ? h-1 : ys;
+          xs = xs < 0 ? 0 : xs >= w ? w-1 : xs;
+          Uint32 src_rgba = orig_pixels[ys * w + xs];
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+          sum_r += (src_rgba >> 24) & 0xff;
+          sum_g += (src_rgba >> 16) & 0xff;
+          sum_b += (src_rgba >> 8) & 0xff;
+          sum_a += src_rgba & 0xff;
+#else
+          sum_r += src_rgba & 0xff;
+          sum_g += (src_rgba >> 8) & 0xff;
+          sum_b += (src_rgba >> 16) & 0xff;
+          sum_a += (src_rgba >> 24) & 0xff;
+#endif
+        }
+      }
+      int red = sum_r / 9;
+      int green = sum_g / 9;
+      int blue = sum_b / 9;
+      int alpha = sum_a / 9;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+      Uint32 color = (red << 24) | (green << 16) | (blue << 8) | alpha;
+#else
+      Uint32 color = red | (green << 8) | (blue << 16) | (alpha << 24);
+#endif
+      dest_pixels[y * w + x] = color;
+    }
+  }
+
+  ptr->surface = dest;
+  SDL_FreeSurface(orig);
   return Qnil;
 }
 
