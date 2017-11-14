@@ -579,7 +579,9 @@ static VALUE rb_bitmap_m_blur(VALUE self) {
   SDL_Surface *orig = ptr->surface;
   int w = orig->w;
   int h = orig->h;
+  int orig_pitch = orig->pitch / 4;
   SDL_Surface *dest = create_rgba_surface(w, h);
+  int dest_pitch = dest->pitch / 4;
 
   Uint32 *orig_pixels = orig->pixels;
   Uint32 *dest_pixels = dest->pixels;
@@ -592,7 +594,7 @@ static VALUE rb_bitmap_m_blur(VALUE self) {
           int xs = x + xp;
           ys = ys < 0 ? 0 : ys >= h ? h-1 : ys;
           xs = xs < 0 ? 0 : xs >= w ? w-1 : xs;
-          Uint32 src_rgba = orig_pixels[ys * w + xs];
+          Uint32 src_rgba = orig_pixels[ys * orig_pitch + xs];
           sum_r += RGBA32_R(src_rgba);
           sum_g += RGBA32_G(src_rgba);
           sum_b += RGBA32_B(src_rgba);
@@ -604,7 +606,7 @@ static VALUE rb_bitmap_m_blur(VALUE self) {
       int blue = sum_b / 9;
       int alpha = sum_a / 9;
       Uint32 color = RGBA32(red, green, blue, alpha);
-      dest_pixels[y * w + x] = color;
+      dest_pixels[y * dest_pitch + x] = color;
     }
   }
 
