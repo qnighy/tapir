@@ -11,7 +11,7 @@ RUBY_PLATFORM := $(shell $(RUBY_DIR)/bin/ruby -e 'print RUBY_PLATFORM')
 
 bin_PROGRAMS = $(EXEC)
 tapir_SOURCES = main.c main_rb.c archive.c openres.c gl_misc.c sdl_misc.c \
-		misc.c font_lookup.c ini.c tapir_config.c \
+		surface_misc.c misc.c font_lookup.c ini.c tapir_config.c \
 		Bitmap.c BitmapArray.c \
 		Audio.c Color.c Font.c Graphics.c Input.c Plane.c \
 		RGSSError.c RGSSReset.c Rect.c Sprite.c Table.c Tilemap.c \

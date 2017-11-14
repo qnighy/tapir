@@ -17,6 +17,7 @@
 #include "openres.h"
 #include "misc.h"
 #include "sdl_misc.h"
+#include "surface_misc.h"
 
 static void bitmap_mark(struct Bitmap *ptr);
 static void bitmap_free(struct Bitmap *ptr);
