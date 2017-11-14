@@ -307,25 +307,14 @@ static void blt(
       }
       Uint32 src_rgba = src_pixels[sy * src_pitch + sx];
       Uint32 dst_rgba = dst_pixels[dy * dst_pitch + dx];
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-      Uint32 src_r = (src_rgba >> 24) & 0xff;
-      Uint32 src_g = (src_rgba >> 16) & 0xff;
-      Uint32 src_b = (src_rgba >> 8) & 0xff;
-      Uint32 src_a = src_rgba & 0xff;
-      Uint32 dst_r = (dst_rgba >> 24) & 0xff;
-      Uint32 dst_g = (dst_rgba >> 16) & 0xff;
-      Uint32 dst_b = (dst_rgba >> 8) & 0xff;
-      Uint32 dst_a = dst_rgba & 0xff;
-#else
-      Uint32 src_r = src_rgba & 0xff;
-      Uint32 src_g = (src_rgba >> 8) & 0xff;
-      Uint32 src_b = (src_rgba >> 16) & 0xff;
-      Uint32 src_a = (src_rgba >> 24) & 0xff;
-      Uint32 dst_r = dst_rgba & 0xff;
-      Uint32 dst_g = (dst_rgba >> 8) & 0xff;
-      Uint32 dst_b = (dst_rgba >> 16) & 0xff;
-      Uint32 dst_a = (dst_rgba >> 24) & 0xff;
-#endif
+      Uint32 src_r = RGBA32_R(src_rgba);
+      Uint32 src_g = RGBA32_G(src_rgba);
+      Uint32 src_b = RGBA32_B(src_rgba);
+      Uint32 src_a = RGBA32_A(src_rgba);
+      Uint32 dst_r = RGBA32_R(dst_rgba);
+      Uint32 dst_g = RGBA32_G(dst_rgba);
+      Uint32 dst_b = RGBA32_B(dst_rgba);
+      Uint32 dst_a = RGBA32_A(dst_rgba);
 
       src_a = (src_a * opacity * 2 + 255) / (255 * 2);
       Uint32 denom = 255 * src_a + (255 - src_a) * dst_a;
@@ -342,11 +331,7 @@ static void blt(
       Uint32 new_r = (dst_r * dst_o + src_r * src_o) / 256;
       Uint32 new_g = (dst_g * dst_o + src_g * src_o) / 256;
       Uint32 new_b = (dst_b * dst_o + src_b * src_o) / 256;
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-      Uint32 new_rgba = (new_r << 24) | (new_g << 16) | (new_b << 8) | new_a;
-#else
-      Uint32 new_rgba = new_r | (new_g << 8) | (new_b << 16) | (new_a << 24);
-#endif
+      Uint32 new_rgba = RGBA32(new_r, new_g, new_b, new_a);
       dst_pixels[dy * dst_pitch + dx] = new_rgba;
     }
   }
@@ -433,11 +418,7 @@ static VALUE rb_bitmap_m_fill_rect(int argc, VALUE *argv, VALUE self) {
   Uint32 green = (Uint8)color_ptr->green;
   Uint32 blue = (Uint8)color_ptr->blue;
   Uint32 alpha = (Uint8)color_ptr->alpha;
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-  Uint32 color = (red << 24) | (green << 16) | (blue << 8) | alpha;
-#else
-  Uint32 color = red | (green << 8) | (blue << 16) | (alpha << 24);
-#endif
+  Uint32 color = RGBA32(red, green, blue, alpha);
   SDL_FillRect(ptr->surface, &sdl_rect, color);
   return Qnil;
 }
@@ -501,11 +482,7 @@ static VALUE rb_bitmap_m_gradient_fill_rect(
       Uint32 green = green1 + (int)(green2 - green1) * i / l;
       Uint32 blue = blue1 + (int)(blue2 - blue1) * i / l;
       Uint32 alpha = alpha1 + (int)(alpha2 - alpha1) * i / l;
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-      Uint32 color = (red << 24) | (green << 16) | (blue << 8) | alpha;
-#else
-      Uint32 color = red | (green << 8) | (blue << 16) | (alpha << 24);
-#endif
+      Uint32 color = RGBA32(red, green, blue, alpha);
       pixels[y * pitch + x] = color;
     }
   }
@@ -616,28 +593,17 @@ static VALUE rb_bitmap_m_blur(VALUE self) {
           ys = ys < 0 ? 0 : ys >= h ? h-1 : ys;
           xs = xs < 0 ? 0 : xs >= w ? w-1 : xs;
           Uint32 src_rgba = orig_pixels[ys * w + xs];
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-          sum_r += (src_rgba >> 24) & 0xff;
-          sum_g += (src_rgba >> 16) & 0xff;
-          sum_b += (src_rgba >> 8) & 0xff;
-          sum_a += src_rgba & 0xff;
-#else
-          sum_r += src_rgba & 0xff;
-          sum_g += (src_rgba >> 8) & 0xff;
-          sum_b += (src_rgba >> 16) & 0xff;
-          sum_a += (src_rgba >> 24) & 0xff;
-#endif
+          sum_r += RGBA32_R(src_rgba);
+          sum_g += RGBA32_G(src_rgba);
+          sum_b += RGBA32_B(src_rgba);
+          sum_a += RGBA32_A(src_rgba);
         }
       }
       int red = sum_r / 9;
       int green = sum_g / 9;
       int blue = sum_b / 9;
       int alpha = sum_a / 9;
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-      Uint32 color = (red << 24) | (green << 16) | (blue << 8) | alpha;
-#else
-      Uint32 color = red | (green << 8) | (blue << 16) | (alpha << 24);
-#endif
+      Uint32 color = RGBA32(red, green, blue, alpha);
       dest_pixels[y * w + x] = color;
     }
   }

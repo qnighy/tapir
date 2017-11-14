@@ -12,6 +12,20 @@
 
 #include <SDL.h>
 
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+#define RGBA32_R(rgba) (((rgba) >> 24) & 0xff)
+#define RGBA32_G(rgba) (((rgba) >> 16) & 0xff)
+#define RGBA32_B(rgba) (((rgba) >> 8) & 0xff)
+#define RGBA32_A(rgba) ((rgba) & 0xff)
+#define RGBA32(r, g, b, a) (((r) << 24) | ((g) << 16) | ((b) << 8) | (a))
+#else
+#define RGBA32_R(rgba) ((rgba) & 0xff)
+#define RGBA32_G(rgba) (((rgba) >> 8) & 0xff)
+#define RGBA32_B(rgba) (((rgba) >> 16) & 0xff)
+#define RGBA32_A(rgba) (((rgba) >> 24) & 0xff)
+#define RGBA32(r, g, b, a) ((r) | ((g) << 8) | ((b) << 16) | ((a) << 24))
+#endif
+
 SDL_Surface *create_rgba_surface(int width, int height);
 SDL_Surface *create_rgba_surface_from(SDL_Surface *orig);
 
