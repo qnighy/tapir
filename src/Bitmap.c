@@ -79,10 +79,8 @@ void bitmapBindTexture(struct Bitmap *ptr) {
   }
   glBindTexture(GL_TEXTURE_2D, ptr->texture_id);
   if(ptr->texture_invalidated) {
-    SDL_LockSurface(ptr->surface);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ptr->surface->w, ptr->surface->h,
         0, GL_RGBA, GL_UNSIGNED_BYTE, ptr->surface->pixels);
-    SDL_UnlockSurface(ptr->surface);
     ptr->texture_invalidated = false;
   }
 }
@@ -280,9 +278,6 @@ static void blt(
     SDL_Surface *dst, SDL_Surface *src,
     int dst_x, int dst_y, int dst_w, int dst_h,
     int src_x, int src_y, int src_w, int src_h, int opacity) {
-  SDL_LockSurface(dst);
-  SDL_LockSurface(src);
-
   Uint32 *src_pixels = src->pixels;
   int src_pitch = src->pitch / 4;
   Uint32 *dst_pixels = dst->pixels;
@@ -335,9 +330,6 @@ static void blt(
       dst_pixels[dy * dst_pitch + dx] = new_rgba;
     }
   }
-
-  SDL_UnlockSurface(src);
-  SDL_UnlockSurface(dst);
 }
 
 static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self) {
@@ -533,12 +525,10 @@ static VALUE rb_bitmap_m_get_pixel(VALUE self, VALUE x, VALUE y) {
   if(!(0 <= xi && xi < ptr->surface->w && 0 <= yi && yi < ptr->surface->h)) {
     return rb_color_new2();
   }
-  SDL_LockSurface(ptr->surface);
   Uint8 *pixel =
     (Uint8*)ptr->surface->pixels + yi * ptr->surface->pitch + xi * 4;
   VALUE color = rb_color_new(
     pixel[0], pixel[1], pixel[2], pixel[3]);
-  SDL_UnlockSurface(ptr->surface);
   return color;
 }
 
@@ -552,14 +542,12 @@ static VALUE rb_bitmap_m_set_pixel(VALUE self, VALUE x, VALUE y, VALUE color) {
   if(!(0 <= xi && xi < ptr->surface->w && 0 <= yi && yi < ptr->surface->h)) {
     return Qnil;
   }
-  SDL_LockSurface(ptr->surface);
   Uint8 *pixel =
     (Uint8*)ptr->surface->pixels + yi * ptr->surface->pitch + xi * 4;
   pixel[0] = color_ptr->red;
   pixel[1] = color_ptr->green;
   pixel[2] = color_ptr->blue;
   pixel[3] = color_ptr->alpha;
-  SDL_UnlockSurface(ptr->surface);
   return Qnil;
 }
 
