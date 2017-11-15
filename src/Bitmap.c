@@ -552,9 +552,82 @@ static VALUE rb_bitmap_m_set_pixel(VALUE self, VALUE x, VALUE y, VALUE color) {
 }
 
 static VALUE rb_bitmap_m_hue_change(VALUE self, VALUE hue) {
-  (void) self;
-  (void) hue;
-  WARN_UNIMPLEMENTED("Bitmap#hue_change");
+  struct Bitmap *ptr = rb_bitmap_data_mut(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  ptr->texture_invalidated = true;
+  SDL_Surface *surface = ptr->surface;
+  int w = surface->w;
+  int h = surface->h;
+  int pitch = surface->pitch / 4;
+  Uint32 *pixels = surface->pixels;
+  int hue_i = NUM2INT(hue);
+
+  if(hue_i == 0) return Qnil;
+
+  for(int y = 0; y < h; ++y) {
+    for(int x = 0; x < w; ++x) {
+      Uint32 rgba = pixels[y * pitch + x];
+      int r = RGBA32_R(rgba);
+      int g = RGBA32_G(rgba);
+      int b = RGBA32_B(rgba);
+      int a = RGBA32_A(rgba);
+      int minval = r;
+      if(minval > g) minval = g;
+      if(minval > b) minval = b;
+      int maxval = r;
+      if(maxval < g) maxval = g;
+      if(maxval < b) maxval = b;
+      int dif = maxval - minval;
+      if(dif == 0) continue;
+      int hue2;
+      if(maxval == r) {
+        hue2 = (g - b) * 60 / dif;
+        if(hue2 < 0) hue2 += 360;
+      } else if(maxval == g) {
+        hue2 = (b - r) * 60 / dif + 120;
+      } else {
+        hue2 = (r - g) * 60 / dif + 240;
+      }
+
+      hue2 = (hue2 + hue_i) % 360;
+      if(hue2 < 0) hue2 += 360;
+
+      if(hue2 < 60) {
+        // r > g > b
+        r = maxval;
+        g = minval + dif * hue2 / 60;
+        b = minval;
+      } else if(hue2 < 120) {
+        // g > r > b
+        r = minval + dif * (120 - hue2) / 60;
+        g = maxval;
+        b = minval;
+      } else if(hue2 < 180) {
+        // g > b > r
+        r = minval;
+        g = maxval;
+        b = minval + dif * (hue2 - 120) / 60;
+      } else if(hue2 < 240) {
+        // b > g > r
+        r = minval;
+        g = minval + dif * (240 - hue2) / 60;
+        b = maxval;
+      } else if(hue2 < 300) {
+        // b > r > g
+        r = minval + dif * (hue2 - 240) / 60;
+        g = minval;
+        b = maxval;
+      } else {
+        // r > b > g
+        r = maxval;
+        g = minval;
+        b = minval + dif * (360 - hue2) / 60;
+      }
+
+      rgba = RGBA32(r, g, b, a);
+      pixels[y * pitch + x] = rgba;
+    }
+  }
   return Qnil;
 }
 
