@@ -677,10 +677,66 @@ static VALUE rb_bitmap_m_blur(VALUE self) {
 }
 
 static VALUE rb_bitmap_m_radial_blur(VALUE self, VALUE angle, VALUE division) {
-  (void) self;
-  (void) angle;
-  (void) division;
-  WARN_UNIMPLEMENTED("Bitmap#radial_blur");
+  struct Bitmap *ptr = rb_bitmap_data_mut(self);
+  if(!ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
+  ptr->texture_invalidated = true;
+
+  int angle_i = NUM2INT(angle);
+  double angle_rad = angle_i * (3.1415926535897932384 / 180.0);
+  int division_i = NUM2INT(division);
+  if(division_i < 2) return Qnil;
+
+  SDL_Surface *orig = ptr->surface;
+  int w = orig->w;
+  int h = orig->h;
+  int orig_pitch = orig->pitch / 4;
+  SDL_Surface *dest = create_rgba_surface(w, h);
+  int dest_pitch = dest->pitch / 4;
+
+  Uint32 *orig_pixels = orig->pixels;
+  Uint32 *dest_pixels = dest->pixels;
+
+  double *sins = malloc(sizeof(*sins) * division);
+  double *coss = malloc(sizeof(*coss) * division);
+  for(int i = 0; i < division_i; ++i) {
+    double theta = angle_rad * ((double)i / (division_i - 1) - 0.5);
+    sins[i] = sin(theta);
+    coss[i] = cos(theta);
+  }
+  double centerx = (w - 1) * 0.5;
+  double centery = (h - 1) * 0.5;
+
+  for(int y = 0; y < h; ++y) {
+    for(int x = 0; x < w; ++x) {
+      int sum_r = 0, sum_g = 0, sum_b = 0, sum_a = 0;
+      for(int i = 0; i < division_i; ++i) {
+        int xrel = x - centerx;
+        int yrel = y - centery;
+        int xs = xrel * coss[i] - yrel * sins[i] + centerx + 0.5;
+        int ys = xrel * sins[i] + yrel * coss[i] + centery + 0.5;
+        ys = ys < 0 ? -ys : ys >= h ? h*2-1-ys : ys;
+        xs = xs < 0 ? -xs : xs >= w ? w*2-1-xs : xs;
+        ys = ys < 0 ? 0 : ys >= h ? h-1 : ys;
+        xs = xs < 0 ? 0 : xs >= w ? w-1 : xs;
+        Uint32 src_rgba = orig_pixels[ys * orig_pitch + xs];
+        sum_r += RGBA32_R(src_rgba);
+        sum_g += RGBA32_G(src_rgba);
+        sum_b += RGBA32_B(src_rgba);
+        sum_a += RGBA32_A(src_rgba);
+      }
+      int red = sum_r / division_i;
+      int green = sum_g / division_i;
+      int blue = sum_b / division_i;
+      int alpha = sum_a / division_i;
+      Uint32 color = RGBA32(red, green, blue, alpha);
+      dest_pixels[y * dest_pitch + x] = color;
+    }
+  }
+  free(sins);
+  free(coss);
+
+  ptr->surface = dest;
+  SDL_FreeSurface(orig);
   return Qnil;
 }
 #endif
