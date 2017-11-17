@@ -28,6 +28,7 @@ struct Sprite {
 #endif
   int bush_depth, opacity, blend_type;
   int flash_duration, flash_count;
+  bool flash_is_nil;
   double zoom_x, zoom_y, angle;
 #if RGSS >= 2
   double wave_phase;

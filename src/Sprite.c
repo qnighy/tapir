@@ -242,6 +242,7 @@ static VALUE sprite_alloc(VALUE klass) {
   ptr->flash_color = Qnil;
   ptr->flash_duration = 0;
   ptr->flash_count = 0;
+  ptr->flash_is_nil = false;
   VALUE ret = Data_Wrap_Struct(klass, sprite_mark, sprite_free, ptr);
   ptr->src_rect = rb_rect_new2();
   ptr->color = rb_color_new2();
@@ -308,6 +309,7 @@ static VALUE rb_sprite_m_initialize_copy(VALUE self, VALUE orig) {
   rb_color_set2(ptr->flash_color, orig_ptr->flash_color);
   ptr->flash_duration = orig_ptr->flash_duration;
   ptr->flash_count = orig_ptr->flash_count;
+  ptr->flash_is_nil = orig_ptr->flash_is_nil;
   return Qnil;
 }
 
@@ -324,7 +326,12 @@ static VALUE rb_sprite_m_disposed_p(VALUE self) {
 
 static VALUE rb_sprite_m_flash(VALUE self, VALUE color, VALUE duration) {
   struct Sprite *ptr = rb_sprite_data_mut(self);
-  rb_color_set2(ptr->flash_color, color);
+  if(color == Qnil) {
+    ptr->flash_is_nil = true;
+  } else {
+    ptr->flash_is_nil = false;
+    rb_color_set2(ptr->flash_color, color);
+  }
   ptr->flash_duration = NUM2INT(duration);
   ptr->flash_count = 0;
   return Qnil;
@@ -643,6 +650,7 @@ static void renderSprite(
 
   const struct Color *color_ptr = rb_color_data(ptr->color);
   const struct Color *flash_color_ptr = rb_color_data(ptr->flash_color);
+  if(ptr->flash_duration > 0 && ptr->flash_is_nil) return;
   double flash_opacity =
     ptr->flash_duration <= 0 ? 0.0 :
     1.0 - (double)ptr->flash_count / ptr->flash_duration;
