@@ -1,6 +1,37 @@
 <!doctype html>
 <html lang="{{ page.lang }}">
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tapir: {{ page.title }}</title>
-<h1>{{ page.title }} - Tapir</h1>
-{{ content }}
+<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+<!--[if lte IE 8]>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-old-ie-min.css">
+<![endif]-->
+<!--[if gt IE 8]><!-->
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-min.css">
+<!--<![endif]-->
+<link rel="stylesheet" href="css/tapir-www.css">
+{% if page.url == "/" %}
+{% assign index_menu_class = "pure-menu-selected" %}
+{% endif %}
+{% if page.url == "/download.html" %}
+{% assign download_menu_class = "pure-menu-selected" %}
+{% endif %}
+<div class="header">
+  <div class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed">
+    <a class="pure-menu-heading" href="index.html">Tapir</a>
+
+    <ul class="pure-menu-list">
+      <li class="pure-menu-item {{ index_menu_class }}"><a href="index.html" class="pure-menu-link">Home</a></li>
+      <li class="pure-menu-item {{ download_menu_class }}"><a href="download.html" class="pure-menu-link">Download</a></li>
+    </ul>
+  </div>
+</div>
+<div class="content">
+  {% if page.title == "Home" %}
+  <h1>Tapir</h1>
+  {% else %}
+  <h1>{{ page.title }} - Tapir</h1>
+  {% endif %}
+  {{ content }}
+</div>

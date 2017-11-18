@@ -1,6 +1,6 @@
 ---
 lang: en
-title: hoge
+title: Home
 ---
 
 **Tapir** (<i>/téipər/</i>, same as "taper") is an RGSS-compatible runtime. In short, this is a kind of **emulator for RPG Maker XP, VX, and VX Ace**.
