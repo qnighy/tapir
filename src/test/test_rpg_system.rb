@@ -8,9 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGSystem
-    include RGSSTest
-
+  class TestRPGSystem < Test
     @@klass = RPG::System
 
     def test_superclass
@@ -431,10 +429,9 @@ module RGSSTest
     end
   end
 
-  class TestRPGSystemVehicle
-    include RGSSTest
-
-    @@klass = RPG::System::Vehicle if RGSS >= 2
+  if RGSS >= 2
+  class TestRPGSystemVehicle < Test
+    @@klass = RPG::System::Vehicle
 
     def test_superclass
       assert_equal(@@klass.superclass, Object)
@@ -481,10 +478,9 @@ module RGSSTest
       assert_equal(obj.start_y, 0)
     end
   end
+  end # if RGSS >= 2
 
-  class TestRPGSystemTerms
-    include RGSSTest
-
+  class TestRPGSystemTerms < Test
     if RGSS >= 2
       @@klass = RPG::System::Terms
     else
@@ -621,9 +617,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGSystemTestBattler
-    include RGSSTest
-
+  class TestRPGSystemTestBattler < Test
     @@klass = RPG::System::TestBattler
 
     def test_superclass
@@ -685,9 +679,4 @@ module RGSSTest
       end
     end
   end
-
-  run_test(TestRPGSystem)
-  run_test(TestRPGSystemVehicle) if RGSS >= 2
-  run_test(TestRPGSystemTerms)
-  run_test(TestRPGSystemTestBattler)
 end

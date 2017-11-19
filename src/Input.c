@@ -7,12 +7,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "Input.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "Input.h"
 #include "misc.h"
 #include "sdl_misc.h"
-#include "config.h"
+#include "tapir_config.h"
 
 VALUE rb_mInput;
 

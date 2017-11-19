@@ -1,0 +1,16 @@
+/.debhelper/
+*.debhelper
+/*.debhelper.log
+/debhelper-build-stamp
+
+/files
+
+/*.substvars
+/substvars
+
+/tmp/
+/rgss1-rtp-installer/
+/rgss2-rtp-installer/
+/rgss3-rtp-installer/
+/tapir-bin/
+/tapir/

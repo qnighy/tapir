@@ -8,10 +8,9 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGTileset
-    include RGSSTest
-
-    @@klass = RPG::Tileset if RGSS == 1 || RGSS == 3
+  if RGSS == 1 || RGSS == 3
+  class TestRPGTileset < Test
+    @@klass = RPG::Tileset
 
     def test_superclass
       assert_equal(@@klass.superclass, Object)
@@ -105,6 +104,5 @@ module RGSSTest
       end
     end
   end
-
-  run_test(TestRPGTileset) if RGSS == 1 || RGSS == 3
+  end # if RGSS == 1 || RGSS == 3
 end

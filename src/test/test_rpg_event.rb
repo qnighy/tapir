@@ -8,9 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGEvent
-    include RGSSTest
-
+  class TestRPGEvent < Test
     @@klass = RPG::Event
 
     def test_superclass
@@ -55,9 +53,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGEventPage
-    include RGSSTest
-
+  class TestRPGEventPage < Test
     @@klass = RPG::Event::Page
 
     def test_superclass
@@ -148,9 +144,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGEventPageCondition
-    include RGSSTest
-
+  class TestRPGEventPageCondition < Test
     @@klass = RPG::Event::Page::Condition
 
     def test_superclass
@@ -236,9 +230,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGEventPageGraphic
-    include RGSSTest
-
+  class TestRPGEventPageGraphic < Test
     @@klass = RPG::Event::Page::Graphic
 
     def test_superclass
@@ -307,9 +299,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGEventCommand
-    include RGSSTest
-
+  class TestRPGEventCommand < Test
     @@klass = RPG::EventCommand
 
     def test_superclass
@@ -365,9 +355,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGMoveRoute
-    include RGSSTest
-
+  class TestRPGMoveRoute < Test
     @@klass = RPG::MoveRoute
 
     def test_superclass
@@ -422,9 +410,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGMoveCommand
-    include RGSSTest
-
+  class TestRPGMoveCommand < Test
     @@klass = RPG::MoveCommand
 
     def test_superclass
@@ -470,12 +456,4 @@ module RGSSTest
       assert_raise(ArgumentError) { @@klass.new(:hoge, :fuga, :piyo) }
     end
   end
-
-  run_test(TestRPGEvent)
-  run_test(TestRPGEventPage)
-  run_test(TestRPGEventPageCondition)
-  run_test(TestRPGEventPageGraphic)
-  run_test(TestRPGEventCommand)
-  run_test(TestRPGMoveRoute)
-  run_test(TestRPGMoveCommand)
 end

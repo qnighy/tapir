@@ -7,12 +7,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "ini.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <iconv.h>
-#include "ini.h"
 
 // 932 is the default code page for Japanese Windows environment.
 int ansi_code_page = 932;
@@ -53,14 +53,15 @@ struct buffer convert_all(
     size_t iconv_inbytesleft = inbuf.size - inpos;
     char *iconv_outbuf = outbuf.buf + outbuf.size;
     size_t iconv_outbytesleft = outbuf.capacity - outbuf.size;
-    size_t numconverted = iconv(
+    size_t irrev = iconv(
         cd, &iconv_inbuf, &iconv_inbytesleft, &iconv_outbuf,
         &iconv_outbytesleft);
     // TODO: error handling
-    if(numconverted == (size_t)(-1)) break;
-    if(numconverted == 0) {
+    if(irrev == (size_t)(-1)) break;
+    if(iconv_inbuf == inbuf.buf + inpos) {
       outbuf.capacity += outbuf.capacity / 2;
       outbuf.buf = realloc(outbuf.buf, outbuf.capacity);
+      continue;
     }
     inpos = iconv_inbuf - inbuf.buf;
     outbuf.size = iconv_outbuf - outbuf.buf;

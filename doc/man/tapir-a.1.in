@@ -1,0 +1,51 @@
+.TH TAPIR "1" "October 2017" "tapir @PACKAGE_VERSION@" "User Commands"
+.SH NAME
+tapir-a \- RPG Maker VX Ace emulator
+.SH SYNOPSIS
+.B tapir-a
+[\-h] [\-\-help] [\-d \fIDIR\fR] [test] [btest] [console]
+
+.SH DESCRIPTION
+This program is a compatible runtime for RGSS (Ruby Game Scripting System) 3,
+which can run games made with RPG Maker VX Ace.
+
+Usually
+.BR tapir (1)
+is more convenient because it automatically chooses which version to invoke.
+
+.SH OPTIONS
+
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Display the help message.
+.TP
+\fB\-d\fR \fIDIR\fR
+Specify the game directory.
+.TP
+\fBtest\fR
+Enable testing mode.
+.TP
+\fBbtest\fR
+Enable battle-testing mode.
+.TP
+\fBconsole\fR
+Unused. This option exists for compatibility with RGSS3.
+
+.SH "EXAMPLES"
+To execute a game named "Sakusaku":
+    $ tapir-a -d path/to/Sakusaku
+
+.SH SEE ALSO
+.BR tapir (1),
+.BR tapir-x (1),
+.BR tapir-v (1)
+
+.SH "BUGS"
+See https://github.com/qnighy/tapir/issues for issues.
+
+.SH "AUTHOR"
+Masaki Hara
+
+.SH "COPYRIGHT"
+This work is dual\[hy]licensed under Apache\ 2.0 and MIT terms.
+See \fICOPYRIGHT\fR file in the tapir source distribution.

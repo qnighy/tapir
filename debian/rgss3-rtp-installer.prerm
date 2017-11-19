@@ -1,0 +1,26 @@
+#!/bin/sh
+set -e
+
+RTP_STAMP="/usr/lib/rgss3-rtp-installer/rtp100.stamp"
+RTP_INSTALL_DIR="/usr/share/Enterbrain/RGSS3/RPGVXAce"
+
+case "$1" in
+  remove)
+    rm -f "$RTP_STAMP"
+    rm -rf "$RTP_INSTALL_DIR"
+    ;;
+  upgrade|deconfigure)
+    ;;
+
+  failed-upgrade)
+    ;;
+
+  *)
+    echo "prerm called with unknown argument \`$1'" >&2
+    exit 1
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0

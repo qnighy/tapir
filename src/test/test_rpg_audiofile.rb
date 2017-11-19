@@ -38,9 +38,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGAudioFile
-    include RGSSTest
-
+  class TestRPGAudioFile < Test
     @@klass = RPG::AudioFile
 
     def test_superclass
@@ -116,12 +114,12 @@ module RGSSTest
     end
   end
 
-  class TestRPGBGM
-    include RGSSTest
+  if RGSS >= 2
+  class TestRPGBGM < Test
     include MockAudio
 
-    @@klass = RPG::BGM if RGSS >= 2
-    @@last = RPG::BGM.class_eval("@@last") if RGSS >= 2
+    @@klass = RPG::BGM
+    @@last = RPG::BGM.class_eval("@@last")
 
     def test_superclass
       assert_equal(@@klass.superclass, RPG::AudioFile)
@@ -247,8 +245,8 @@ module RGSSTest
       assert_equal(history, [[:bgm_stop]])
     end
 
+    if RGSS == 3
     def test_replay
-      RGSS == 3 or return
       history = mock_audio {
         @@klass.class_eval("@@last = nil")
         obj = @@klass.new("hoge", 22, 37)
@@ -264,6 +262,7 @@ module RGSSTest
       }
       assert_equal(history, [[:bgm_play, "Audio/BGM/hoge", 22, 37, 24]])
     end
+    end # if RGSS == 3
 
     def test_stop
       history = mock_audio {
@@ -293,13 +292,14 @@ module RGSSTest
       assert_equal(history, [[:bgm_fade, 48]])
     end
   end
+  end # if RGSS >= 2
 
-  class TestRPGBGS
-    include RGSSTest
+  if RGSS >= 2
+  class TestRPGBGS < Test
     include MockAudio
 
-    @@klass = RPG::BGS if RGSS >= 2
-    @@last = RPG::BGS.class_eval("@@last") if RGSS >= 2
+    @@klass = RPG::BGS
+    @@last = RPG::BGS.class_eval("@@last")
 
     def test_superclass
       assert_equal(@@klass.superclass, RPG::AudioFile)
@@ -425,8 +425,8 @@ module RGSSTest
       assert_equal(history, [[:bgs_stop]])
     end
 
+    if RGSS == 3
     def test_replay
-      RGSS == 3 or return
       history = mock_audio {
         @@klass.class_eval("@@last = nil")
         obj = @@klass.new("hoge", 22, 37)
@@ -442,6 +442,7 @@ module RGSSTest
       }
       assert_equal(history, [[:bgs_play, "Audio/BGS/hoge", 22, 37, 24]])
     end
+    end # if RGSS == 3
 
     def test_stop
       history = mock_audio {
@@ -471,12 +472,13 @@ module RGSSTest
       assert_equal(history, [[:bgs_fade, 48]])
     end
   end
+  end # if RGSS >= 2
 
-  class TestRPGME
-    include RGSSTest
+  if RGSS >= 2
+  class TestRPGME < Test
     include MockAudio
 
-    @@klass = RPG::ME if RGSS >= 2
+    @@klass = RPG::ME
 
     def test_superclass
       assert_equal(@@klass.superclass, RPG::AudioFile)
@@ -557,12 +559,13 @@ module RGSSTest
       assert_equal(history, [[:me_fade, 48]])
     end
   end
+  end # if RGSS >= 2
 
-  class TestRPGSE
-    include RGSSTest
+  if RGSS >= 2
+  class TestRPGSE < Test
     include MockAudio
 
-    @@klass = RPG::SE if RGSS >= 2
+    @@klass = RPG::SE
 
     def test_superclass
       assert_equal(@@klass.superclass, RPG::AudioFile)
@@ -636,13 +639,5 @@ module RGSSTest
       assert_equal(history, [[:se_stop]])
     end
   end
-
-  run_test(TestRPGAudioFile)
-
-  if RGSS >= 2
-    run_test(TestRPGBGM)
-    run_test(TestRPGBGS)
-    run_test(TestRPGME)
-    run_test(TestRPGSE)
-  end
+  end # if RGSS >= 2
 end

@@ -67,7 +67,4 @@ void freeze_screen(void);
 void defreeze_screen(void);
 void load_transition_image(const char *filename, int vagueness);
 
-SDL_Surface *create_rgba_surface(int width, int height);
-SDL_Surface *create_rgba_surface_from(SDL_Surface *orig);
-
 #endif /* SDL_MISC_H */

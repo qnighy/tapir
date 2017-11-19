@@ -7,10 +7,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "Win32APIFake.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include "Win32APIFake.h"
 #include "misc.h"
 
 struct Win32Rect {

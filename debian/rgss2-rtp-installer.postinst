@@ -1,0 +1,102 @@
+#!/bin/sh
+set -e
+
+tmpdir="$(mktemp -d -t rgss2-rtp-installer.XXXXXXXXXX)"
+
+RTP_STAMP="/usr/lib/rgss2-rtp-installer/rtp102e.stamp"
+RTP_URL="https://s3-ap-northeast-1.amazonaws.com/degica-prod.product-files/19/vx_rtp102e.zip"
+RTP_FILENAME="/var/cache/rgss2-rtp-installer/vx_rtp102e.zip"
+RTP_FILENAME2="$tmpdir/RPGVX_RTP/Setup.exe"
+RTP_EXTRACT_DIR="$tmpdir/vx_rtp"
+RTP_INSTALL_DIR="/usr/share/Enterbrain/RGSS2/RPGVX"
+
+install_rtp() {
+  if [ -e "$RTP_STAMP" ]; then
+    # Already installed
+    return 0
+  fi
+
+  license_question="rgss2-rtp-installer/accepted-license-2008-02-09"
+
+  db_get $license_question
+  if [ "$RET" = false ]; then
+    rm -f "$RTP_STAMP"
+    rm -rf "$RTP_INSTALL_DIR"/*
+    mkdir -p "$RTP_INSTALL_DIR"
+    cat > "$RTP_INSTALL_DIR"/README <<EOD
+License refused.
+
+Please reinstall the rgss2-rtp-installer package (e.g. via
+ apt install --reinstall rgss2-rtp-installer
+to get prompted for the license again.
+EOD
+    # License declined; finish.
+    return 0
+  fi
+
+  if [ -e "$RTP_FILENAME" ]; then
+    echo "Already downloaded $RTP_FILENAME" >&2
+  else
+    echo "Downloading $RTP_FILENAME..." >&2
+    mkdir -p "$(dirname "$RTP_FILENAME")"
+    wget -q "$RTP_URL" -O "$RTP_FILENAME"
+  fi
+
+  echo "Checking integrity of $RTP_FILENAME..." >&2
+  sha256sum -c - <<EOD
+8c82c02c876391d9585934454a629748d71b421c4957ada1dff8dc4b013ce403  $RTP_FILENAME
+EOD
+
+  echo "Extracting $RTP_FILENAME..." >&2
+  unzip -d "$tmpdir" -o "$RTP_FILENAME"
+
+  echo "Extracting $RTP_FILENAME2..." >&2
+  mkdir -p "$RTP_EXTRACT_DIR"
+  innoextract -s -d "$RTP_EXTRACT_DIR" "$RTP_FILENAME2"
+
+  echo "Installing RTP to $RTP_INSTALL_DIR..." >&2
+  for dir in \
+      Audio/BGM Audio/BGS Audio/ME Audio/SE Fonts \
+      Graphics/Animations Graphics/Battlers Graphics/Characters \
+      Graphics/Faces Graphics/Parallaxes Graphics/System; do
+    install -d "$RTP_INSTALL_DIR/$dir"
+    install -m 644 "$RTP_EXTRACT_DIR/app/$dir"/* "$RTP_INSTALL_DIR/$dir"
+  done
+  install -m 644 "$RTP_EXTRACT_DIR/app/Game.ico" "$RTP_INSTALL_DIR"
+  install -m 644 "$RTP_EXTRACT_DIR/app"/*.dll "$RTP_INSTALL_DIR"
+
+  mkdir -p "$(dirname "$RTP_STAMP")"
+  touch "$RTP_STAMP"
+
+  echo "Removing extracted files..." >&2
+  rm -rf "$RTP_EXTRACT_DIR"
+  rm -rf "$tmpdir/RPGVX_RTP"
+
+  echo "Removing downloaded files..." >&2
+  # rm -f "$RTP_FILENAME"
+}
+
+
+. /usr/share/debconf/confmodule
+db_version 2.0
+
+case "$1" in
+  configure)
+    install_rtp
+    ;;
+
+  abort-upgrade|abort-remove|abort-deconfigure)
+    install_rtp
+    ;;
+
+  *)
+    echo "postinst called with unknown argument \`$1'" >&2
+    exit 1
+    ;;
+esac
+
+rm -rf $tmpdir || true
+
+#DEBHELPER#
+
+exit 0

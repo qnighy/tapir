@@ -8,9 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestBitmap
-    include RGSSTest
-
+  class TestBitmap < Test
     @@imgdir = "../../src/test/Graphics"
 
     def test_superclass
@@ -62,8 +60,8 @@ module RGSSTest
       assert_equal(b.disposed?, true)
     end
 
+    if RGSS == 3
     def test_dispose_2
-      RGSS == 3 or return
       b = Bitmap.new(33, 10)
       assert_equal(b.disposed?, false)
 
@@ -76,6 +74,7 @@ module RGSSTest
       end
       assert_equal(b.disposed?, true)
     end
+    end # if RGSS == 3
 
     def test_width_1
       b = Bitmap.new(45, 60)
@@ -448,114 +447,194 @@ module RGSSTest
       assert_bitmap_equal2("test_fill_rect_7", b0)
     end
 
+    if RGSS >= 2
     def test_gradient_fill_rect_1
-      RGSS >= 2 or return
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b0.gradient_fill_rect(
         0, 0, 40, 32,
         Color.new(100, 50, 150, 255), Color.new(100, 50, 150, 255))
       assert_bitmap_equal2("test_gradient_fill_rect_1", b0)
     end
+    end # if RGSS >= 2
 
+    if RGSS >= 2
     def test_gradient_fill_rect_1a
-      RGSS >= 2 or return
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b0.gradient_fill_rect(
         0.9, 0.9, 40, 32,
         Color.new(100, 50, 150, 255), Color.new(100, 50, 150, 255))
       assert_bitmap_equal2("test_gradient_fill_rect_1a", b0)
     end
+    end # if RGSS >= 2
 
+    if RGSS >= 2
     def test_gradient_fill_rect_1b
-      RGSS >= 2 or return
       b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
       b0.gradient_fill_rect(
         Rect.new(0, 0, 40, 32),
         Color.new(100, 50, 150, 255), Color.new(100, 50, 150, 255))
       assert_bitmap_equal2("test_gradient_fill_rect_1b", b0)
     end
+    end # if RGSS >= 2
 
+    if RGSS >= 2
     def test_gradient_fill_rect_2
-      RGSS >= 2 or return
       b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
       b0.gradient_fill_rect(
         0, 0, 40, 32,
         Color.new(100, 50, 150, 100), Color.new(100, 50, 150, 100))
       assert_bitmap_equal2("test_gradient_fill_rect_2", b0)
     end
+    end # if RGSS >= 2
 
+    if RGSS >= 2
     def test_gradient_fill_rect_3
-      RGSS >= 2 or return
       b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
       b0.gradient_fill_rect(
         5, 7, 10, 13,
         Color.new(45, 255, 0, 126), Color.new(45, 255, 0, 126))
       assert_bitmap_equal2("test_gradient_fill_rect_3", b0)
     end
+    end # if RGSS >= 2
 
+    if RGSS >= 2
     def test_gradient_fill_rect_4
-      RGSS >= 2 or return
       b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
       b0.gradient_fill_rect(
         -3, -5, 100, 100,
         Color.new(45, 255, 0, 126), Color.new(45, 255, 0, 126))
       assert_bitmap_equal2("test_gradient_fill_rect_4", b0)
     end
+    end # if RGSS >= 2
 
+    if RGSS >= 2
     def test_gradient_fill_rect_5
-      RGSS >= 2 or return
       b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
       b0.gradient_fill_rect(
         11, 11, -13, 13,
         Color.new(0, 255, 0, 50), Color.new(0, 255, 0, 50))
       assert_bitmap_equal2("test_gradient_fill_rect_5", b0)
     end
+    end # if RGSS >= 2
 
+    if RGSS >= 2
     def test_gradient_fill_rect_6
-      RGSS >= 2 or return
       b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
       b0.gradient_fill_rect(
         11, 11, 13, -13,
         Color.new(0, 255, 0, 50), Color.new(0, 255, 0, 50))
       assert_bitmap_equal2("test_gradient_fill_rect_6", b0)
     end
+    end # if RGSS >= 2
 
+    if RGSS >= 2
     def test_gradient_fill_rect_7
-      RGSS >= 2 or return
       b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
       b0.gradient_fill_rect(
         11, 11, -13, -13,
         Color.new(0, 255, 0, 50), Color.new(0, 255, 0, 50))
       assert_bitmap_equal2("test_gradient_fill_rect_7", b0)
     end
+    end # if RGSS >= 2
 
+    if RGSS >= 2
     def test_gradient_fill_rect_8
-      RGSS >= 2 or return
       b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
       b0.gradient_fill_rect(
         11, 11, 50, 50,
         Color.new(0, 255, 0, 50), Color.new(55, 200, 255, 255), false)
       assert_bitmap_equal2("test_gradient_fill_rect_8", b0)
     end
+    end # if RGSS >= 2
 
+    if RGSS >= 2
     def test_gradient_fill_rect_9
-      RGSS >= 2 or return
       b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
       b0.gradient_fill_rect(
         11, 11, 50, 50,
         Color.new(0, 255, 0, 50), Color.new(55, 200, 255, 255), true)
       assert_bitmap_equal2("test_gradient_fill_rect_9", b0)
     end
+    end # if RGSS >= 2
 
+    if RGSS >= 2
     def test_gradient_fill_rect_10
-      RGSS >= 2 or return
       b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
       b0.gradient_fill_rect(
         -5, -8, 20, 23,
         Color.new(255, 255, 255, 255), Color.new(0, 0, 0, 0))
       assert_bitmap_equal2("test_gradient_fill_rect_10", b0)
     end
-  end
+    end # if RGSS >= 2
 
-  run_test(TestBitmap)
+    def test_hue_change_1
+      b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
+      b0.hue_change(100)
+      assert_bitmap_equal2("test_hue_change_1", b0)
+    end
+
+    def test_hue_change_2
+      b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
+      b0.hue_change(411)
+      assert_bitmap_equal2("test_hue_change_2", b0)
+    end
+
+    if RGSS >= 2
+    def test_blur_1
+      b0 = Bitmap.new("#@@imgdir/random_rgb_40x32_a.png")
+      b0.blur
+      assert_bitmap_equal2("test_blur_1", b0)
+    end
+    end # if RGSS >= 2
+
+    if RGSS >= 2
+    def test_blur_2
+      b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
+      b0.blur
+      assert_bitmap_equal2("test_blur_2", b0)
+    end
+    end # if RGSS >= 2
+
+    # def test_generate_checkered
+    #   b0 = Bitmap.new(41, 33)
+    #   9.times do|xx|
+    #     7.times do|yy|
+    #       b0.fill_rect(xx*5, yy*5, 5, 5, Color.new(rand(256), rand(256), rand(256), 255))
+    #     end
+    #   end
+    #   save_bitmap(b0, "#@@imgdir/checkered_41x33.png")
+    # end
+
+    if RGSS >= 2
+    def test_radial_blur_1
+      b0 = Bitmap.new("#@@imgdir/checkered_41x33.png")
+      b0.radial_blur(90, 2)
+      assert_bitmap_equal2("test_radial_blur_1", b0)
+    end
+    end # if RGSS >= 2
+
+    if RGSS >= 2
+    def test_radial_blur_2
+      b0 = Bitmap.new("#@@imgdir/checkered_41x33.png")
+      b0.radial_blur(60, 3)
+      assert_bitmap_equal2("test_radial_blur_2", b0)
+    end
+    end # if RGSS >= 2
+
+    if RGSS >= 2
+    def test_radial_blur_3
+      b0 = Bitmap.new("#@@imgdir/checkered_41x33.png")
+      b0.radial_blur(60, 4)
+      assert_bitmap_equal2("test_radial_blur_3", b0)
+    end
+    end # if RGSS >= 2
+
+    if RGSS >= 2
+    def test_radial_blur_4
+      b0 = Bitmap.new("#@@imgdir/random_rgba_40x32_a.png")
+      b0.radial_blur(59, 5)
+      assert_bitmap_equal2("test_radial_blur_4", b0)
+    end
+    end # if RGSS >= 2
+  end
 end

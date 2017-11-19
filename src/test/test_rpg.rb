@@ -8,9 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPG
-    include RGSSTest
-
+  class TestRPG < Test
     @@klass = RPG
 
     def test_is_module
@@ -47,6 +45,4 @@ module RGSSTest
       assert_symset_equal(@@klass.methods - Object.methods, [])
     end
   end
-
-  run_test(TestRPG)
 end

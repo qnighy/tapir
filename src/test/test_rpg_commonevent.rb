@@ -8,9 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGCommonEvent
-    include RGSSTest
-
+  class TestRPGCommonEvent < Test
     @@klass = RPG::CommonEvent
 
     def test_superclass
@@ -62,8 +60,8 @@ module RGSSTest
       assert_equal(obj.trigger, 0)
     end
 
+    if RGSS == 3
     def test_autorun_p
-      RGSS == 3 or return
       obj = @@klass.new
       obj.trigger = 0
       assert_equal(obj.autorun?, false)
@@ -72,9 +70,10 @@ module RGSSTest
       obj.trigger = 2
       assert_equal(obj.autorun?, false)
     end
+    end # if RGSS == 3
 
+    if RGSS == 3
     def test_parallel_p
-      RGSS == 3 or return
       obj = @@klass.new
       obj.trigger = 0
       assert_equal(obj.parallel?, false)
@@ -83,7 +82,6 @@ module RGSSTest
       obj.trigger = 2
       assert_equal(obj.parallel?, true)
     end
+    end # if RGSS == 3
   end
-
-  run_test(TestRPGCommonEvent)
 end

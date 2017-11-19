@@ -1,0 +1,24 @@
+#!/usr/bin/make -f
+
+#export DH_VERBOSE = 1
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_CFLAGS_MAINT_APPEND  = -Wall -Wextra
+
+override_dh_auto_configure:
+	./autogen.sh
+	dh_auto_configure -- --bindir=/usr/games
+	# this is to ensure mtime(lex.c) >= mtime(keywords).
+	touch ruby181/lex.c
+
+override_dh_auto_test:
+	# dh_auto_test
+
+override_dh_gencontrol:
+	# Add results from du -k /usr/share/Enterbrain/RGSS.
+	echo "Extra-Size=22808" >> debian/rgss1-rtp-installer.substvars
+	echo "Extra-Size=43484" >> debian/rgss2-rtp-installer.substvars
+	echo "Extra-Size=199640" >> debian/rgss3-rtp-installer.substvars
+	dh_gencontrol
+
+%:
+	dh $@

@@ -8,9 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGTroop
-    include RGSSTest
-
+  class TestRPGTroop < Test
     @@klass = RPG::Troop
 
     def test_superclass
@@ -72,9 +70,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGTroopMember
-    include RGSSTest
-
+  class TestRPGTroopMember < Test
     @@klass = RPG::Troop::Member
 
     def test_superclass
@@ -128,9 +124,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGTroopPage
-    include RGSSTest
-
+  class TestRPGTroopPage < Test
     @@klass = RPG::Troop::Page
 
     def test_superclass
@@ -187,9 +181,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGTroopPageCondition
-    include RGSSTest
-
+  class TestRPGTroopPageCondition < Test
     @@klass = RPG::Troop::Page::Condition
 
     def test_superclass
@@ -260,9 +252,4 @@ module RGSSTest
       assert_equal(obj.turn_valid, false)
     end
   end
-
-  run_test(TestRPGTroop)
-  run_test(TestRPGTroopMember)
-  run_test(TestRPGTroopPage)
-  run_test(TestRPGTroopPageCondition)
 end

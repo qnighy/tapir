@@ -8,26 +8,11 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestSpriteOrdering
-    include RGSSTest
-
+  if RGSS >= 2
+  class TestSpriteOrdering < Test
     @@imgdir = "../../src/test/Graphics"
 
-    def register(obj)
-      @objects << obj
-      obj
-    end
-
-    def cleaned(&b)
-      begin
-        @objects = []
-        b.call
-      ensure
-        @objects.each do|obj|
-          obj.dispose
-        end
-      end
-    end
+    include WithClean
 
     def filled_bitmap(w, h, color)
       b = Bitmap.new(w, h)
@@ -43,6 +28,7 @@ module RGSSTest
     end
 
     def test_z_ordering_sprite_1
+      skip_default
       cleaned do
         s2 = register(Sprite.new)
         s2.z = 100
@@ -58,6 +44,7 @@ module RGSSTest
     end
 
     def test_z_ordering_sprite_2
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.z = -100
@@ -73,6 +60,7 @@ module RGSSTest
     end
 
     def test_z_ordering_window_1
+      skip_default
       cleaned do
         w1 = register(Window.new)
         w1.z = 150
@@ -91,6 +79,7 @@ module RGSSTest
     end
 
     def test_z_ordering_window_2
+      skip_default
       cleaned do
         w1 = register(Window.new)
         w1.z = -150
@@ -109,6 +98,7 @@ module RGSSTest
     end
 
     def test_z_ordering_plane_1
+      skip_default
       cleaned do
         p1 = register(Plane.new)
         p1.bitmap = checkered_bitmap(4, 4, Color.new(255, 0, 0, 128))
@@ -124,6 +114,7 @@ module RGSSTest
     end
 
     def test_z_ordering_plane_2
+      skip_default
       cleaned do
         p1 = register(Plane.new)
         p1.bitmap = checkered_bitmap(4, 4, Color.new(255, 0, 0, 128))
@@ -139,6 +130,7 @@ module RGSSTest
     end
 
     def test_z_ordering_tilemap
+      skip_default
       cleaned do
         t1 = register(Tilemap.new)
         t1.bitmaps[5] = filled_bitmap(512, 512, Color.new(128, 128, 128, 255))
@@ -169,6 +161,7 @@ module RGSSTest
     end
 
     def test_y_ordering_sprite_1
+      skip_default
       cleaned do
         s2 = register(Sprite.new)
         s2.y = 10
@@ -184,6 +177,7 @@ module RGSSTest
     end
 
     def test_y_ordering_sprite_2
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.y = 0
@@ -199,6 +193,7 @@ module RGSSTest
     end
 
     def test_y_ordering_window_1
+      skip_default
       cleaned do
         w1 = register(Window.new)
         w1.z = 0
@@ -222,6 +217,7 @@ module RGSSTest
     end
 
     def test_y_ordering_plane_1
+      skip_default
       cleaned do
         p1 = register(Plane.new)
         p1.bitmap = checkered_bitmap(4, 4, Color.new(255, 0, 0, 128))
@@ -241,6 +237,7 @@ module RGSSTest
     end
 
     def test_y_ordering_tilemap
+      skip_default
       cleaned do
         t1 = register(Tilemap.new)
         t1.bitmaps[5] = filled_bitmap(512, 512, Color.new(128, 128, 128, 255))
@@ -278,6 +275,7 @@ module RGSSTest
     end
 
     def test_t_ordering_1
+      skip_default
       cleaned do
         w1 = register(Window.new)
         w1.z = 0
@@ -296,6 +294,7 @@ module RGSSTest
     end
 
     def test_t_ordering_2
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.z = 0
@@ -314,6 +313,7 @@ module RGSSTest
     end
 
     def test_t_reordering
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.z = 0
@@ -338,8 +338,5 @@ module RGSSTest
       end
     end
   end
-
-  if RGSS >= 2
-    run_test(TestSpriteOrdering)
-  end
+  end # if RGSS >= 2
 end

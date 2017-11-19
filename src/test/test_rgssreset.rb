@@ -8,12 +8,10 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRGSSReset
-    include RGSSTest
-
+  # TODO: in RGSS1/2, hidden class Reset is generated on-demand.
+  if RGSS == 3
+  class TestRGSSReset < Test
     def test_class
-      # TODO: in RGSS1/2, hidden class Reset is generated on-demand.
-      RGSSTest::RGSS == 3 or return
       assert_equal(RGSSReset.superclass, Exception)
       assert_symset_equal(RGSSReset.constants, [])
       assert_symset_equal(RGSSReset.class_variables, [])
@@ -21,6 +19,5 @@ module RGSSTest
       assert_symset_equal(owned_instance_methods(RGSSReset), [])
     end
   end
-
-  run_test(TestRGSSReset)
+  end # if RGSS == 3
 end

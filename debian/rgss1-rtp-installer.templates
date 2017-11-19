@@ -1,0 +1,6 @@
+Template: rgss1-rtp-installer/accepted-license-2005-10-08
+Type: boolean
+Default: false
+_Description: Do you accept the RTP 2005-10-08 License?
+ .
+ ${LICENSE}

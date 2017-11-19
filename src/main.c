@@ -11,7 +11,6 @@
 #include <stdbool.h>
 #include <ruby.h>
 #include <SDL.h>
-#include <libconfig.h>
 #include "main_rb.h"
 #include "misc.h"
 #include "sdl_misc.h"
@@ -19,7 +18,7 @@
 #include "openres.h"
 #include "font_lookup.h"
 #include "ini.h"
-#include "config.h"
+#include "tapir_config.h"
 #include "Audio.h"
 #include "Bitmap.h"
 #include "BitmapArray.h"

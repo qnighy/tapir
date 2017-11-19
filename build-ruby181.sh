@@ -13,6 +13,11 @@ set -ue
 
 cd "$(dirname "$0")"
 dir="$(pwd)"
+
+if [ -e .git ]; then
+  git submodule update --init ruby181
+fi
+
 cd ruby181
 if [ ! -e configure ]; then
   autoconf
@@ -23,9 +28,16 @@ if [ ! -e Makefile ]; then
 
 fi
 
-echo "option nodynamic" > ext/Setup
-echo "zlib" >> ext/Setup
-echo "nkf" >> ext/Setup
+echo "option nodynamic" > ext/Setup.tapir
+echo "zlib" >> ext/Setup.tapir
+echo "nkf" >> ext/Setup.tapir
+
+sed -i.bak -e 's/"Setup"/"Setup.tapir"/' config.status
+rm -f config.status.bak
+if [ -e rbconfig.rb ]; then
+  sed -i.bak -e 's/"Setup"/"Setup.tapir"/' rbconfig.rb
+  rm -f rbconfig.rb.bak
+fi
 
 make "$@"
 make install

@@ -8,9 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRGSSError
-    include RGSSTest
-
+  class TestRGSSError < Test
     def test_class
       assert_equal(RGSSError.superclass, StandardError)
       assert_symset_equal(RGSSError.constants, [])
@@ -19,6 +17,4 @@ module RGSSTest
       assert_symset_equal(owned_instance_methods(RGSSError), [])
     end
   end
-
-  run_test(TestRGSSError)
 end

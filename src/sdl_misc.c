@@ -7,6 +7,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "sdl_misc.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -15,7 +16,7 @@
 #include <SDL_ttf.h>
 #include "misc.h"
 #include "gl_misc.h"
-#include "sdl_misc.h"
+#include "surface_misc.h"
 #include "openres.h"
 #include "Sprite.h"
 #include "Plane.h"
@@ -26,20 +27,6 @@
 #include "RGSSReset.h"
 #include "Tilemap.h"
 #include "Viewport.h"
-
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-#define RMASK 0xff000000
-#define GMASK 0x00ff0000
-#define BMASK 0x0000ff00
-#define AMASK 0x000000ff
-#define PIXELFORMAT_RGBA32 SDL_PIXELFORMAT_RGBA8888
-#else
-#define RMASK 0x000000ff
-#define GMASK 0x0000ff00
-#define BMASK 0x00ff0000
-#define AMASK 0xff000000
-#define PIXELFORMAT_RGBA32 SDL_PIXELFORMAT_ABGR8888
-#endif
 
 #if RGSS >= 2
 int window_width = 544;
@@ -95,10 +82,19 @@ void initSDL(const char *window_title) {
     fprintf(stderr, "Mix_Init warning: could not init OGG\n");
   }
 
+  // TODO: in some environment, SDL_mixer produces unignorable latency...
   if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) < 0) {
     printf("Mix_OpenAudio Error: %s\n", Mix_GetError());
     exit(1);
   }
+
+  Mix_AllocateChannels(16);
+
+  // int mix_frequency, mix_channels;
+  // Uint16 mix_format;
+  // Mix_QuerySpec(&mix_frequency, &mix_format, &mix_channels);
+  // fprintf(stderr, "frequency = %d, format = %d, channels = %d\n",
+  //     mix_frequency, (int)mix_format, mix_channels);
 
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
@@ -373,21 +369,8 @@ void defreeze_screen(void) {
   SDL_FreeSurface(frozen);
 }
 
-SDL_Surface *create_rgba_surface(int width, int height) {
-  return SDL_CreateRGBSurface(
-      0, width, height, 32,
-      RMASK, GMASK, BMASK, AMASK);
-}
-
-SDL_Surface *create_rgba_surface_from(SDL_Surface *orig) {
-  SDL_Surface *ret =
-    SDL_ConvertSurfaceFormat(orig, PIXELFORMAT_RGBA32, 0);
-  SDL_FreeSurface(orig);
-  return ret;
-}
-
 void load_transition_image(const char *filename, int vagueness) {
-  if(!filename) {
+  if(!filename || !strcmp(filename, "")) {
     SDL_Surface *img = create_rgba_surface(window_width, window_height);
     SDL_FillRect(img, NULL, SDL_MapRGBA(img->format, 255, 255, 255, 255));
     glBindTexture(GL_TEXTURE_2D, transition_texture2);
@@ -402,14 +385,9 @@ void load_transition_image(const char *filename, int vagueness) {
   SDL_Surface *transition_image = NULL;
 
   {
-    SDL_RWops *file = NULL;
-    for(int i = 0; i < 2; ++i) {
-      const char * const extensions[] = {"", ".png"};
-      VALUE filename2 = rb_str_new2(filename);
-      rb_str_cat2(filename2, extensions[i]);
-      file = openres(filename2, true);
-      if(file) break;
-    }
+    const char * const extensions[] = {"", ".png", NULL};
+    VALUE filename2 = rb_str_new2(filename);
+    SDL_RWops *file = openres_ext(filename2, true, extensions);
     if(!file) {
       /* TODO: check error handling */
       rb_raise(rb_eRGSSError, "Error loading %s: %s",

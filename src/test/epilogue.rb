@@ -7,7 +7,11 @@
 # option. This file may not be copied, modified, or distributed
 # except according to those terms.
 
-puts "RGSSTest_Finish"
+module RGSSTest
+  self.run
 
-$stderr.close
-$stdout.close
+  puts "RGSSTest_Finish"
+
+  $stderr.close
+  $stdout.close
+end

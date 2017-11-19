@@ -7,10 +7,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "Viewport.h"
 #define GL_GLEXT_PROTOTYPES
 #include <SDL.h>
 #include <SDL_opengl.h>
-#include "Viewport.h"
 #include "Rect.h"
 #include "Tone.h"
 #include "Color.h"
@@ -24,6 +24,8 @@ static VALUE rb_viewport_m_initialize(int argc, VALUE *argv, VALUE self);
 static VALUE rb_viewport_m_initialize_copy(VALUE self, VALUE orig);
 static VALUE rb_viewport_m_dispose(VALUE self);
 static VALUE rb_viewport_m_disposed_p(VALUE self);
+static VALUE rb_viewport_m_flash(VALUE self, VALUE color, VALUE duration);
+static VALUE rb_viewport_m_update(VALUE self);
 static VALUE rb_viewport_m_rect(VALUE self);
 static VALUE rb_viewport_m_set_rect(VALUE self, VALUE newval);
 static VALUE rb_viewport_m_visible(VALUE self);
@@ -59,6 +61,8 @@ void Init_Viewport(void) {
       rb_viewport_m_initialize_copy, 1);
   rb_define_method(rb_cViewport, "dispose", rb_viewport_m_dispose, 0);
   rb_define_method(rb_cViewport, "disposed?", rb_viewport_m_disposed_p, 0);
+  rb_define_method(rb_cViewport, "flash", rb_viewport_m_flash, 2);
+  rb_define_method(rb_cViewport, "update", rb_viewport_m_update, 0);
   rb_define_method(rb_cViewport, "rect", rb_viewport_m_rect, 0);
   rb_define_method(rb_cViewport, "rect=", rb_viewport_m_set_rect, 1);
   rb_define_method(rb_cViewport, "visible", rb_viewport_m_visible, 0);
@@ -73,8 +77,6 @@ void Init_Viewport(void) {
   rb_define_method(rb_cViewport, "color=", rb_viewport_m_set_color, 1);
   rb_define_method(rb_cViewport, "tone", rb_viewport_m_tone, 0);
   rb_define_method(rb_cViewport, "tone=", rb_viewport_m_set_tone, 1);
-  // TODO: implement Viewport#flash
-  // TODO: implement Viewport#update
 }
 
 bool rb_viewport_data_p(VALUE obj) {
@@ -195,6 +197,20 @@ static VALUE rb_viewport_m_dispose(VALUE self) {
 static VALUE rb_viewport_m_disposed_p(VALUE self) {
   const struct Viewport *ptr = rb_viewport_data(self);
   return ptr->renderable.disposed ? Qtrue : Qfalse;
+}
+
+static VALUE rb_viewport_m_flash(VALUE self, VALUE color, VALUE duration) {
+  (void) self;
+  (void) color;
+  (void) duration;
+  WARN_UNIMPLEMENTED("Viewport#flash");
+  return Qnil;
+}
+
+static VALUE rb_viewport_m_update(VALUE self) {
+  (void) self;
+  WARN_UNIMPLEMENTED("Viewport#update");
+  return Qnil;
 }
 
 static VALUE rb_viewport_m_rect(VALUE self) {

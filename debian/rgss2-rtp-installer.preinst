@@ -1,0 +1,67 @@
+#!/bin/sh
+set -e
+
+tmpdir="$(mktemp -d -t rgss2-rtp-installer.XXXXXXXXXX)"
+
+fetch_license() {
+  echo "Downloading the license term..." >&2
+  wget -q http://www.rpgmakerweb.com/download/additional/run-time-packages -O - \
+    | sed -n -e '/ON-CLICK LICENSE AGREEMENT FOR RPG MAKER RUNTIME PACKAGE 08\.02\.29/,/^<\/div>/p' \
+    | sed -e 's/<\/\(p\|h4\)>/\n/; s/<[^>]*>\|^ \+//g' \
+    > "$tmpdir/license2.txt"
+  if ! sha256sum -c - >/dev/null <<EOD
+f84396d95777f2470123f52ee395b4ede559a89a5849ff85f7c2b075747d290c  $tmpdir/license2.txt
+EOD
+  then
+    echo "Could not extract the license term." >&2
+    return 1
+  fi
+}
+
+present_license() {
+  license_question="rgss2-rtp-installer/accepted-license-2008-02-09"
+
+  db_get $license_question
+  if [ "$RET" = true ]; then
+    # Already agreed
+    return 0
+  fi
+  if ! fetch_license; then
+    echo "Could not fetch license terms" >&2
+    return 0
+  fi
+  db_fset $license_question seen false
+  db_subst $license_question LICENSE \
+    "$(debconf-escape -e < "$tmpdir/license2.txt")"
+  if ! db_input critical $license_question; then
+    echo "Could not present license terms" >&2
+    return 0
+  fi
+  db_go || return 0
+}
+
+
+. /usr/share/debconf/confmodule
+db_version 2.0
+db_capb escape
+
+case "$1" in
+  install|upgrade)
+    present_license
+    ;;
+
+  abort-upgrade)
+    present_license
+    ;;
+
+  *)
+    echo "preinst called with unknown argument \`$1'" >&2
+    exit 1
+    ;;
+esac
+
+rm -rf $tmpdir || true
+
+#DEBHELPER#
+
+exit 0

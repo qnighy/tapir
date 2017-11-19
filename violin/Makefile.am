@@ -9,5 +9,18 @@
 # option. This file may not be copied, modified, or distributed
 # except according to those terms.
 
-RGSS := 2
+RGSS = 2
+RUBY_SRC_DIR = ../ruby181
+RUBY_DIR = ../ruby181-build
+EXEC = tapir-v
+tapir_v_SOURCES = $(tapir_SOURCES)
+CPPFLAGS += -I$(RUBY_DIR)/lib/ruby/1.8/$(RUBY_PLATFORM) \
+	    -DRGSS=$(RGSS)
+LIBS += $(RUBY_SRC_DIR)/ext/nkf/nkf.a
+
+BUILT_SOURCES = ../ruby181-build
+
+../ruby181-build:
+	make ruby181-build -C ..
+
 include ../src/common.mk

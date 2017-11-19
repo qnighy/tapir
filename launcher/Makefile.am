@@ -9,5 +9,15 @@
 # option. This file may not be copied, modified, or distributed
 # except according to those terms.
 
-RGSS := 1
-include ../src/common.mk
+EXEC = tapir
+bin_PROGRAMS = $(EXEC)
+tapir_SOURCES = launcher.c ini.c
+
+
+all-local: $(EXEC)
+	cp $(EXEC) ../bin/$(EXEC)
+
+clean-local:
+	$(RM) ../bin/$(EXEC)
+
+VPATH += ../src

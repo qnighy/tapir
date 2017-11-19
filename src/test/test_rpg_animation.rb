@@ -8,9 +8,7 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGAnimation
-    include RGSSTest
-
+  class TestRPGAnimation < Test
     @@klass = RPG::Animation
 
     def test_superclass
@@ -91,9 +89,8 @@ module RGSSTest
       assert_equal(obj.timings, [])
     end
 
+    if RGSS == 3
     def test_to_screen_p
-      RGSS == 3 or return
-
       obj = @@klass.new
       obj.position = 0
       assert_equal(obj.to_screen?, false)
@@ -104,11 +101,10 @@ module RGSSTest
       obj.position = 3
       assert_equal(obj.to_screen?, true)
     end
+    end # if RGSS == 3
   end
 
-  class TestRPGAnimationFrame
-    include RGSSTest
-
+  class TestRPGAnimationFrame < Test
     @@klass = RPG::Animation::Frame
 
     def test_superclass
@@ -147,9 +143,7 @@ module RGSSTest
     end
   end
 
-  class TestRPGAnimationTiming
-    include RGSSTest
-
+  class TestRPGAnimationTiming < Test
     @@klass = RPG::Animation::Timing
 
     def test_superclass
@@ -215,8 +209,4 @@ module RGSSTest
       end
     end
   end
-
-  run_test(TestRPGAnimation)
-  run_test(TestRPGAnimationFrame)
-  run_test(TestRPGAnimationTiming)
 end

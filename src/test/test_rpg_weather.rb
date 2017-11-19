@@ -8,10 +8,9 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestRPGWeather
-    include RGSSTest
-
-    @@klass = RPG::Weather if RGSS == 1
+  if RGSS == 1
+  class TestRPGWeather < Test
+    @@klass = RPG::Weather
 
     def test_superclass
       assert_equal(@@klass.superclass, Object)
@@ -62,8 +61,5 @@ module RGSSTest
       assert_equal(obj.instance_eval("@type"), 0)
     end
   end
-
-  if RGSS == 1
-    run_test(TestRPGWeather)
-  end
+  end # if RGSS == 1
 end

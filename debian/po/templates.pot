@@ -1,0 +1,43 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the tapir package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: tapir\n"
+"Report-Msgid-Bugs-To: tapir@packages.debian.org\n"
+"POT-Creation-Date: 2017-11-02 23:35+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../rgss1-rtp-installer.templates:1001
+msgid "Do you accept the RTP 2005-10-08 License?"
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../rgss1-rtp-installer.templates:1001 ../rgss2-rtp-installer.templates:1001
+#: ../rgss3-rtp-installer.templates:1001
+msgid "${LICENSE}"
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../rgss2-rtp-installer.templates:1001
+msgid "Do you accept the RTP 2008-02-09 License?"
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../rgss3-rtp-installer.templates:1001
+msgid "Do you accept the RTP 2012-03-15 License?"
+msgstr ""

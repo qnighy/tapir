@@ -7,9 +7,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "archive.h"
 #include <stdlib.h>
 #include <stdint.h>
-#include "archive.h"
 
 #if RGSS == 3
 #define RGSS_ARCHIVE_NAME "Game.rgss3a"

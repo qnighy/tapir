@@ -7,9 +7,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "openres.h"
 #include <sys/types.h>
 #include <dirent.h>
-#include "openres.h"
 #include "archive.h"
 #include "misc.h"
 #include "RGSSError.h"
@@ -36,6 +36,20 @@ SDL_RWops *openres(VALUE path, bool use_archive) {
   rb_str_concat(path2, path);
   rb_str_update(path, 0, RSTRING_LEN(path), path2);
   return caseless_open(StringValueCStr(path), "rb");
+}
+
+SDL_RWops *openres_ext(VALUE path, bool use_archive,
+    const char * const exts[]) {
+  for(; *exts; ++exts) {
+    VALUE path2 = rb_str_new(RSTRING_PTR(path), RSTRING_LEN(path));
+    rb_str_cat2(path2, *exts);
+    SDL_RWops *file = openres(path2, use_archive);
+    if(file) {
+      rb_str_update(path, 0, RSTRING_LEN(path), path2);
+      return file;
+    }
+  }
+  return NULL;
 }
 
 VALUE rb_load_data(VALUE self, VALUE path) {

@@ -7,11 +7,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "Audio.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL.h>
 #include <SDL_mixer.h>
-#include "Audio.h"
 #include "RGSSError.h"
 #include "misc.h"
 #include "sdl_misc.h"
@@ -19,8 +19,18 @@
 
 VALUE rb_mAudio;
 
+struct chunk_cache_entry {
+  char *name;
+  Mix_Chunk *chunk;
+};
+
 // TODO: properly close these
 static Mix_Music *bgm;
+
+static size_t chunk_cache_size, chunk_cache_capacity;
+static struct chunk_cache_entry *chunk_cache;
+
+static Mix_Chunk *load_chunk_cached(VALUE filename);
 
 #if RGSS == 3
 static VALUE rb_audio_s_setup_midi(VALUE klass);
@@ -87,7 +97,6 @@ static VALUE rb_audio_s_bgm_play(int argc, VALUE *argv, VALUE klass) {
     rb_raise(rb_eArgError, "wrong number of arguments (%d for 1..3)", argc);
   }
 #endif
-  (void) argv;
   int volume = argc > 1 ? saturateInt32(NUM2INT(argv[1]), 0, 100) : 100;
   int pitch = argc > 2 ? saturateInt32(NUM2INT(argv[2]), 50, 150) : 100;
   int pos = argc > 3 ? NUM2INT(argv[3]) : 0;
@@ -106,16 +115,10 @@ static VALUE rb_audio_s_bgm_play(int argc, VALUE *argv, VALUE klass) {
     bgm = NULL;
   }
 
-  SDL_RWops *file = NULL;
-  VALUE filename = Qnil;
-  for(int i = 0; i < 6; ++i) {
-    const char * const extensions[] = {
-      "", ".ogg", ".wma", ".mp3", ".wav", ".mid"};
-    filename = rb_str_new(RSTRING_PTR(argv[0]), RSTRING_LEN(argv[0]));
-    rb_str_cat2(filename, extensions[i]);
-    file = openres(filename, false);
-    if(file) break;
-  }
+  const char * const extensions[] = {
+    "", ".ogg", ".wma", ".mp3", ".wav", ".mid", NULL};
+  VALUE filename = rb_str_new(RSTRING_PTR(argv[0]), RSTRING_LEN(argv[0]));
+  SDL_RWops *file = openres_ext(filename, false, extensions);
   if(!file) {
     /* TODO: check error handling */
     rb_raise(rb_eRGSSError, "Error loading %s: %s",
@@ -130,7 +133,7 @@ static VALUE rb_audio_s_bgm_play(int argc, VALUE *argv, VALUE klass) {
         StringValueCStr(argv[0]),
         Mix_GetError());
   }
-  Mix_VolumeMusic(volume * 128 / 100);
+  Mix_VolumeMusic(volume * MIX_MAX_VOLUME / 100);
   // TODO: LOOPSTART from ogg
   Mix_PlayMusic(bgm, -1);
   return Qnil;
@@ -230,8 +233,20 @@ static VALUE rb_audio_s_se_play(int argc, VALUE *argv, VALUE klass) {
   if(argc <= 0 || argc > 3) {
     rb_raise(rb_eArgError, "wrong number of arguments (%d for 1..3)", argc);
   }
-  (void) argv;
-  WARN_UNIMPLEMENTED("Audio.se_play");
+  int volume = argc > 1 ? saturateInt32(NUM2INT(argv[1]), 0, 100) : 80;
+  int pitch = argc > 2 ? saturateInt32(NUM2INT(argv[2]), 50, 150) : 100;
+
+  if(pitch != 100) {
+    WARN_UNIMPLEMENTED("Audio.se_play with pitch");
+  }
+
+  Mix_Chunk *chunk = load_chunk_cached(argv[0]);
+  if(!chunk) return Qnil;
+
+  Mix_VolumeChunk(chunk, volume * MIX_MAX_VOLUME / 100);
+  Mix_PlayChannel(-1, chunk, 0);
+
+
   return Qnil;
 }
 
@@ -241,9 +256,54 @@ static VALUE rb_audio_s_se_stop(VALUE klass) {
   return Qnil;
 }
 
+static Mix_Chunk *load_chunk_cached(VALUE filename) {
+  const char *filename_c = StringValueCStr(filename);
+  for(size_t i = 0; i < chunk_cache_size; ++i) {
+    if(!strcmp(chunk_cache[i].name, filename_c)) {
+      return chunk_cache[i].chunk;
+    }
+  }
+
+  const char * const extensions[] = {
+    "", ".ogg", ".wma", ".mp3", ".wav", ".mid", NULL};
+  filename = rb_str_new(RSTRING_PTR(filename), RSTRING_LEN(filename));
+  SDL_RWops *file = openres_ext(filename, false, extensions);
+  if(!file) {
+    /* TODO: check error handling */
+    rb_raise(rb_eRGSSError, "Error loading %s: %s",
+        StringValueCStr(filename),
+        SDL_GetError());
+  }
+
+  Mix_Chunk *chunk = Mix_LoadWAV_RW(file, 1);
+
+  if(!chunk) return NULL;
+
+  if(chunk_cache_size <= chunk_cache_capacity) {
+    chunk_cache_capacity += chunk_cache_capacity / 2;
+    chunk_cache = realloc(chunk_cache,
+        sizeof(*chunk_cache) * chunk_cache_capacity);
+  }
+
+  chunk_cache[chunk_cache_size].chunk = chunk;
+  chunk_cache[chunk_cache_size].name = strdup(filename_c);
+  chunk_cache_size++;
+
+  return chunk;
+}
+
 void initAudioSDL(void) {
+  chunk_cache_size = 0;
+  chunk_cache_capacity = 10;
+  chunk_cache = malloc(sizeof(*chunk_cache) * chunk_cache_capacity);
 }
 
 void deinitAudioSDL(void) {
   if(bgm) Mix_FreeMusic(bgm);
+  Mix_HaltChannel(-1);
+  for(size_t i = 0; i < chunk_cache_size; ++i) {
+    Mix_FreeChunk(chunk_cache[i].chunk);
+    free(chunk_cache[i].name);
+  }
+  free(chunk_cache);
 }

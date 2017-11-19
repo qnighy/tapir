@@ -8,28 +8,14 @@
 # except according to those terms.
 
 module RGSSTest
-  class TestSprite
-    include RGSSTest
-
+  if RGSS >= 2
+  class TestSprite < Test
     @@imgdir = "../../src/test/Graphics"
 
-    def register(obj)
-      @objects << obj
-      obj
-    end
-
-    def cleaned(&b)
-      begin
-        @objects = []
-        b.call
-      ensure
-        @objects.each do|obj|
-          obj.dispose
-        end
-      end
-    end
+    include WithClean
 
     def test_positioning_1
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -54,6 +40,7 @@ module RGSSTest
     end
 
     def test_zoom_1
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -81,6 +68,7 @@ module RGSSTest
     end
 
     def test_angle_1
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -105,6 +93,7 @@ module RGSSTest
     end
 
     def test_bush_1
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -129,6 +118,7 @@ module RGSSTest
     end
 
     def test_wave_1
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -152,6 +142,7 @@ module RGSSTest
     end
 
     def test_sprite_1
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -188,6 +179,7 @@ module RGSSTest
     end
 
     def test_sprite_2
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -220,6 +212,7 @@ module RGSSTest
     end
 
     def test_sprite_rect_angle
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -235,6 +228,7 @@ module RGSSTest
     end
 
     def test_color_1
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -254,6 +248,7 @@ module RGSSTest
     end
 
     def test_color_2
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -274,6 +269,7 @@ module RGSSTest
     end
 
     def test_color_3
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -303,6 +299,7 @@ module RGSSTest
     end
 
     def test_tone_1
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -322,6 +319,7 @@ module RGSSTest
     end
 
     def test_tone_2
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -341,6 +339,7 @@ module RGSSTest
     end
 
     def test_tone_3
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -361,6 +360,7 @@ module RGSSTest
     end
 
     def test_tone_4
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -382,6 +382,7 @@ module RGSSTest
     end
 
     def test_flash_1
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -406,6 +407,7 @@ module RGSSTest
     end
 
     def test_wave_update
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
 
@@ -431,6 +433,7 @@ module RGSSTest
     end
 
     def test_blend_type_1
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -450,6 +453,7 @@ module RGSSTest
     end
 
     def test_blend_type_2
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
         s1.bitmap = Bitmap.new("#@@imgdir/grad_rgb_256x256.png")
@@ -469,6 +473,7 @@ module RGSSTest
     end
 
     def test_auto_src_rect_1
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
 
@@ -480,6 +485,7 @@ module RGSSTest
     end
 
     def test_auto_src_rect_2
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
 
@@ -491,6 +497,7 @@ module RGSSTest
     end
 
     def test_auto_src_rect_3
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
 
@@ -502,6 +509,7 @@ module RGSSTest
     end
 
     def test_auto_src_rect_4
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
 
@@ -513,6 +521,7 @@ module RGSSTest
     end
 
     def test_auto_src_rect_5
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
 
@@ -524,6 +533,7 @@ module RGSSTest
     end
 
     def test_auto_src_rect_6
+      skip_default
       cleaned do
         s1 = register(Sprite.new)
 
@@ -536,8 +546,5 @@ module RGSSTest
       end
     end
   end
-
-  if RGSS >= 2
-    run_test(TestSprite)
-  end
+  end # if RGSS >= 2
 end

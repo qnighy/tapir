@@ -7,9 +7,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "Plane.h"
 #include <SDL.h>
 #include "gl_misc.h"
-#include "Plane.h"
 #include "Bitmap.h"
 #include "Viewport.h"
 #include "Rect.h"

@@ -7,9 +7,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "Graphics.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "Graphics.h"
 #include "Bitmap.h"
 #include "misc.h"
 #include "sdl_misc.h"

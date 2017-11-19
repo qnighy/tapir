@@ -7,11 +7,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#include "misc.h"
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-#include "misc.h"
 
 int32_t saturateInt32(int32_t val, int32_t minval, int32_t maxval) {
   if(val <= minval) return minval;

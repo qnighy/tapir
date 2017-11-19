@@ -1,0 +1,50 @@
+.TH TAPIR "1" "October 2017" "tapir @PACKAGE_VERSION@" "User Commands"
+.SH NAME
+tapir \- RPG Maker emulator
+.SH SYNOPSIS
+.B tapir
+[\-h] [\-\-help] [\-d \fIDIR\fR] [\-1] [\-2] [\-3] [debug] [test] [btest] [console]
+
+.SH DESCRIPTION
+This program is a compatible runtime for RGSS (Ruby Game Scripting System),
+which can run games made with RPG Maker XP, RPG Maker VX, or RPG Maker VX Ace.
+
+.SH OPTIONS
+
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Display the help message.
+.TP
+\fB\-d\fR \fIDIR\fR
+Specify the game directory.
+.TP
+\fB\-1\fR, \fB\-2\fR, \fB\-3\fR
+Force RGSS version.
+.TP
+\fBdebug\fR, \fBtest\fR
+Enable testing mode.
+.TP
+\fBbtest\fR
+Enable battle-testing mode.
+.TP
+\fBconsole\fR
+Unused. This option exists for compatibility with RGSS3.
+
+.SH "EXAMPLES"
+To execute a game named "Sakusaku":
+    $ tapir -d path/to/Sakusaku
+
+.SH SEE ALSO
+.BR tapir-x (1),
+.BR tapir-v (1),
+.BR tapir-a (1)
+
+.SH "BUGS"
+See https://github.com/qnighy/tapir/issues for issues.
+
+.SH "AUTHOR"
+Masaki Hara
+
+.SH "COPYRIGHT"
+This work is dual\[hy]licensed under Apache\ 2.0 and MIT terms.
+See \fICOPYRIGHT\fR file in the tapir source distribution.

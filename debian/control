@@ -1,0 +1,57 @@
+Source: tapir
+Section: games
+Priority: optional
+Maintainer: Masaki Hara <ackie.h.gmai@gmail.com>
+Build-Depends: debhelper (>=9), po-debconf (>= 1.0.0), autoconf (>= 2.69), automake (>= 1.15), ruby (>= 1.9.3), bison (>= 2:3.0.0), flex (>= 2.6.0), libsdl2-dev (>=2.0.4), libsdl2-image-dev (>=2.0.0), libsdl2-mixer-dev (>=2.0.1), libsdl2-ttf-dev (>=2.0.14), libfontconfig1-dev (>= 2.11.0), libconfig-dev (>= 1.5)
+Standards-Version: 3.9.7
+Homepage: https://github.com/qnighy/tapir
+
+Package: rgss1-rtp-installer
+Architecture: all
+Pre-Depends: ${misc:Pre-Depends}, wget (>= 1.17.0)
+Depends: ${misc:Depends}, unzip (>= 6.0), innoextract (>= 1.5)
+Description: Installer for RPG Maker XP RTP
+ This package allows for easy installation of RPG Maker XP RTP
+ (run time package).
+ .
+ You will need an Internet connection to download these fonts if you
+ don't already have them.
+
+Package: rgss2-rtp-installer
+Architecture: all
+Pre-Depends: ${misc:Pre-Depends}, wget (>= 1.17.0)
+Depends: ${misc:Depends}, unzip (>= 6.0), innoextract (>= 1.5)
+Description: Installer for RPG Maker VX RTP
+ This package allows for easy installation of RPG Maker VX RTP
+ (run time package).
+ .
+ You will need an Internet connection to download these fonts if you
+ don't already have them.
+
+Package: rgss3-rtp-installer
+Architecture: all
+Pre-Depends: ${misc:Pre-Depends}, wget (>= 1.17.0)
+Depends: ${misc:Depends}, unzip (>= 6.0), innoextract (>= 1.5)
+Description: Installer for RPG Maker VX Ace RTP
+ This package allows for easy installation of RPG Maker VX Ace RTP
+ (run time package).
+ .
+ You will need an Internet connection to download these fonts if you
+ don't already have them.
+
+Package: tapir-bin
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Compatible runtime for RPG Maker XP, VX, and VX Ace (binary package)
+ This program is a compatible runtime for RGSS (Ruby Game Scripting System),
+ which can run games made with RPG Maker XP, RPG Maker VX, or RPG Maker VX Ace.
+
+Package: tapir
+Architecture: any
+Depends: ${misc:Depends}, tapir-bin (= ${binary:Version}), rgss1-rtp-installer (>= 0.1.0), rgss2-rtp-installer (>= 0.1.0), rgss3-rtp-installer (>= 0.1.0)
+Description: Compatible runtime for RPG Maker XP, VX, and VX Ace (metapackage)
+ This program is a compatible runtime for RGSS (Ruby Game Scripting System),
+ which can run games made with RPG Maker XP, RPG Maker VX, or RPG Maker VX Ace.
+ .
+ This is a metapackage that installs the game runtime and required resource
+ packages called RTP.
