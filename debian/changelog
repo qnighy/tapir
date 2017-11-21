@@ -1,3 +1,9 @@
+tapir (0.1.0~alpha1ppa2) xenial; urgency=medium
+
+  * Change unstable to xenial.
+
+ -- Masaki Hara <ackie.h.gmai@gmail.com>  Tue, 21 Nov 2017 14:01:33 +0900
+
 tapir (0.1.0~alpha1ppa1) unstable; urgency=medium
 
   * Test release for PPA.
