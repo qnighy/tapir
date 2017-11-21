@@ -48,7 +48,7 @@ Description: Compatible runtime for RPG Maker XP, VX, and VX Ace (binary package
 
 Package: tapir
 Architecture: any
-Depends: ${misc:Depends}, tapir-bin (= ${binary:Version}), rgss1-rtp-installer (>= 0.1.0), rgss2-rtp-installer (>= 0.1.0), rgss3-rtp-installer (>= 0.1.0)
+Depends: ${misc:Depends}, tapir-bin (= ${binary:Version}), rgss1-rtp-installer, rgss2-rtp-installer, rgss3-rtp-installer
 Description: Compatible runtime for RPG Maker XP, VX, and VX Ace (metapackage)
  This program is a compatible runtime for RGSS (Ruby Game Scripting System),
  which can run games made with RPG Maker XP, RPG Maker VX, or RPG Maker VX Ace.
