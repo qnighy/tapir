@@ -1,3 +1,9 @@
+tapir (0.1.0~alpha1ppa1) unstable; urgency=medium
+
+  * Test release for PPA.
+
+ -- Masaki Hara <ackie.h.gmai@gmail.com>  Tue, 21 Nov 2017 13:52:18 +0900
+
 tapir (0.1.0) unstable; urgency=low
 
   * Initial Release.
