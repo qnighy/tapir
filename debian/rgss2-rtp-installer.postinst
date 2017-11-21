@@ -72,8 +72,12 @@ EOD
   rm -rf "$RTP_EXTRACT_DIR"
   rm -rf "$tmpdir/RPGVX_RTP"
 
-  echo "Removing downloaded files..." >&2
-  # rm -f "$RTP_FILENAME"
+  if [ -e "$RTP_FILENAME.keep" ]; then
+    echo "Keeping downloaded files." >&2
+  else
+    echo "Removing downloaded files..." >&2
+    rm -f "$RTP_FILENAME"
+  fi
 }
 
 

@@ -1,3 +1,9 @@
+tapir (0.1.0~alpha1ppa4) xenial; urgency=medium
+
+  * Correctly remove downloaded files.
+
+ -- Masaki Hara <ackie.h.gmai@gmail.com>  Tue, 21 Nov 2017 16:37:33 +0900
+
 tapir (0.1.0~alpha1ppa3) xenial; urgency=medium
 
   * Remove version restriction from dependency to rgssN-rtp-installer.
