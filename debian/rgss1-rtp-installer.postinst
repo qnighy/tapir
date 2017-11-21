@@ -69,8 +69,12 @@ EOD
   echo "Removing extracted files..." >&2
   rm -rf "$RTP_EXTRACT_DIR"
 
-  echo "Removing downloaded files..." >&2
-  # rm -f "$RTP_FILENAME"
+  if [ -e "$RTP_FILENAME.keep" ]; then
+    echo "Keeping downloaded files." >&2
+  else
+    echo "Removing downloaded files..." >&2
+    rm -f "$RTP_FILENAME"
+  fi
 }
 
 
