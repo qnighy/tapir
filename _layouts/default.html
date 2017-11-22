@@ -22,8 +22,15 @@
     <a class="pure-menu-heading" href="index.html">Tapir</a>
 
     <ul class="pure-menu-list">
+{% if page.lang == "ja" %}
+      <li class="pure-menu-item {{ index_menu_class }}"><a href="index.ja.html" class="pure-menu-link">ホーム</a></li>
+      <li class="pure-menu-item {{ download_menu_class }}"><a href="download.ja.html" class="pure-menu-link">ダウンロード</a></li>
+{% else %}
       <li class="pure-menu-item {{ index_menu_class }}"><a href="index.html" class="pure-menu-link">Home</a></li>
       <li class="pure-menu-item {{ download_menu_class }}"><a href="download.html" class="pure-menu-link">Download</a></li>
+{% endif %}
+      <li class="pure-menu-item"><a href="{{ page.basename }}.html" class="pure-menu-link">English</a></li>
+      <li class="pure-menu-item"><a href="{{ page.basename }}.ja.html" class="pure-menu-link">日本語</a></li>
     </ul>
   </div>
 </div>
