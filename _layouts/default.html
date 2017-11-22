@@ -11,10 +11,10 @@
     <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-min.css">
 <!--<![endif]-->
 <link rel="stylesheet" href="css/tapir-www.css">
-{% if page.url == "/" %}
+{% if page.basename == "index" %}
 {% assign index_menu_class = "pure-menu-selected" %}
 {% endif %}
-{% if page.url == "/download.html" %}
+{% if page.basename == "download" %}
 {% assign download_menu_class = "pure-menu-selected" %}
 {% endif %}
 <div class="header">
@@ -28,7 +28,7 @@
   </div>
 </div>
 <div class="content">
-  {% if page.title == "Home" %}
+  {% if page.basename == "index" %}
   <h1>Tapir</h1>
   {% else %}
   <h1>{{ page.title }} - Tapir</h1>

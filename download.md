@@ -1,4 +1,5 @@
 ---
+basename: download
 lang: en
 title: Download
 ---

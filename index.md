@@ -1,4 +1,5 @@
 ---
+basename: index
 lang: en
 title: Home
 ---
