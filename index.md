@@ -9,7 +9,7 @@ title: Home
 
 - It can run games made with **RPG Maker** series. (XP, VX, VX Ace only)
 - Supported platform: **Linux**. (We're also planning to support platforms like macos)
-- It can also run **encrypted games**. (Note: encryption support is not yet merged to the public release.)
+- It can also run **encrypted games**.
 - It supports games extended by **RGSS scripts**.
 
 ## Requirements
