@@ -283,6 +283,8 @@ static void blt(
   Uint32 *dst_pixels = dst->pixels;
   int dst_pitch = dst->pitch / 4;
 
+  if(dst_w == 0 || dst_h == 0) return;
+
   int ratio_x = 256 * src_w / dst_w;
   int ratio_y = 256 * src_h / dst_h;
   if(ratio_x < 0) --src_x;
