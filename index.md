@@ -19,6 +19,10 @@ title: Home
 - Graphics: OpenGL 2.1 or later
 - Disk: RTP requires 260 megabytes in total.
 
+## Downloding
+
+See [download](download.html) page.
+
 ## How to use
 
-See [README](https://github.com/qnighy/tapir/blob/master/README.md) on GitHub.
+See [how to use](usage.html) page.

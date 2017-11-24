@@ -19,6 +19,10 @@ title: ホーム
 - グラフィックス: OpenGL 2.1以上
 - ディスク容量: RTPのインストールには、3種類合わせて260メガバイトほど必要です。
 
+## ダウンロード
+
+[ダウンロード](download.ja.html)のページを参照してください。
+
 ## 使い方
 
-GitHub上の[README](https://github.com/qnighy/tapir/blob/master/README.ja.md)を参照してください。
+[使い方](usage.ja.html)のページを参照してください。
