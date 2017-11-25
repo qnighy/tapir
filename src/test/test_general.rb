@@ -101,5 +101,9 @@ module RGSSTest
         "\x82\xD9\x82\xB0".force_encoding("Shift_JIS"))
     end
     end # if RGSS == 3
+
+    def test_regex
+      assert_nothing_raised { Regexp.compile('\\s*+\\s*') }
+    end
   end
 end
