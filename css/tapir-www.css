@@ -17,5 +17,10 @@
 }
 
 .content h2 {
-  background-color: #EEEEEE;
+  background-color: #AACCEE;
+  padding: 3px 10px;
+}
+
+.highlighter-rouge {
+  background-color: #DDDDDD;
 }
