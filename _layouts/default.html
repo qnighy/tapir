@@ -22,7 +22,11 @@
 {% endif %}
 <div class="header">
   <div class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed">
+{% if page.lang == "ja" %}
+    <a class="pure-menu-heading" href="index.ja.html">Tapir</a>
+{% else %}
     <a class="pure-menu-heading" href="index.html">Tapir</a>
+{% endif %}
 
     <ul class="pure-menu-list">
 {% if page.lang == "ja" %}
