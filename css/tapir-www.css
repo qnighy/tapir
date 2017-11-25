@@ -3,3 +3,15 @@
   padding-left: 1em;
   padding-right: 1em;
 }
+
+.home-menu {
+  background-color: #DDEEFF;
+}
+
+.home-menu *.pure-menu-item :hover {
+  background-color: #EEFFFF;
+}
+
+.lang-menu {
+  background-color: #DDFFEE;
+}
