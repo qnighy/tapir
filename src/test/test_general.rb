@@ -103,7 +103,7 @@ module RGSSTest
     end # if RGSS == 3
 
     def test_regex
-      assert_nothing_raised { Regexp.compile('\\s*+\\s*') }
+      assert_nothing_raised(RegexpError) { Regexp.compile('\\s*+\\s*') }
     end
   end
 end
