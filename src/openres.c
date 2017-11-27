@@ -17,7 +17,6 @@
 #include "tapir_config.h"
 #include "RGSSError.h"
 
-// TODO: Support multiple RTPs (Game.ini)
 #if RGSS == 3
 #define RTP_BASE_DETECTOR "/RGSS3/RPGVXAce/Graphics/Titles1/Castle.png"
 #define RTP_RGSS_VERSION "RGSS3"
@@ -31,8 +30,8 @@
 
 static char *rtp_paths[NUM_RTP_SLOTS];
 
-const char *get_rtp_path() {
-  return rtp_paths[0];
+const char *get_rtp_path(int rtp_slot) {
+  return rtp_paths[rtp_slot];
 }
 
 void configure_rtp_path(struct ini_section *game_section) {
@@ -130,11 +129,17 @@ SDL_RWops *openres(VALUE path, bool use_archive) {
   // TODO: support case-insensitive paths
   file = caseless_open(StringValueCStr(path), "rb");
   if(file) return file;
-  VALUE path2 = rb_str_new2(get_rtp_path());
-  rb_str_cat2(path2, "/");
-  rb_str_concat(path2, path);
-  rb_str_update(path, 0, RSTRING_LEN(path), path2);
-  return caseless_open(StringValueCStr(path), "rb");
+  for(int rtp_slot = 0; rtp_slot < NUM_RTP_SLOTS; ++rtp_slot) {
+    const char *rtp_path = get_rtp_path(rtp_slot);
+    if(!rtp_path) continue;
+    VALUE path2 = rb_str_new2(rtp_path);
+    rb_str_cat2(path2, "/");
+    rb_str_concat(path2, path);
+    rb_str_update(path, 0, RSTRING_LEN(path), path2);
+    file = caseless_open(StringValueCStr(path), "rb");
+    if(file) return file;
+  }
+  return NULL;
 }
 
 SDL_RWops *openres_ext(VALUE path, bool use_archive,

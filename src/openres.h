@@ -21,7 +21,7 @@
 #define NUM_RTP_SLOTS 3
 #endif
 
-const char *get_rtp_path(void);
+const char *get_rtp_path(int rtp_slot);
 void configure_rtp_path(struct ini_section *game_section);
 void deconfigure_rtp_path(void);
 
