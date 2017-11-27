@@ -9,24 +9,108 @@
 
 #include "openres.h"
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <dirent.h>
+#include <unistd.h>
 #include "archive.h"
 #include "misc.h"
+#include "tapir_config.h"
 #include "RGSSError.h"
 
-// TODO: Make RTP base path configurable
-// TODO: Make RTP name configurable (Game.ini)
 // TODO: Support multiple RTPs (Game.ini)
 #if RGSS == 3
-#define RTP_PATH DATA_DIR "/Enterbrain/RGSS3/RPGVXAce"
+#define RTP_BASE_DETECTOR "/RGSS3/RPGVXAce/Graphics/Titles1/Castle.png"
+#define RTP_RGSS_VERSION "RGSS3"
 #elif RGSS == 2
-#define RTP_PATH DATA_DIR "/Enterbrain/RGSS2/RPGVX"
+#define RTP_BASE_DETECTOR "/RGSS2/RPGVX/Graphics/System/Title.png"
+#define RTP_RGSS_VERSION "RGSS2"
 #else
-#define RTP_PATH DATA_DIR "/Enterbrain/RGSS/Standard"
+#define RTP_BASE_DETECTOR "/RGSS/Standard/Graphics/Titles/001-Title01.jpg"
+#define RTP_RGSS_VERSION "RGSS"
 #endif
 
+static char *rtp_paths[NUM_RTP_SLOTS];
+
 const char *get_rtp_path() {
-  return RTP_PATH;
+  return rtp_paths[0];
+}
+
+void configure_rtp_path(struct ini_section *game_section) {
+  const char *rtp_base_path = get_rtp_base_config();
+  if(!rtp_base_path) {
+    static const char *rtp_base_candidates[] = {
+      // "/opt/Enterbrain",
+      "/usr/local/share/Enterbrain",
+      "/usr/share/Enterbrain",
+      NULL
+    };
+    for(int i = 0; rtp_base_candidates[i]; ++i) {
+      const char *rtp_base_candidate = rtp_base_candidates[i];
+      char *detect_path = malloc(
+          strlen(rtp_base_candidate) +
+          strlen(RTP_BASE_DETECTOR) + 1);
+      strcpy(detect_path, rtp_base_candidate);
+      strcat(detect_path, RTP_BASE_DETECTOR);
+      struct stat buf;
+      int result = stat(detect_path, &buf);
+      free(detect_path);
+      if(result == 0) {
+        rtp_base_path = rtp_base_candidate;
+        break;
+      }
+    }
+  }
+
+#if RGSS >= 2
+  const char *rtp_names[NUM_RTP_SLOTS] = {NULL};
+#else
+  const char *rtp_names[NUM_RTP_SLOTS] = {NULL, NULL, NULL};
+#endif
+  if(game_section) {
+#if RGSS >= 2
+    rtp_names[0] = find_ini_entry(game_section, "RTP");
+#else
+    rtp_names[0] = find_ini_entry(game_section, "RTP1");
+    rtp_names[1] = find_ini_entry(game_section, "RTP2");
+    rtp_names[2] = find_ini_entry(game_section, "RTP3");
+#endif
+  }
+  for(int i = 0; i < NUM_RTP_SLOTS; ++i) {
+    rtp_paths[i] = NULL;
+
+    if(!rtp_names[i]) {
+      rtp_names[i] = "";
+    }
+    if(!strcmp(rtp_names[i], "")) continue;
+    const char *rtp_path_from_config = get_rtp_config(rtp_names[i]);
+    if(rtp_path_from_config) {
+      rtp_paths[i] = strdup(rtp_path_from_config);
+      continue;
+    }
+
+    // RTP default fallback
+    if(!rtp_base_path) {
+      fprintf(stderr, "warning: could not find RTP %s\n", rtp_names[i]);
+      continue;
+    }
+
+    size_t rtp_path_len =
+        strlen(rtp_base_path) +
+        1 + strlen(RTP_RGSS_VERSION) +
+        1 + strlen(rtp_names[i]);
+    rtp_paths[i] = malloc(rtp_path_len + 1);
+    snprintf(rtp_paths[i], rtp_path_len + 1, "%s/%s/%s",
+        rtp_base_path, RTP_RGSS_VERSION, rtp_names[i]);
+  }
+}
+
+void deconfigure_rtp_path() {
+  for(int i = 0; i < NUM_RTP_SLOTS; ++i) {
+    if(rtp_paths[i]) {
+      free(rtp_paths[i]);
+      rtp_paths[i] = NULL;
+    }
+  }
 }
 
 static SDL_RWops *caseless_open(char *path, const char *mode);
@@ -46,7 +130,7 @@ SDL_RWops *openres(VALUE path, bool use_archive) {
   // TODO: support case-insensitive paths
   file = caseless_open(StringValueCStr(path), "rb");
   if(file) return file;
-  VALUE path2 = rb_str_new2(RTP_PATH);
+  VALUE path2 = rb_str_new2(get_rtp_path());
   rb_str_cat2(path2, "/");
   rb_str_concat(path2, path);
   rb_str_update(path, 0, RSTRING_LEN(path), path2);

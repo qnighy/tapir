@@ -146,3 +146,30 @@ static int convert_keyname(const char *key) {
     return 0;
   }
 }
+
+const char *get_rtp_config(const char *rtp_name) {
+  config_setting_t *vsetting = config_lookup(&tapir_config, version_name);
+  if(!vsetting) return NULL;
+
+  config_setting_t *rsetting = config_setting_lookup(vsetting, "rtp");
+  if(!rsetting) return NULL;
+
+  const char *value;
+  if(config_setting_lookup_string(rsetting, rtp_name, &value)) {
+    return value;
+  } else {
+    return NULL;
+  }
+}
+
+const char *get_rtp_base_config() {
+  config_setting_t *setting = config_lookup(&tapir_config, "rgss");
+  if(!setting) return NULL;
+
+  const char *value;
+  if(config_setting_lookup_string(setting, "rtp_base_path", &value)) {
+    return value;
+  } else {
+    return NULL;
+  }
+}

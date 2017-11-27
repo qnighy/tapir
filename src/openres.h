@@ -13,8 +13,17 @@
 #include <stdbool.h>
 #include <SDL.h>
 #include <ruby.h>
+#include "ini.h"
+
+#if RGSS >= 2
+#define NUM_RTP_SLOTS 1
+#else
+#define NUM_RTP_SLOTS 3
+#endif
 
 const char *get_rtp_path(void);
+void configure_rtp_path(struct ini_section *game_section);
+void deconfigure_rtp_path(void);
 
 SDL_RWops *openres(VALUE path, bool use_archive);
 SDL_RWops *openres_ext(VALUE path, bool use_archive,

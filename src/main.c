@@ -131,6 +131,8 @@ int main(int argc, char **argv) {
 
   if(!game_title) game_title = "tapir";
 
+  configure_rtp_path(game_section);
+
   initSDL(game_title);
 
   initArchive();
@@ -178,6 +180,7 @@ static void tapir_atexit(void) {
   uninitFontLookup();
   deinitArchive();
   cleanupSDL();
+  deconfigure_rtp_path();
   deinit_tapir_config();
 }
 

@@ -20,6 +20,7 @@ extern int key_config[KEYCONFIG_LEN];
 void init_tapir_config(void);
 void deinit_tapir_config(void);
 
-int get_key_config(int button);
+const char *get_rtp_config(const char *rtp_name);
+const char *get_rtp_base_config(void);
 
 #endif /* CONFIG_H */
