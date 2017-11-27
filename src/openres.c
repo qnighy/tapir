@@ -14,6 +14,21 @@
 #include "misc.h"
 #include "RGSSError.h"
 
+// TODO: Make RTP base path configurable
+// TODO: Make RTP name configurable (Game.ini)
+// TODO: Support multiple RTPs (Game.ini)
+#if RGSS == 3
+#define RTP_PATH DATA_DIR "/Enterbrain/RGSS3/RPGVXAce"
+#elif RGSS == 2
+#define RTP_PATH DATA_DIR "/Enterbrain/RGSS2/RPGVX"
+#else
+#define RTP_PATH DATA_DIR "/Enterbrain/RGSS/Standard"
+#endif
+
+const char *get_rtp_path() {
+  return RTP_PATH;
+}
+
 static SDL_RWops *caseless_open(char *path, const char *mode);
 static void modify_case(char *path);
 

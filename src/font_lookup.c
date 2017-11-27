@@ -23,7 +23,13 @@ void initFontLookup(void) {
   config = FcInitLoadConfigAndFonts();
   // TODO case-insensitive paths
   FcConfigAppFontAddDir(config, (const FcChar8 *)"Fonts");
-  FcConfigAppFontAddDir(config, (const FcChar8 *)(RTP_PATH "/Fonts"));
+
+  const char *rtp_path = get_rtp_path();
+  char *rtp_font_dir = malloc(strlen(rtp_path) + strlen("/Fonts") + 1);
+  strcpy(rtp_font_dir, rtp_path);
+  strcat(rtp_font_dir, "/Fonts");
+  FcConfigAppFontAddDir(config, (const FcChar8 *)rtp_font_dir);
+  free(rtp_font_dir);
 }
 
 void uninitFontLookup(void) {
