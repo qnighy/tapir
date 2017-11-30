@@ -27,6 +27,7 @@ scripts = [
 scripts << "#{TEST_SRC}/test_general.rb"
 scripts << "#{TEST_SRC}/test_rgsserror.rb"
 scripts << "#{TEST_SRC}/test_rgssreset.rb"
+scripts << "#{TEST_SRC}/test_color.rb"
 scripts << "#{TEST_SRC}/test_bitmap.rb"
 scripts << "#{TEST_SRC}/test_sprite.rb"
 scripts << "#{TEST_SRC}/test_window.rb"
