@@ -1908,12 +1908,17 @@ static VALUE load_scripts2(VALUE data) {
   rb_eval_string(
       /* TODO: determine script path from Game.ini */
       "$RGSS_SCRIPTS = load_data("SCRIPT_PATH")\n"
-      "$RGSS_SCRIPTS.each do|num,title,script|\n"
+      "$RGSS_SCRIPTS.each_with_index do|(num,title,script), idx|\n"
       "  s = Zlib::Inflate::inflate(script)\n"
 #if RGSS == 3
       "  s.force_encoding(\"utf-8\")\n"
 #endif
-      "  eval(s, binding, title)\n"
+#if RGSS == 3
+      "  filename = sprintf(\"{%04d}\", idx)\n"
+#else
+      "  filename = sprintf(\"Section%03d\", idx)\n"
+#endif
+      "  eval(s, binding, filename)\n"
       "end\n"
   );
   return Qnil;
