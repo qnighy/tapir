@@ -276,6 +276,10 @@ static VALUE rb_tone_m_set(int argc, VALUE *argv, VALUE self) {
           NUM2DBL(argv[3]));
       break;
 #if RGSS == 3
+    case 0:
+      // Undocumented, but implemented in RGSS.
+      rb_tone_set(self, 0.0, 0.0, 0.0, 0.0);
+      break;
     case 1:
       rb_tone_set2(self, argv[0]);
       break;
@@ -284,7 +288,7 @@ static VALUE rb_tone_m_set(int argc, VALUE *argv, VALUE self) {
       // Note: original RGSS has wrong messages.
 #if RGSS == 3
       rb_raise(rb_eArgError,
-          "wrong number of arguments (%d for 1, 3..4)", argc);
+          "wrong number of arguments (%d for 0..1, 3..4)", argc);
 #else
       rb_raise(rb_eArgError,
           "wrong number of arguments (%d for 3..4)", argc);
