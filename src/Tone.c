@@ -49,11 +49,14 @@ void rb_tone_set(
 void rb_tone_set2(VALUE self, VALUE other) {
   struct Tone *ptr = rb_tone_data_mut(self);
   const struct Tone *other_ptr = rb_tone_data(other);
-  // Note: original RGSS doesn't check saturation here.
-  ptr->red = saturateDouble(other_ptr->red, -255.0, 255.0);
-  ptr->green = saturateDouble(other_ptr->green, -255.0, 255.0);
-  ptr->blue = saturateDouble(other_ptr->blue, -255.0, 255.0);
-  ptr->gray = saturateDouble(other_ptr->gray, 0.0, 255.0);
+  ptr->red = other_ptr->red;
+  ptr->green = other_ptr->green;
+  ptr->blue = other_ptr->blue;
+  ptr->gray = other_ptr->gray;
+  // ptr->red = saturateDouble(other_ptr->red, -255.0, 255.0);
+  // ptr->green = saturateDouble(other_ptr->green, -255.0, 255.0);
+  // ptr->blue = saturateDouble(other_ptr->blue, -255.0, 255.0);
+  // ptr->gray = saturateDouble(other_ptr->gray, 0.0, 255.0);
 }
 
 double rb_tone_red(VALUE self) {
@@ -404,11 +407,15 @@ static VALUE rb_tone_s_old_load(VALUE klass, VALUE str) {
     rb_raise(rb_eArgError, "Corrupted marshal data for Tone.");
   }
   if(!s) return ret;
-  // Note: original RGSS doesn't check saturation here.
-  ptr->red = saturateDouble(readDouble(s+sizeof(double)*0), -255.0, 255.0);
-  ptr->green = saturateDouble(readDouble(s+sizeof(double)*1), -255.0, 255.0);
-  ptr->blue = saturateDouble(readDouble(s+sizeof(double)*2), -255.0, 255.0);
-  ptr->gray = saturateDouble(readDouble(s+sizeof(double)*3), 0.0, 255.0);
+  // Note: values should be clamped, but not in the original RGSS.
+  ptr->red = readDouble(s+sizeof(double)*0);
+  ptr->green = readDouble(s+sizeof(double)*1);
+  ptr->blue = readDouble(s+sizeof(double)*2);
+  ptr->gray = readDouble(s+sizeof(double)*3);
+  // ptr->red = saturateDouble(readDouble(s+sizeof(double)*0), -255.0, 255.0);
+  // ptr->green = saturateDouble(readDouble(s+sizeof(double)*1), -255.0, 255.0);
+  // ptr->blue = saturateDouble(readDouble(s+sizeof(double)*2), -255.0, 255.0);
+  // ptr->gray = saturateDouble(readDouble(s+sizeof(double)*3), 0.0, 255.0);
   return ret;
 }
 
