@@ -123,6 +123,8 @@ void Init_Rect() {
   rb_define_private_method(rb_cRect, "initialize_copy",
       rb_rect_m_initialize_copy, 1);
   rb_define_method(rb_cRect, "==", rb_rect_m_equal, 1);
+  rb_define_method(rb_cRect, "===", rb_rect_m_equal, 1);
+  rb_define_method(rb_cRect, "eql?", rb_rect_m_equal, 1);
   rb_define_method(rb_cRect, "set", rb_rect_m_set, -1);
   rb_define_method(rb_cRect, "empty", rb_rect_m_empty, 0);
   rb_define_method(rb_cRect, "x", rb_rect_m_x, 0);

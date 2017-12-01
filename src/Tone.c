@@ -122,6 +122,8 @@ void Init_Tone(void) {
   rb_define_private_method(rb_cTone, "initialize_copy",
       rb_tone_m_initialize_copy, 1);
   rb_define_method(rb_cTone, "==", rb_tone_m_equal, 1);
+  rb_define_method(rb_cTone, "===", rb_tone_m_equal, 1);
+  rb_define_method(rb_cTone, "eql?", rb_tone_m_equal, 1);
   rb_define_method(rb_cTone, "set", rb_tone_m_set, -1);
   rb_define_method(rb_cTone, "red", rb_tone_m_red, 0);
   rb_define_method(rb_cTone, "red=", rb_tone_m_set_red, 1);

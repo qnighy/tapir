@@ -127,6 +127,8 @@ void Init_Color(void) {
   rb_define_private_method(rb_cColor, "initialize_copy",
       rb_color_m_initialize_copy, 1);
   rb_define_method(rb_cColor, "==", rb_color_m_equal, 1);
+  rb_define_method(rb_cColor, "===", rb_color_m_equal, 1);
+  rb_define_method(rb_cColor, "eql?", rb_color_m_equal, 1);
   rb_define_method(rb_cColor, "set", rb_color_m_set, -1);
   rb_define_method(rb_cColor, "red", rb_color_m_red, 0);
   rb_define_method(rb_cColor, "red=", rb_color_m_set_red, 1);
