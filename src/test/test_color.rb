@@ -151,28 +151,6 @@ module RGSSTest
       assert_equal([obj.alpha].pack("G"), nanstr4)
     end
 
-    def test_new_nan_saturation_3
-      nanstr1 = "\x7f\xfe\xee\xdd\x01\x23\x45\x67"
-      nanstr2 = "\xff\xfe\xee\xdd\xfa\x07\x7c\xbc"
-      nanstr3 = "\x7f\xf8\x00\x00\x00\x00\x00\x01"
-      nanstr4 = "\xff\xf7\x00\x00\x13\x00\x00\x01"
-      nanstr4a = "\xff\xff\x00\x00\x13\x00\x00\x01"
-      nanstr1.force_encoding("ASCII-8BIT") rescue nil
-      nanstr2.force_encoding("ASCII-8BIT") rescue nil
-      nanstr3.force_encoding("ASCII-8BIT") rescue nil
-      nanstr4.force_encoding("ASCII-8BIT") rescue nil
-      nanstr4a.force_encoding("ASCII-8BIT") rescue nil
-      nan1 = nanstr1.unpack("G")[0]
-      nan2 = nanstr2.unpack("G")[0]
-      nan3 = nanstr3.unpack("G")[0]
-      nan4 = nanstr4.unpack("G")[0]
-      obj = @@klass.new(nan1, nan2, nan3, nan4)
-      assert_equal([obj.red].pack("G"), nanstr1)
-      assert_equal([obj.green].pack("G"), nanstr2)
-      assert_equal([obj.blue].pack("G"), nanstr3)
-      assert_equal([obj.alpha].pack("G"), nanstr4a)
-    end
-
     def test_set_arg4_1
       obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
       obj.set(0.0, 0.0, 0.0, 0.0)
