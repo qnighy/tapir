@@ -245,7 +245,12 @@ static VALUE rb_color_m_initialize_copy(VALUE self, VALUE orig) {
  * Compares it to another color.
  */
 static VALUE rb_color_m_equal(VALUE self, VALUE other) {
+#if RGSS == 3
   if(!rb_color_data_p(other)) return Qfalse;
+#else
+  // RGSS <= 2 fails comparison when different objects are given.
+  rb_color_data(other);
+#endif
   return rb_color_equal(self, other) ? Qtrue : Qfalse;
 }
 

@@ -218,7 +218,12 @@ static VALUE rb_rect_m_initialize_copy(VALUE self, VALUE orig) {
  * Compares it to another rectangle.
  */
 static VALUE rb_rect_m_equal(VALUE self, VALUE other) {
+#if RGSS == 3
   if(!rb_rect_data_p(other)) return Qfalse;
+#else
+  // RGSS <= 2 fails comparison when different objects are given.
+  rb_rect_data(other);
+#endif
   return rb_rect_equal(self, other) ? Qtrue : Qfalse;
 }
 

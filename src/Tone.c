@@ -235,7 +235,12 @@ static VALUE rb_tone_m_initialize_copy(VALUE self, VALUE orig) {
  * Compares it to another tone.
  */
 static VALUE rb_tone_m_equal(VALUE self, VALUE other) {
+#if RGSS == 3
   if(!rb_tone_data_p(other)) return Qfalse;
+#else
+  // RGSS <= 2 fails comparison when different objects are given.
+  rb_tone_data(other);
+#endif
   return rb_tone_equal(self, other) ? Qtrue : Qfalse;
 }
 
