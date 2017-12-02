@@ -11,6 +11,7 @@
 #define INI_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 extern int ansi_code_page;
 
@@ -30,6 +31,7 @@ struct ini {
 };
 
 struct ini *load_ini(const char *filename, int codepage);
+bool save_ini(struct ini *data, const char *filename, int codepage);
 struct ini_section *new_ini_section(const char *name);
 void free_ini_section(struct ini_section *section);
 void add_ini_entry(
