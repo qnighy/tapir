@@ -181,6 +181,18 @@ void add_ini_entry(
   section->size++;
 }
 
+void set_ini_entry(
+    struct ini_section *section, const char *key, const char *value) {
+  for(size_t i = 0; i < section->size; ++i) {
+    if(!strcmp(section->entries[i].key, key)) {
+      free(section->entries[i].value);
+      section->entries[i].value = strdup(value);
+      return;
+    }
+  }
+  add_ini_entry(section, key, value);
+}
+
 const char *find_ini_entry(struct ini_section *section, const char *key) {
   for(size_t i = 0; i < section->size; ++i) {
     if(!strcmp(section->entries[i].key, key)) {
@@ -222,4 +234,13 @@ struct ini_section *find_ini_section(struct ini *data, const char *name) {
     }
   }
   return NULL;
+}
+
+struct ini_section *find_ini_section_or_insert(
+    struct ini *data, const char *name) {
+  struct ini_section *section = find_ini_section(data, name);
+  if(section) return section;
+  section = new_ini_section(name);
+  add_ini_section(data, section);
+  return section;
 }
