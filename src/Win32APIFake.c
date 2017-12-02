@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include "misc.h"
+#include "ini.h"
 
 struct Win32Rect {
   int32_t left, top, right, bottom;
@@ -24,6 +25,7 @@ static void define_fake(VALUE obj, VALUE (*func)(), int argc);
 static void lookup_trgssx(VALUE self, const char *func);
 static void lookup_gdi32(VALUE self, const char *func);
 static void lookup_user32(VALUE self, const char *func);
+static void lookup_kernel32(VALUE self, const char *func);
 
 static VALUE rb_win32apifake_m_initialize(int argc, VALUE *argv, VALUE self);
 
@@ -46,6 +48,8 @@ static VALUE rb_win32apifake_m_initialize(int argc, VALUE *argv, VALUE self) {
     lookup_gdi32(self, func);
   } else if(!strcmp(dllname, "user32")) {
     lookup_user32(self, func);
+  } else if(!strcmp(dllname, "kernel32")) {
+    lookup_kernel32(self, func);
   } else {
     fprintf(stderr, "unimplemented: %s.dll: %s\n", dllname, func);
   }
@@ -62,6 +66,8 @@ static VALUE rb_GetDesktopWindow(VALUE self);
 static VALUE rb_GetWindowLong(VALUE self, VALUE hwnd, VALUE index);
 static VALUE rb_SystemParametersInfo(
     VALUE self, VALUE action, VALUE param, VALUE pparam, VALUE update_option);
+static VALUE rb_GetPrivateProfileInt(
+    VALUE self, VALUE section, VALUE key, VALUE defval, VALUE inifile);
 
 static void lookup_trgssx(VALUE self, const char *func) {
   (void) self;
@@ -85,6 +91,15 @@ static void lookup_user32(VALUE self, const char *func) {
     define_fake(self, rb_SystemParametersInfo, 4);
   } else {
     fprintf(stderr, "unimplemented: user32.dll: %s\n", func);
+  }
+}
+
+static void lookup_kernel32(VALUE self, const char *func) {
+  (void) self;
+  if(!strcmp(func, "GetPrivateProfileInt")) {
+    define_fake(self, rb_GetPrivateProfileInt, 4);
+  } else {
+    fprintf(stderr, "unimplemented: kernel32.dll: %s\n", func);
   }
 }
 
@@ -121,4 +136,29 @@ static VALUE rb_SystemParametersInfo(
     return INT2NUM(0);
   }
   return INT2NUM(-1);
+}
+
+static VALUE rb_GetPrivateProfileInt(
+    VALUE self, VALUE section, VALUE key, VALUE defval, VALUE inifile) {
+  (void) self;
+  const char *section_str = StringValueCStr(section);
+  const char *key_str = StringValueCStr(key);
+  int defval_i = NUM2INT(defval);
+  const char *inifile_str = StringValueCStr(inifile);
+
+  int retval = defval_i;
+
+  struct ini *inidata = load_ini(inifile_str, 0);
+  if(!inidata) goto fail;
+  struct ini_section *sec = find_ini_section(inidata, section_str);
+  if(!sec) goto fail;
+  const char *val = find_ini_entry(sec, key_str);
+  if(!val) goto fail;
+  if(sscanf(val, "%d", &retval) < 1) {
+    retval = defval_i;
+  }
+fail:
+  if(inidata) free_ini(inidata);
+
+  return INT2NUM(retval);
 }
