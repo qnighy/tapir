@@ -44,6 +44,7 @@ scripts << "#{TEST_SRC}/test_rpg_system.rb"
 scripts << "#{TEST_SRC}/test_rpg_audiofile.rb"
 scripts << "#{TEST_SRC}/test_rpg_sprite.rb"
 scripts << "#{TEST_SRC}/test_rpg_weather.rb"
+scripts << "#{TEST_SRC}/test_ext_1.rb"
 
 scripts << "#{TEST_SRC}/epilogue.rb"
 
