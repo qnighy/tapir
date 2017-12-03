@@ -70,5 +70,48 @@ module RGSSTest
         File.delete(ini_filename) rescue nil
       end
     end
+
+    def test_set_audiovol_2
+      ini_filename = "./Game_test_set_audiovol_2.ini"
+      begin
+        File.open(ini_filename, "wb") do|file|
+          file.print "[AudioVol]\r\n"
+          file.print "BGS=54\r\n"
+          file.print "ME=0\r\n"
+          file.print "SE=77\r\n"
+          file.print "\r\n"
+          file.print "[Game]\r\n"
+          # "Title=テスト 表示 \\\r\n".encode("cp932")
+          file.print "Title=\x83\x65\x83\x58\x83\x67 \x95\x5C\x8E\xA6 \\\r\n"
+        end
+        @GetPrivateProfileInt = Win32API.new('kernel32', 'GetPrivateProfileInt', %w(p p i p), 'i')
+        @WritePrivateProfileString = Win32API.new('kernel32', 'WritePrivateProfileString', %w(p p p p), 'i')
+
+        @WritePrivateProfileString.call('AudioVol', 'SE', "3", ini_filename)
+        @WritePrivateProfileString.call('AudioVol', 'ME', "35", ini_filename)
+        @WritePrivateProfileString.call('AudioVol', 'BGM', "95", ini_filename)
+        @WritePrivateProfileString.call('AudioVol', 'BGS', "72", ini_filename)
+        assert_equal(
+          @GetPrivateProfileInt.call('AudioVol', 'BGM', 100, ini_filename),
+          95)
+        assert_equal(
+          @GetPrivateProfileInt.call('AudioVol', 'BGS', 100, ini_filename),
+          72)
+        assert_equal(
+          @GetPrivateProfileInt.call('AudioVol', 'SE', 100, ini_filename),
+          3)
+        assert_equal(
+          @GetPrivateProfileInt.call('AudioVol', 'ME', 100, ini_filename),
+          35)
+        File.open(ini_filename, "rb") do|file|
+          ini_contents = file.readlines
+          expected = "Title=\x83\x65\x83\x58\x83\x67 \x95\x5C\x8E\xA6 \\\r\n"
+          expected.force_encoding("ASCII-8BIT") rescue nil
+          assert(ini_contents.index(expected))
+        end
+      ensure
+        File.delete(ini_filename) rescue nil
+      end
+    end
   end
 end
