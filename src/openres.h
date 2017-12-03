@@ -28,6 +28,10 @@ void deconfigure_rtp_path(void);
 SDL_RWops *openres(VALUE path, bool use_archive);
 SDL_RWops *openres_ext(VALUE path, bool use_archive,
     const char * const exts[]);
+// TODO: this is a dirty hack -- only the first call of `rb_load_data`
+//       after this function is considered "script loading", that means
+//       it will only look into the archive provided it exists.
+void flag_script_loading(void);
 VALUE rb_load_data(VALUE self, VALUE path);
 
 #endif /* OPENRES_H */

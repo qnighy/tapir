@@ -157,13 +157,23 @@ SDL_RWops *openres_ext(VALUE path, bool use_archive,
   return NULL;
 }
 
+static bool script_loading_flag = false;
+
+void flag_script_loading(void) {
+  script_loading_flag = true;
+}
+
 VALUE rb_load_data(VALUE self, VALUE path) {
   (void) self;
+
+  bool script_loading = script_loading_flag;
+  script_loading_flag = false;
 
   SDL_RWops *file = NULL;
   if(archiveExists()) {
     file = openFromArchive(StringValueCStr(path));
-  } else {
+  }
+  if(!file && (!archiveExists() || !script_loading)) {
     file = caseless_open(StringValueCStr(path), "rb");
   }
   if(!file) {
