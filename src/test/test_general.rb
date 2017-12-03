@@ -105,5 +105,9 @@ module RGSSTest
     def test_regex
       assert_nothing_raised(RegexpError) { Regexp.compile('\\s*+\\s*') }
     end
+
+    def test_load_data_noent
+      assert_raise(Errno::ENOENT) { load_data("Data/nonexistent.dat") }
+    end
   end
 end

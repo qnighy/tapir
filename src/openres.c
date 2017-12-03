@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <errno.h>
 #include "archive.h"
 #include "misc.h"
 #include "tapir_config.h"
@@ -166,7 +167,8 @@ VALUE rb_load_data(VALUE self, VALUE path) {
     file = caseless_open(StringValueCStr(path), "rb");
   }
   if(!file) {
-    rb_raise(rb_eRGSSError, "Couldn't open %s", StringValueCStr(path));
+    errno = ENOENT;
+    rb_sys_fail(StringValueCStr(path));
   }
   VALUE str = rb_str_new(0, 0);
   while(true) {
