@@ -68,6 +68,8 @@ static VALUE rb_SystemParametersInfo(
     VALUE self, VALUE action, VALUE param, VALUE pparam, VALUE update_option);
 static VALUE rb_GetPrivateProfileInt(
     VALUE self, VALUE section, VALUE key, VALUE defval, VALUE inifile);
+static VALUE rb_WritePrivateProfileString(
+    VALUE self, VALUE section, VALUE key, VALUE val, VALUE inifile);
 
 static void lookup_trgssx(VALUE self, const char *func) {
   (void) self;
@@ -98,6 +100,8 @@ static void lookup_kernel32(VALUE self, const char *func) {
   (void) self;
   if(!strcmp(func, "GetPrivateProfileInt")) {
     define_fake(self, rb_GetPrivateProfileInt, 4);
+  } else if(!strcmp(func, "WritePrivateProfileString")) {
+    define_fake(self, rb_WritePrivateProfileString, 4);
   } else {
     fprintf(stderr, "unimplemented: kernel32.dll: %s\n", func);
   }
@@ -161,4 +165,23 @@ fail:
   if(inidata) free_ini(inidata);
 
   return INT2NUM(retval);
+}
+
+static VALUE rb_WritePrivateProfileString(
+    VALUE self, VALUE section, VALUE key, VALUE val, VALUE inifile) {
+  (void) self;
+  const char *section_str = StringValueCStr(section);
+  const char *key_str = StringValueCStr(key);
+  const char *val_str = StringValueCStr(val);
+  const char *inifile_str = StringValueCStr(inifile);
+
+  struct ini *inidata = load_ini(inifile_str, 0);
+  if(!inidata) inidata = new_ini();
+  struct ini_section *sec = find_ini_section_or_insert(inidata, section_str);
+  // TODO: encoding
+  set_ini_entry(sec, key_str, val_str);
+  bool save_success = save_ini(inidata, inifile_str, 0);
+  free_ini(inidata);
+
+  return INT2NUM((int)save_success);
 }
