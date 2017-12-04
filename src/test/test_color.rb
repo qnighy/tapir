@@ -470,6 +470,45 @@ module RGSSTest
       assert_equal([obj.alpha].pack("G"), nanstr4)
     end
 
+    def test_initialize_copy
+      obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
+      obj.send(:initialize_copy, @@klass.new(35.25, 37.25, 39.25, 41.25))
+      assert_equal(obj.red, 35.25)
+      assert_equal(obj.green, 37.25)
+      assert_equal(obj.blue, 39.25)
+      assert_equal(obj.alpha, 41.25)
+    end
+
+    def test_initialize_copy_self
+      obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
+      obj.send(:initialize_copy, obj)
+      assert_equal(obj.red, 20.0)
+      assert_equal(obj.green, 20.0)
+      assert_equal(obj.blue, 20.0)
+      assert_equal(obj.alpha, 20.0)
+    end
+
+    def test_initialize_copy_argerror
+      obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
+      assert_raise(ArgumentError) {
+        obj.send(:initialize_copy, obj, obj, obj, obj)
+      }
+      assert_raise(ArgumentError) {
+        obj.send(:initialize_copy, obj, obj, obj)
+      }
+      assert_raise(ArgumentError) { obj.send(:initialize_copy, obj, obj) }
+      assert_raise(ArgumentError) { obj.send(:initialize_copy) }
+    end
+
+    def test_initialize_copy_typeerror
+      obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
+      assert_raise(TypeError) { obj.send(:initialize_copy, Object.new) }
+      color_sub = Class.new(Color)
+      assert_raise(TypeError) {
+        obj.send(:initialize_copy, color_sub.new(20.0, 20.0, 20.0, 20.0))
+      }
+    end
+
     def test_to_s_1
       obj = @@klass.new(3.75, 137.0, 254.375, 200.0)
       assert_equal(obj.to_s, "(3.750000, 137.000000, 254.375000, 200.000000)")
