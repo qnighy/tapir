@@ -234,6 +234,9 @@ static VALUE rb_color_m_initialize(int argc, VALUE *argv, VALUE self) {
 }
 
 static VALUE rb_color_m_initialize_copy(VALUE self, VALUE orig) {
+  if (TYPE(self) != TYPE(orig) || rb_obj_class(self) != rb_obj_class(orig)) {
+    rb_raise(rb_eTypeError, "wrong argument class");
+  }
   rb_color_set2(self, orig);
   return Qnil;
 }
