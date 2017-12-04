@@ -232,7 +232,7 @@ module RGSSTest
       assert_equal(obj.height, (1 << 30) - 1)
 
       # Buggy behavior
-      obj = @@klass.new(1 << 30, 1 << 30, 1 << 30, 1 << 30)
+      obj = @@klass.new(-(1 << 30), -(1 << 30), -(1 << 30), -(1 << 30))
       assert_equal(obj.x, -(1 << 30))
       assert_equal(obj.y, -(1 << 30))
       assert_equal(obj.width, -(1 << 30))
@@ -373,7 +373,7 @@ module RGSSTest
       assert_equal(obj.width, (1 << 30) - 1)
       assert_equal(obj.height, (1 << 30) - 1)
 
-      obj = Rect._load("\x00\x00\x00\x40\x00\x00\x00\x40\x00\x00\x00\x40\x00\x00\x00\x40")
+      obj = Rect._load("\x00\x00\x00\xC0\x00\x00\x00\xC0\x00\x00\x00\xC0\x00\x00\x00\xC0")
       assert_equal(obj.x, -(1 << 30))
       assert_equal(obj.y, -(1 << 30))
       assert_equal(obj.width, -(1 << 30))
