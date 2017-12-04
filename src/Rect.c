@@ -248,10 +248,6 @@ static VALUE rb_rect_m_set(int argc, VALUE *argv, VALUE self) {
           NUM2INT(argv[2]), NUM2INT(argv[3]));
       break;
 #if RGSS == 3
-    case 0:
-      // Undocumented, but implemented in RGSS.
-      rb_rect_set(self, 0, 0, 0, 0);
-      break;
     case 1:
       rb_rect_set2(self, argv[0]);
       break;
