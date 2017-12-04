@@ -366,7 +366,7 @@ static VALUE rb_rect_m_set_height(VALUE self, VALUE newval) {
  */
 static VALUE rb_rect_m_to_s(VALUE self) {
   const struct Rect *ptr = rb_rect_data(self);
-  char s[50];
+  char s[60];
   snprintf(s, sizeof(s), "(%d, %d, %d, %d)",
       ptr->x, ptr->y, ptr->width, ptr->height);
   return rb_str_new2(s);
