@@ -26,14 +26,8 @@ double clamp_double(double val, double minval, double maxval) {
   return val;
 }
 
-union u64d_converter {
-  uint64_t u64;
-  double d;
-};
-
 double readDouble(const char *ptr) {
-  union u64d_converter num;
-  num.u64 =
+  uint64_t u =
     ((uint64_t)(unsigned char)ptr[0])|
     ((uint64_t)(unsigned char)ptr[1]<<8)|
     ((uint64_t)(unsigned char)ptr[2]<<16)|
@@ -42,20 +36,22 @@ double readDouble(const char *ptr) {
     ((uint64_t)(unsigned char)ptr[5]<<40)|
     ((uint64_t)(unsigned char)ptr[6]<<48)|
     ((uint64_t)(unsigned char)ptr[7]<<56);
-  return num.d;
+  double val;
+  memcpy(&val, &u, sizeof(val));
+  return val;
 }
 
 void writeDouble(char *ptr, double val) {
-  union u64d_converter num;
-  num.d = val;
-  ptr[0] = num.u64;
-  ptr[1] = num.u64>>8;
-  ptr[2] = num.u64>>16;
-  ptr[3] = num.u64>>24;
-  ptr[4] = num.u64>>32;
-  ptr[5] = num.u64>>40;
-  ptr[6] = num.u64>>48;
-  ptr[7] = num.u64>>56;
+  uint64_t u;
+  memcpy(&u, &val, sizeof(val));
+  ptr[0] = u;
+  ptr[1] = u>>8;
+  ptr[2] = u>>16;
+  ptr[3] = u>>24;
+  ptr[4] = u>>32;
+  ptr[5] = u>>40;
+  ptr[6] = u>>48;
+  ptr[7] = u>>56;
 }
 
 int32_t readInt32(const char *ptr) {
