@@ -614,7 +614,7 @@ static VALUE rb_window_m_opacity(VALUE self) {
 
 static VALUE rb_window_m_set_opacity(VALUE self, VALUE newval) {
   struct Window *ptr = rb_window_data_mut(self);
-  ptr->opacity = saturateInt32(NUM2INT(newval), 0, 255);
+  ptr->opacity = clamp_int32(NUM2INT(newval), 0, 255);
   return newval;
 }
 
@@ -625,7 +625,7 @@ static VALUE rb_window_m_back_opacity(VALUE self) {
 
 static VALUE rb_window_m_set_back_opacity(VALUE self, VALUE newval) {
   struct Window *ptr = rb_window_data_mut(self);
-  ptr->back_opacity = saturateInt32(NUM2INT(newval), 0, 255);
+  ptr->back_opacity = clamp_int32(NUM2INT(newval), 0, 255);
   return newval;
 }
 
@@ -636,7 +636,7 @@ static VALUE rb_window_m_contents_opacity(VALUE self) {
 
 static VALUE rb_window_m_set_contents_opacity(VALUE self, VALUE newval) {
   struct Window *ptr = rb_window_data_mut(self);
-  ptr->contents_opacity = saturateInt32(NUM2INT(newval), 0, 255);
+  ptr->contents_opacity = clamp_int32(NUM2INT(newval), 0, 255);
   return newval;
 }
 
@@ -648,7 +648,7 @@ static VALUE rb_window_m_openness(VALUE self) {
 
 static VALUE rb_window_m_set_openness(VALUE self, VALUE newval) {
   struct Window *ptr = rb_window_data_mut(self);
-  ptr->openness = saturateInt32(NUM2INT(newval), 0, 255);
+  ptr->openness = clamp_int32(NUM2INT(newval), 0, 255);
   return newval;
 }
 #endif

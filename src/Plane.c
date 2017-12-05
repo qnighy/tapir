@@ -315,7 +315,7 @@ static VALUE rb_plane_m_opacity(VALUE self) {
 
 static VALUE rb_plane_m_set_opacity(VALUE self, VALUE newval) {
   struct Plane *ptr = rb_plane_data_mut(self);
-  ptr->opacity = saturateInt32(NUM2INT(newval), 0, 255);
+  ptr->opacity = clamp_int32(NUM2INT(newval), 0, 255);
   return newval;
 }
 

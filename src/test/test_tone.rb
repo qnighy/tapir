@@ -94,7 +94,7 @@ module RGSSTest
       assert_raise(TypeError) { @@klass.new(0.0, 0.0, 0.0, "hoge") }
     end
 
-    def test_new_lower_saturation
+    def test_new_lower_clamping
       obj = @@klass.new(-100.0, -110.0, -120.0, -130.0)
       assert_equal(obj.red, -100.0)
       assert_equal(obj.green, -110.0)
@@ -116,7 +116,7 @@ module RGSSTest
       assert_equal(1.0 / obj.gray, 1.0 / -0.0)
     end
 
-    def test_new_upper_saturation
+    def test_new_upper_clamping
       obj = @@klass.new(300.0, 310.0, 320.0, 330.0)
       assert_equal(obj.red, 255.0)
       assert_equal(obj.green, 255.0)
@@ -124,7 +124,7 @@ module RGSSTest
       assert_equal(obj.gray, 255.0)
     end
 
-    def test_new_nan_saturation_1
+    def test_new_nan_clamping_1
       obj = @@klass.new(0.0 / 0.0, 0.0 / 0.0, 0.0 / 0.0, 0.0 / 0.0)
       assert(obj.red.nan?)
       assert(obj.green.nan?)
@@ -132,7 +132,7 @@ module RGSSTest
       assert(obj.gray.nan?)
     end
 
-    def test_new_nan_saturation_2
+    def test_new_nan_clamping_2
       nanstr1 = "\x7f\xfe\xee\xdd\x01\x23\x45\x67"
       nanstr2 = "\xff\xfe\xee\xdd\xfa\x07\x7c\xbc"
       nanstr3 = "\x7f\xf8\x00\x00\x00\x00\x00\x01"
@@ -235,7 +235,7 @@ module RGSSTest
       # assert_raise(TypeError) { obj.set(Color.new(0.0, 0.0, 0.0, 0.0)) }
     end
 
-    def test_set_lower_saturation
+    def test_set_lower_clamping
       obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
       obj.set(-100.0, -110.0, -120.0, -130.0)
       assert_equal(obj.red, -100.0)
@@ -260,7 +260,7 @@ module RGSSTest
       assert_equal(1.0 / obj.gray, 1.0 / -0.0)
     end
 
-    def test_set_upper_saturation
+    def test_set_upper_clamping
       obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
       obj.set(300.0, 310.0, 320.0, 330.0)
       assert_equal(obj.red, 255.0)
@@ -269,7 +269,7 @@ module RGSSTest
       assert_equal(obj.gray, 255.0)
     end
 
-    def test_set_nan_saturation_1
+    def test_set_nan_clamping_1
       obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
       obj.set(0.0 / 0.0, 0.0 / 0.0, 0.0 / 0.0, 0.0 / 0.0)
       assert(obj.red.nan?)
@@ -278,7 +278,7 @@ module RGSSTest
       assert(obj.gray.nan?)
     end
 
-    def test_set_nan_saturation_2
+    def test_set_nan_clamping_2
       nanstr1 = "\x7f\xfe\xee\xdd\x01\x23\x45\x67"
       nanstr2 = "\xff\xfe\xee\xdd\xfa\x07\x7c\xbc"
       nanstr3 = "\x7f\xf8\x00\x00\x00\x00\x00\x01"
@@ -353,7 +353,7 @@ module RGSSTest
       assert_raise(TypeError) { obj.gray = "hoge" }
     end
 
-    def test_set_rgba_lower_saturation
+    def test_set_rgba_lower_clamping
       obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
       obj.red = -100.0
       assert_equal(obj.red, -100.0)
@@ -405,7 +405,7 @@ module RGSSTest
       assert_equal(1.0 / obj.gray, 1.0 / -0.0)
     end
 
-    def test_set_rgba_upper_saturation
+    def test_set_rgba_upper_clamping
       obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
       obj.red = 300.0
       assert_equal(obj.red, 255.0)
@@ -423,7 +423,7 @@ module RGSSTest
       assert_equal(obj.gray, 255.0)
     end
 
-    def test_set_rgba_nan_saturation_1
+    def test_set_rgba_nan_clamping_1
       obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
       obj.red = 0.0 / 0.0
       assert(obj.red.nan?)
@@ -441,7 +441,7 @@ module RGSSTest
       assert(obj.gray.nan?)
     end
 
-    def test_set_rgba_nan_saturation_2
+    def test_set_rgba_nan_clamping_2
       nanstr1 = "\x7f\xfe\xee\xdd\x01\x23\x45\x67"
       nanstr2 = "\xff\xfe\xee\xdd\xfa\x07\x7c\xbc"
       nanstr3 = "\x7f\xf8\x00\x00\x00\x00\x00\x01"
@@ -505,9 +505,9 @@ module RGSSTest
     def test_initialize_copy_typeerror
       obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
       assert_raise(TypeError) { obj.send(:initialize_copy, Object.new) }
-      color_sub = Class.new(Tone)
+      tone_sub = Class.new(Tone)
       assert_raise(TypeError) {
-        obj.send(:initialize_copy, color_sub.new(20.0, 20.0, 20.0, 20.0))
+        obj.send(:initialize_copy, tone_sub.new(20.0, 20.0, 20.0, 20.0))
       }
     end
 

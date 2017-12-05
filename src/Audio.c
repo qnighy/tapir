@@ -97,8 +97,8 @@ static VALUE rb_audio_s_bgm_play(int argc, VALUE *argv, VALUE klass) {
     rb_raise(rb_eArgError, "wrong number of arguments (%d for 1..3)", argc);
   }
 #endif
-  int volume = argc > 1 ? saturateInt32(NUM2INT(argv[1]), 0, 100) : 100;
-  int pitch = argc > 2 ? saturateInt32(NUM2INT(argv[2]), 50, 150) : 100;
+  int volume = argc > 1 ? clamp_int32(NUM2INT(argv[1]), 0, 100) : 100;
+  int pitch = argc > 2 ? clamp_int32(NUM2INT(argv[2]), 50, 150) : 100;
   int pos = argc > 3 ? NUM2INT(argv[3]) : 0;
 
   if(pitch != 100) {
@@ -233,8 +233,8 @@ static VALUE rb_audio_s_se_play(int argc, VALUE *argv, VALUE klass) {
   if(argc <= 0 || argc > 3) {
     rb_raise(rb_eArgError, "wrong number of arguments (%d for 1..3)", argc);
   }
-  int volume = argc > 1 ? saturateInt32(NUM2INT(argv[1]), 0, 100) : 80;
-  int pitch = argc > 2 ? saturateInt32(NUM2INT(argv[2]), 50, 150) : 100;
+  int volume = argc > 1 ? clamp_int32(NUM2INT(argv[1]), 0, 100) : 80;
+  int pitch = argc > 2 ? clamp_int32(NUM2INT(argv[2]), 50, 150) : 100;
 
   if(pitch != 100) {
     WARN_UNIMPLEMENTED("Audio.se_play with pitch");

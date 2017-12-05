@@ -348,7 +348,7 @@ static VALUE rb_bitmap_m_blt(int argc, VALUE *argv, VALUE self) {
   const struct Rect *src_rect_ptr = rb_rect_data(argv[3]);
   if(!src_ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
 
-  int opacity = argc > 4 ? saturateInt32(NUM2INT(argv[4]), 0, 255) : 255;
+  int opacity = argc > 4 ? clamp_int32(NUM2INT(argv[4]), 0, 255) : 255;
   if(opacity == 0) return Qnil;
 
   blt(ptr->surface, src_ptr->surface,
@@ -372,7 +372,7 @@ static VALUE rb_bitmap_m_stretch_blt(int argc, VALUE *argv, VALUE self) {
   const struct Rect *src_rect_ptr = rb_rect_data(argv[2]);
   if(!src_ptr->surface) rb_raise(rb_eRGSSError, "disposed bitmap");
 
-  int opacity = argc > 3 ? saturateInt32(NUM2INT(argv[3]), 0, 255) : 255;
+  int opacity = argc > 3 ? clamp_int32(NUM2INT(argv[3]), 0, 255) : 255;
   if(opacity == 0) return Qnil;
 
   blt(ptr->surface, src_ptr->surface,

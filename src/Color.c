@@ -18,10 +18,10 @@ VALUE rb_color_new(double red, double green, double blue, double alpha) {
   struct Color *ptr = rb_color_data_mut(ret);
   // Note: RGB values are expected to be clamped within [0, 255].
   // but original RGSS wrongly uses [-255, 255].
-  ptr->red = saturateDouble(red, -255.0, 255.0);
-  ptr->green = saturateDouble(green, -255.0, 255.0);
-  ptr->blue = saturateDouble(blue, -255.0, 255.0);
-  ptr->alpha = saturateDouble(alpha, 0.0, 255.0);
+  ptr->red = clamp_double(red, -255.0, 255.0);
+  ptr->green = clamp_double(green, -255.0, 255.0);
+  ptr->blue = clamp_double(blue, -255.0, 255.0);
+  ptr->alpha = clamp_double(alpha, 0.0, 255.0);
   return ret;
 }
 VALUE rb_color_new2(void) {
@@ -44,10 +44,10 @@ void rb_color_set(
   struct Color *ptr = rb_color_data_mut(self);
   // Note: RGB values are expected to be clamped within [0, 255].
   // but original RGSS wrongly uses [-255, 255].
-  ptr->red = saturateDouble(newred, -255.0, 255.0);
-  ptr->green = saturateDouble(newgreen, -255.0, 255.0);
-  ptr->blue = saturateDouble(newblue, -255.0, 255.0);
-  ptr->alpha = saturateDouble(newalpha, 0.0, 255.0);
+  ptr->red = clamp_double(newred, -255.0, 255.0);
+  ptr->green = clamp_double(newgreen, -255.0, 255.0);
+  ptr->blue = clamp_double(newblue, -255.0, 255.0);
+  ptr->alpha = clamp_double(newalpha, 0.0, 255.0);
 }
 
 void rb_color_set2(VALUE self, VALUE other) {
@@ -57,10 +57,10 @@ void rb_color_set2(VALUE self, VALUE other) {
   ptr->green = other_ptr->green;
   ptr->blue = other_ptr->blue;
   ptr->alpha = other_ptr->alpha;
-  // ptr->red = saturateDouble(other_ptr->red, 0.0, 255.0);
-  // ptr->green = saturateDouble(other_ptr->green, 0.0, 255.0);
-  // ptr->blue = saturateDouble(other_ptr->blue, 0.0, 255.0);
-  // ptr->alpha = saturateDouble(other_ptr->alpha, 0.0, 255.0);
+  // ptr->red = clamp_double(other_ptr->red, 0.0, 255.0);
+  // ptr->green = clamp_double(other_ptr->green, 0.0, 255.0);
+  // ptr->blue = clamp_double(other_ptr->blue, 0.0, 255.0);
+  // ptr->alpha = clamp_double(other_ptr->alpha, 0.0, 255.0);
 }
 
 double rb_color_red(VALUE self) {
@@ -71,7 +71,7 @@ void rb_color_set_red(VALUE self, double newval) {
   struct Color *ptr = rb_color_data_mut(self);
   // Note: RGB values are expected to be clamped within [0, 255].
   // but original RGSS wrongly uses [-255, 255].
-  ptr->red = saturateDouble(newval, -255.0, 255.0);
+  ptr->red = clamp_double(newval, -255.0, 255.0);
 }
 double rb_color_green(VALUE self) {
   const struct Color *ptr = rb_color_data(self);
@@ -81,7 +81,7 @@ void rb_color_set_green(VALUE self, double newval) {
   struct Color *ptr = rb_color_data_mut(self);
   // Note: RGB values are expected to be clamped within [0, 255].
   // but original RGSS wrongly uses [-255, 255].
-  ptr->green = saturateDouble(newval, -255.0, 255.0);
+  ptr->green = clamp_double(newval, -255.0, 255.0);
 }
 double rb_color_blue(VALUE self) {
   const struct Color *ptr = rb_color_data(self);
@@ -91,7 +91,7 @@ void rb_color_set_blue(VALUE self, double newval) {
   struct Color *ptr = rb_color_data_mut(self);
   // Note: RGB values are expected to be clamped within [0, 255].
   // but original RGSS wrongly uses [-255, 255].
-  ptr->blue = saturateDouble(newval, -255.0, 255.0);
+  ptr->blue = clamp_double(newval, -255.0, 255.0);
 }
 double rb_color_alpha(VALUE self) {
   const struct Color *ptr = rb_color_data(self);
@@ -99,7 +99,7 @@ double rb_color_alpha(VALUE self) {
 }
 void rb_color_set_alpha(VALUE self, double newval) {
   struct Color *ptr = rb_color_data_mut(self);
-  ptr->alpha = saturateDouble(newval, 0.0, 255.0);
+  ptr->alpha = clamp_double(newval, 0.0, 255.0);
 }
 
 static VALUE rb_color_m_initialize(int argc, VALUE *argv, VALUE self);
@@ -434,10 +434,10 @@ static VALUE rb_color_s_old_load(VALUE klass, VALUE str) {
   ptr->green = readDouble(s+sizeof(double)*1);
   ptr->blue = readDouble(s+sizeof(double)*2);
   ptr->alpha = readDouble(s+sizeof(double)*3);
-  // ptr->red = saturateDouble(readDouble(s+sizeof(double)*0), 0.0, 255.0);
-  // ptr->green = saturateDouble(readDouble(s+sizeof(double)*1), 0.0, 255.0);
-  // ptr->blue = saturateDouble(readDouble(s+sizeof(double)*2), 0.0, 255.0);
-  // ptr->alpha = saturateDouble(readDouble(s+sizeof(double)*3), 0.0, 255.0);
+  // ptr->red = clamp_double(readDouble(s+sizeof(double)*0), 0.0, 255.0);
+  // ptr->green = clamp_double(readDouble(s+sizeof(double)*1), 0.0, 255.0);
+  // ptr->blue = clamp_double(readDouble(s+sizeof(double)*2), 0.0, 255.0);
+  // ptr->alpha = clamp_double(readDouble(s+sizeof(double)*3), 0.0, 255.0);
   return ret;
 }
 

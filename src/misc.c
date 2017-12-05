@@ -13,14 +13,14 @@
 #include <errno.h>
 #include <unistd.h>
 
-int32_t saturateInt32(int32_t val, int32_t minval, int32_t maxval) {
+int32_t clamp_int32(int32_t val, int32_t minval, int32_t maxval) {
   if(val <= minval) return minval;
   if(val >= maxval) return maxval;
   return val;
 }
 
 // Note: original RGSS seems to evaluate to_f twice or more.
-double saturateDouble(double val, double minval, double maxval) {
+double clamp_double(double val, double minval, double maxval) {
   if(val < minval) return minval;
   if(val > maxval) return maxval;
   return val;

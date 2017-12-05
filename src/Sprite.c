@@ -579,7 +579,7 @@ static VALUE rb_sprite_m_bush_opacity(VALUE self) {
 
 static VALUE rb_sprite_m_set_bush_opacity(VALUE self, VALUE newval) {
   struct Sprite *ptr = rb_sprite_data_mut(self);
-  ptr->bush_opacity = saturateInt32(NUM2INT(newval), 0, 255);
+  ptr->bush_opacity = clamp_int32(NUM2INT(newval), 0, 255);
   return newval;
 }
 #endif
@@ -591,7 +591,7 @@ static VALUE rb_sprite_m_opacity(VALUE self) {
 
 static VALUE rb_sprite_m_set_opacity(VALUE self, VALUE newval) {
   struct Sprite *ptr = rb_sprite_data_mut(self);
-  ptr->opacity = saturateInt32(NUM2INT(newval), 0, 255);
+  ptr->opacity = clamp_int32(NUM2INT(newval), 0, 255);
   return newval;
 }
 

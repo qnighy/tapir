@@ -16,10 +16,10 @@ static VALUE tone_alloc(VALUE klass);
 VALUE rb_tone_new(double red, double green, double blue, double gray) {
   VALUE ret = tone_alloc(rb_cTone);
   struct Tone *ptr = rb_tone_data_mut(ret);
-  ptr->red = saturateDouble(red, -255.0, 255.0);
-  ptr->green = saturateDouble(green, -255.0, 255.0);
-  ptr->blue = saturateDouble(blue, -255.0, 255.0);
-  ptr->gray = saturateDouble(gray, 0.0, 255.0);
+  ptr->red = clamp_double(red, -255.0, 255.0);
+  ptr->green = clamp_double(green, -255.0, 255.0);
+  ptr->blue = clamp_double(blue, -255.0, 255.0);
+  ptr->gray = clamp_double(gray, 0.0, 255.0);
   return ret;
 }
 VALUE rb_tone_new2(void) {
@@ -40,10 +40,10 @@ void rb_tone_set(
     VALUE self, double newred, double newgreen, double newblue,
     double newgray) {
   struct Tone *ptr = rb_tone_data_mut(self);
-  ptr->red = saturateDouble(newred, -255.0, 255.0);
-  ptr->green = saturateDouble(newgreen, -255.0, 255.0);
-  ptr->blue = saturateDouble(newblue, -255.0, 255.0);
-  ptr->gray = saturateDouble(newgray, 0.0, 255.0);
+  ptr->red = clamp_double(newred, -255.0, 255.0);
+  ptr->green = clamp_double(newgreen, -255.0, 255.0);
+  ptr->blue = clamp_double(newblue, -255.0, 255.0);
+  ptr->gray = clamp_double(newgray, 0.0, 255.0);
 }
 
 void rb_tone_set2(VALUE self, VALUE other) {
@@ -53,10 +53,10 @@ void rb_tone_set2(VALUE self, VALUE other) {
   ptr->green = other_ptr->green;
   ptr->blue = other_ptr->blue;
   ptr->gray = other_ptr->gray;
-  // ptr->red = saturateDouble(other_ptr->red, -255.0, 255.0);
-  // ptr->green = saturateDouble(other_ptr->green, -255.0, 255.0);
-  // ptr->blue = saturateDouble(other_ptr->blue, -255.0, 255.0);
-  // ptr->gray = saturateDouble(other_ptr->gray, 0.0, 255.0);
+  // ptr->red = clamp_double(other_ptr->red, -255.0, 255.0);
+  // ptr->green = clamp_double(other_ptr->green, -255.0, 255.0);
+  // ptr->blue = clamp_double(other_ptr->blue, -255.0, 255.0);
+  // ptr->gray = clamp_double(other_ptr->gray, 0.0, 255.0);
 }
 
 double rb_tone_red(VALUE self) {
@@ -65,7 +65,7 @@ double rb_tone_red(VALUE self) {
 }
 void rb_tone_set_red(VALUE self, double newval) {
   struct Tone *ptr = rb_tone_data_mut(self);
-  ptr->red = saturateDouble(newval, -255.0, 255.0);
+  ptr->red = clamp_double(newval, -255.0, 255.0);
 }
 double rb_tone_green(VALUE self) {
   const struct Tone *ptr = rb_tone_data(self);
@@ -73,7 +73,7 @@ double rb_tone_green(VALUE self) {
 }
 void rb_tone_set_green(VALUE self, double newval) {
   struct Tone *ptr = rb_tone_data_mut(self);
-  ptr->green = saturateDouble(newval, -255.0, 255.0);
+  ptr->green = clamp_double(newval, -255.0, 255.0);
 }
 double rb_tone_blue(VALUE self) {
   const struct Tone *ptr = rb_tone_data(self);
@@ -81,7 +81,7 @@ double rb_tone_blue(VALUE self) {
 }
 void rb_tone_set_blue(VALUE self, double newval) {
   struct Tone *ptr = rb_tone_data_mut(self);
-  ptr->blue = saturateDouble(newval, -255.0, 255.0);
+  ptr->blue = clamp_double(newval, -255.0, 255.0);
 }
 double rb_tone_gray(VALUE self) {
   const struct Tone *ptr = rb_tone_data(self);
@@ -89,7 +89,7 @@ double rb_tone_gray(VALUE self) {
 }
 void rb_tone_set_gray(VALUE self, double newval) {
   struct Tone *ptr = rb_tone_data_mut(self);
-  ptr->gray = saturateDouble(newval, 0.0, 255.0);
+  ptr->gray = clamp_double(newval, 0.0, 255.0);
 }
 
 static VALUE rb_tone_m_initialize(int argc, VALUE *argv, VALUE self);
@@ -424,10 +424,10 @@ static VALUE rb_tone_s_old_load(VALUE klass, VALUE str) {
   ptr->green = readDouble(s+sizeof(double)*1);
   ptr->blue = readDouble(s+sizeof(double)*2);
   ptr->gray = readDouble(s+sizeof(double)*3);
-  // ptr->red = saturateDouble(readDouble(s+sizeof(double)*0), -255.0, 255.0);
-  // ptr->green = saturateDouble(readDouble(s+sizeof(double)*1), -255.0, 255.0);
-  // ptr->blue = saturateDouble(readDouble(s+sizeof(double)*2), -255.0, 255.0);
-  // ptr->gray = saturateDouble(readDouble(s+sizeof(double)*3), 0.0, 255.0);
+  // ptr->red = clamp_double(readDouble(s+sizeof(double)*0), -255.0, 255.0);
+  // ptr->green = clamp_double(readDouble(s+sizeof(double)*1), -255.0, 255.0);
+  // ptr->blue = clamp_double(readDouble(s+sizeof(double)*2), -255.0, 255.0);
+  // ptr->gray = clamp_double(readDouble(s+sizeof(double)*3), 0.0, 255.0);
   return ret;
 }
 

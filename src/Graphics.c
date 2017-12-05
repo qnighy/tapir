@@ -208,7 +208,7 @@ static VALUE rb_graphics_s_transition(int argc, VALUE *argv, VALUE klass) {
   int duration = argc > 0 ? NUM2INT(argv[0]) : 8;
 #endif
   const char *filename = argc > 1 ? StringValueCStr(argv[1]) : NULL;
-  int vague = argc > 2 ? saturateInt32(NUM2INT(argv[2]), 0, 255) : 40;
+  int vague = argc > 2 ? clamp_int32(NUM2INT(argv[2]), 0, 255) : 40;
 
   load_transition_image(filename, vague);
 
@@ -259,8 +259,8 @@ static VALUE rb_graphics_s_height(VALUE klass) {
 static VALUE rb_graphics_s_resize_screen(
     VALUE klass, VALUE width, VALUE height) {
   (void) klass;
-  int newwidth = saturateInt32(NUM2INT(width), 1, 640);
-  int newheight = saturateInt32(NUM2INT(height), 1, 480);
+  int newwidth = clamp_int32(NUM2INT(width), 1, 640);
+  int newheight = clamp_int32(NUM2INT(height), 1, 480);
   SDL_SetWindowSize(window, newwidth, newheight);
   SDL_GetWindowSize(window, &window_width, &window_height);
   return Qnil;
@@ -283,7 +283,7 @@ static VALUE rb_graphics_s_frame_rate(VALUE klass) {
 
 static VALUE rb_graphics_s_set_frame_rate(VALUE klass, VALUE newval) {
   (void) klass;
-  frame_rate = saturateInt32(NUM2INT(newval), 10, 120);
+  frame_rate = clamp_int32(NUM2INT(newval), 10, 120);
   return newval;
 }
 
