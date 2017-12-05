@@ -231,6 +231,14 @@ module RGSSTest
       assert_equal(obj.width, (1 << 30) - 1)
       assert_equal(obj.height, (1 << 30) - 1)
 
+      obj = @@klass.new(-(1 << 30), -(1 << 30), -(1 << 30), -(1 << 30))
+      assert_equal(obj.x, -(1 << 30))
+      assert_equal(obj.y, -(1 << 30))
+      assert_equal(obj.width, -(1 << 30))
+      assert_equal(obj.height, -(1 << 30))
+    end
+
+    def test_xywh_large_buggy
       # Buggy behavior
       obj = @@klass.new(-(1 << 30), -(1 << 30), -(1 << 30), -(1 << 30))
       assert_equal(obj.x, -(1 << 30))
@@ -244,12 +252,6 @@ module RGSSTest
       assert_equal(obj.y, -1)
       assert_equal(obj.width, -1)
       assert_equal(obj.height, -1)
-
-      obj = @@klass.new(-(1 << 30), -(1 << 30), -(1 << 30), -(1 << 30))
-      assert_equal(obj.x, -(1 << 30))
-      assert_equal(obj.y, -(1 << 30))
-      assert_equal(obj.width, -(1 << 30))
-      assert_equal(obj.height, -(1 << 30))
 
       # Buggy behavior
       obj = @@klass.new(-(1 << 30) - 1, -(1 << 30) - 1, -(1 << 30) - 1, -(1 << 30) - 1)

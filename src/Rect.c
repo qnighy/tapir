@@ -10,6 +10,10 @@
 #include "Rect.h"
 #include "misc.h"
 
+// Emulation of INT2FIX in x86-32.
+#define INT2FIX_E(x) \
+  INT2NUM((int32_t)(((uint32_t)(x) + 0x40000000U) & 0x7FFFFFFFU) - 0x40000000)
+
 static void rect_mark(struct Rect *ptr);
 static VALUE rect_alloc(VALUE klass);
 
@@ -281,7 +285,8 @@ static VALUE rb_rect_m_empty(VALUE self) {
  * Returns the x value of the rectangle.
  */
 static VALUE rb_rect_m_x(VALUE self) {
-  return INT2NUM(rb_rect_x(self));
+  // Note: RGSS wrongly wraps it with 31bit.
+  return INT2FIX_E(rb_rect_x(self));
 }
 
 /*
@@ -302,7 +307,8 @@ static VALUE rb_rect_m_set_x(VALUE self, VALUE newval) {
  * Returns the y value of the rectangle.
  */
 static VALUE rb_rect_m_y(VALUE self) {
-  return INT2NUM(rb_rect_y(self));
+  // Note: RGSS wrongly wraps it with 31bit.
+  return INT2FIX_E(rb_rect_y(self));
 }
 
 /*
@@ -323,7 +329,8 @@ static VALUE rb_rect_m_set_y(VALUE self, VALUE newval) {
  * Returns the width value of the rectangle.
  */
 static VALUE rb_rect_m_width(VALUE self) {
-  return INT2NUM(rb_rect_width(self));
+  // Note: RGSS wrongly wraps it with 31bit.
+  return INT2FIX_E(rb_rect_width(self));
 }
 
 /*
@@ -344,7 +351,8 @@ static VALUE rb_rect_m_set_width(VALUE self, VALUE newval) {
  * Returns the height value of the rectangle.
  */
 static VALUE rb_rect_m_height(VALUE self) {
-  return INT2NUM(rb_rect_height(self));
+  // Note: RGSS wrongly wraps it with 31bit.
+  return INT2FIX_E(rb_rect_height(self));
 }
 
 /*
