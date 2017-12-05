@@ -26,7 +26,7 @@ double clamp_double(double val, double minval, double maxval) {
   return val;
 }
 
-double readDouble(const char *ptr) {
+double read_double(const char *ptr) {
   uint64_t u =
     ((uint64_t)(unsigned char)ptr[0])|
     ((uint64_t)(unsigned char)ptr[1]<<8)|
@@ -41,7 +41,7 @@ double readDouble(const char *ptr) {
   return val;
 }
 
-void writeDouble(char *ptr, double val) {
+void write_double(char *ptr, double val) {
   uint64_t u;
   memcpy(&u, &val, sizeof(val));
   ptr[0] = u;
@@ -54,7 +54,7 @@ void writeDouble(char *ptr, double val) {
   ptr[7] = u>>56;
 }
 
-int32_t readInt32(const char *ptr) {
+int32_t read_int32(const char *ptr) {
   return
     ((uint32_t)(unsigned char)ptr[0])|
     ((uint32_t)(unsigned char)ptr[1]<<8)|
@@ -62,20 +62,20 @@ int32_t readInt32(const char *ptr) {
     ((uint32_t)(unsigned char)ptr[3]<<24);
 }
 
-void writeInt32(char *ptr, int32_t val) {
+void write_int32(char *ptr, int32_t val) {
   ptr[0] = ((uint32_t)val);
   ptr[1] = ((uint32_t)val)>>8;
   ptr[2] = ((uint32_t)val)>>16;
   ptr[3] = ((uint32_t)val)>>24;
 }
 
-int16_t readInt16(const char *ptr) {
+int16_t read_int16(const char *ptr) {
   return
     ((uint16_t)(unsigned char)ptr[0])|
     ((uint16_t)(unsigned char)ptr[1]<<8);
 }
 
-void writeInt16(char *ptr, int16_t val) {
+void write_int16(char *ptr, int16_t val) {
   ptr[0] = ((uint16_t)val);
   ptr[1] = ((uint16_t)val)>>8;
 }

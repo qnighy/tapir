@@ -312,11 +312,11 @@ static VALUE rb_table_s_old_load(VALUE klass, VALUE str) {
     rb_raise(rb_eArgError, "Corrupted marshal data for Table.");
   }
   if(!s) s = "";
-  ptr->dim = readInt32(s+sizeof(int32_t)*0);
-  ptr->xsize = readInt32(s+sizeof(int32_t)*1);
-  ptr->ysize = readInt32(s+sizeof(int32_t)*2);
-  ptr->zsize = readInt32(s+sizeof(int32_t)*3);
-  ptr->size = readInt32(s+sizeof(int32_t)*4);
+  ptr->dim = read_int32(s+sizeof(int32_t)*0);
+  ptr->xsize = read_int32(s+sizeof(int32_t)*1);
+  ptr->ysize = read_int32(s+sizeof(int32_t)*2);
+  ptr->zsize = read_int32(s+sizeof(int32_t)*3);
+  ptr->size = read_int32(s+sizeof(int32_t)*4);
   // Note: original RGSS doesn't check dimension or size.
   if(ptr->dim < 1 || ptr->dim > 3 ||
       ptr->xsize < 0 || ptr->ysize < 0 || ptr->zsize < 0) {
@@ -333,7 +333,7 @@ static VALUE rb_table_s_old_load(VALUE klass, VALUE str) {
   if(ptr->data) xfree(ptr->data);
   ptr->data = ALLOC_N(int16_t, ptr->size);
   for(int32_t i = 0; i < ptr->size; ++i) {
-    ptr->data[i] = readInt16(s+sizeof(int32_t)*5+sizeof(int16_t)*i);
+    ptr->data[i] = read_int16(s+sizeof(int32_t)*5+sizeof(int16_t)*i);
   }
   return ret;
 }
@@ -343,13 +343,13 @@ static VALUE rb_table_m_old_dump(VALUE self, VALUE limit) {
   const struct Table *ptr = rb_table_data(self);
   size_t dumpsize = sizeof(int32_t)*5+sizeof(int16_t)*(ptr->size);
   char *s = (char *)xmalloc(dumpsize);
-  writeInt32(s, ptr->dim);
-  writeInt32(s+4, ptr->xsize);
-  writeInt32(s+8, ptr->ysize);
-  writeInt32(s+12, ptr->zsize);
-  writeInt32(s+16, ptr->size);
+  write_int32(s, ptr->dim);
+  write_int32(s+4, ptr->xsize);
+  write_int32(s+8, ptr->ysize);
+  write_int32(s+12, ptr->zsize);
+  write_int32(s+16, ptr->size);
   for(int32_t i = 0; i < ptr->size; ++i) {
-    writeInt16(s+20+i*2, ptr->data[i]);
+    write_int16(s+20+i*2, ptr->data[i]);
   }
   VALUE ret = rb_str_new(s, dumpsize);
   xfree(s);

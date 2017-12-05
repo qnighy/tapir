@@ -431,14 +431,14 @@ static VALUE rb_color_s_old_load(VALUE klass, VALUE str) {
   }
   if(!s) return ret;
   // Note: values should be clamped, but not in the original RGSS.
-  ptr->red = readDouble(s+sizeof(double)*0);
-  ptr->green = readDouble(s+sizeof(double)*1);
-  ptr->blue = readDouble(s+sizeof(double)*2);
-  ptr->alpha = readDouble(s+sizeof(double)*3);
-  // ptr->red = clamp_double(readDouble(s+sizeof(double)*0), 0.0, 255.0);
-  // ptr->green = clamp_double(readDouble(s+sizeof(double)*1), 0.0, 255.0);
-  // ptr->blue = clamp_double(readDouble(s+sizeof(double)*2), 0.0, 255.0);
-  // ptr->alpha = clamp_double(readDouble(s+sizeof(double)*3), 0.0, 255.0);
+  ptr->red = read_double(s+sizeof(double)*0);
+  ptr->green = read_double(s+sizeof(double)*1);
+  ptr->blue = read_double(s+sizeof(double)*2);
+  ptr->alpha = read_double(s+sizeof(double)*3);
+  // ptr->red = clamp_double(read_double(s+sizeof(double)*0), 0.0, 255.0);
+  // ptr->green = clamp_double(read_double(s+sizeof(double)*1), 0.0, 255.0);
+  // ptr->blue = clamp_double(read_double(s+sizeof(double)*2), 0.0, 255.0);
+  // ptr->alpha = clamp_double(read_double(s+sizeof(double)*3), 0.0, 255.0);
   return ret;
 }
 
@@ -453,10 +453,10 @@ static VALUE rb_color_m_old_dump(VALUE self, VALUE limit) {
 
   const struct Color *ptr = rb_color_data(self);
   char s[sizeof(double)*4];
-  writeDouble(s+sizeof(double)*0, ptr->red);
-  writeDouble(s+sizeof(double)*1, ptr->green);
-  writeDouble(s+sizeof(double)*2, ptr->blue);
-  writeDouble(s+sizeof(double)*3, ptr->alpha);
+  write_double(s+sizeof(double)*0, ptr->red);
+  write_double(s+sizeof(double)*1, ptr->green);
+  write_double(s+sizeof(double)*2, ptr->blue);
+  write_double(s+sizeof(double)*3, ptr->alpha);
   VALUE ret = rb_str_new(s, sizeof(s));
   return ret;
 }

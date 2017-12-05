@@ -400,10 +400,10 @@ static VALUE rb_rect_s_old_load(VALUE klass, VALUE str) {
     rb_raise(rb_eArgError, "Corrupted marshal data for Rect.");
   }
   if(!s) return ret;
-  ptr->x = readInt32(s+sizeof(int32_t)*0);
-  ptr->y = readInt32(s+sizeof(int32_t)*1);
-  ptr->width = readInt32(s+sizeof(int32_t)*2);
-  ptr->height = readInt32(s+sizeof(int32_t)*3);
+  ptr->x = read_int32(s+sizeof(int32_t)*0);
+  ptr->y = read_int32(s+sizeof(int32_t)*1);
+  ptr->width = read_int32(s+sizeof(int32_t)*2);
+  ptr->height = read_int32(s+sizeof(int32_t)*3);
   return ret;
 }
 
@@ -417,10 +417,10 @@ static VALUE rb_rect_m_old_dump(VALUE self, VALUE limit) {
   (void) limit;
   const struct Rect *ptr = rb_rect_data(self);
   char s[sizeof(int32_t)*4];
-  writeInt32(s+sizeof(int32_t)*0, ptr->x);
-  writeInt32(s+sizeof(int32_t)*1, ptr->y);
-  writeInt32(s+sizeof(int32_t)*2, ptr->width);
-  writeInt32(s+sizeof(int32_t)*3, ptr->height);
+  write_int32(s+sizeof(int32_t)*0, ptr->x);
+  write_int32(s+sizeof(int32_t)*1, ptr->y);
+  write_int32(s+sizeof(int32_t)*2, ptr->width);
+  write_int32(s+sizeof(int32_t)*3, ptr->height);
   VALUE ret = rb_str_new(s, sizeof(s));
   return ret;
 }

@@ -15,12 +15,12 @@
 int32_t clamp_int32(int32_t val, int32_t minval, int32_t maxval);
 double clamp_double(double val, double minval, double maxval);
 
-double readDouble(const char *ptr);
-void writeDouble(char *ptr, double val);
-int32_t readInt32(const char *ptr);
-void writeInt32(char *ptr, int32_t val);
-int16_t readInt16(const char *ptr);
-void writeInt16(char *ptr, int16_t val);
+double read_double(const char *ptr);
+void write_double(char *ptr, double val);
+int32_t read_int32(const char *ptr);
+void write_int32(char *ptr, int32_t val);
+int16_t read_int16(const char *ptr);
+void write_int16(char *ptr, int16_t val);
 
 void tryChdir(const char *path);
 
