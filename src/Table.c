@@ -9,6 +9,7 @@
 
 #include "Table.h"
 #include "misc.h"
+#include "rubyfill.h"
 
 static void table_mark(struct Table *ptr);
 static void table_free(struct Table *ptr);

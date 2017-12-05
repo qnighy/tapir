@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include "misc.h"
+#include "rubyfill.h"
 #include "ini.h"
 
 struct Win32Rect {

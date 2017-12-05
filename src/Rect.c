@@ -9,6 +9,7 @@
 
 #include "Rect.h"
 #include "misc.h"
+#include "rubyfill.h"
 
 // Emulation of INT2FIX in x86-32.
 #define INT2FIX_E(x) \

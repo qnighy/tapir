@@ -11,17 +11,6 @@
 #define MISC_H
 
 #include <stdint.h>
-#include <ruby.h>
-
-#ifndef RSTRING_PTR
-#define RSTRING_PTR(s) (RSTRING(s)->ptr)
-#endif
-#ifndef RSTRING_LEN
-#define RSTRING_LEN(s) (RSTRING(s)->len)
-#endif
-#ifndef DBL2NUM
-#define DBL2NUM(dbl) rb_float_new(dbl)
-#endif
 
 int32_t clamp_int32(int32_t val, int32_t minval, int32_t maxval);
 double clamp_double(double val, double minval, double maxval);

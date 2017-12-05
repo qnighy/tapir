@@ -14,6 +14,7 @@
 #include <SDL_mixer.h>
 #include "RGSSError.h"
 #include "misc.h"
+#include "rubyfill.h"
 #include "sdl_misc.h"
 #include "openres.h"
 

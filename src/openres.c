@@ -14,7 +14,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include "archive.h"
-#include "misc.h"
+#include "rubyfill.h"
 #include "tapir_config.h"
 #include "RGSSError.h"
 

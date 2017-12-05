@@ -9,6 +9,7 @@
 
 #include "Tone.h"
 #include "misc.h"
+#include "rubyfill.h"
 
 static void tone_mark(struct Tone *ptr);
 static VALUE tone_alloc(VALUE klass);

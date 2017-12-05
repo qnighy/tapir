@@ -16,6 +16,7 @@
 #include "Font.h"
 #include "openres.h"
 #include "misc.h"
+#include "rubyfill.h"
 #include "sdl_misc.h"
 #include "surface_misc.h"
 

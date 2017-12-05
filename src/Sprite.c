@@ -17,6 +17,7 @@
 #include "Color.h"
 #include "Tone.h"
 #include "misc.h"
+#include "rubyfill.h"
 
 static GLuint shader;
 

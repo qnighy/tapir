@@ -9,6 +9,7 @@
 
 #include "Color.h"
 #include "misc.h"
+#include "rubyfill.h"
 
 static void color_mark(struct Color *ptr);
 static VALUE color_alloc(VALUE klass);
