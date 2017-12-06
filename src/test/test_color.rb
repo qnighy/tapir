@@ -217,6 +217,16 @@ module RGSSTest
       end
     end
 
+    def test_set_retval
+      obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
+      assert(obj.set(0.0, 0.0, 3.3, 0.0).equal?(obj))
+      assert(obj.set(-3.7, 8.8, 4.5).equal?(obj))
+      if RGSS == 3
+        assert(obj.set(@@klass.new(3.0, 3.1, 3.2, 3.3)).equal?(obj))
+        assert(obj.set.equal?(obj))
+      end
+    end
+
     def test_set_argerror
       obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
       assert_raise(ArgumentError) { obj.set(0.0, 0.0) }
@@ -317,6 +327,24 @@ module RGSSTest
       assert_equal(obj.alpha, 20.0)
       obj.alpha = 254.5
       assert_equal(obj.alpha, 254.5)
+    end
+
+    def test_set_rgba_retval
+      obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
+      assert_equal(obj.red = 3.25, 3.25)
+      assert_equal(obj.green = 7.5, 7.5)
+      assert_equal(obj.blue = 15.5, 15.5)
+      assert_equal(obj.alpha = 2.75, 2.75)
+
+      assert_equal(obj.red = -300.0, -300.0)
+      assert_equal(obj.green = -310.0, -310.0)
+      assert_equal(obj.blue = -320.0, -320.0)
+      assert_equal(obj.alpha = -330.0, -330.0)
+
+      assert_equal(obj.red = 300.0, 300.0)
+      assert_equal(obj.green = 310.0, 310.0)
+      assert_equal(obj.blue = 320.0, 320.0)
+      assert_equal(obj.alpha = 330.0, 330.0)
     end
 
     def test_rgba_argerror

@@ -162,6 +162,14 @@ module RGSSTest
       end
     end
 
+    def test_set_retval
+      obj = @@klass.new(20, 20, 20, 20)
+      assert(obj.set(1, 2, 3, 4).equal?(obj))
+      if RGSS == 3
+        assert(obj.set(@@klass.new(1, 2, 3, 4)).equal?(obj))
+      end
+    end
+
     def test_set_argerror
       obj = @@klass.new(20, 20, 20, 20)
       assert_raise(ArgumentError) { obj.set }
@@ -229,6 +237,11 @@ module RGSSTest
       assert_equal(obj.y, 0)
       assert_equal(obj.width, 0)
       assert_equal(obj.height, 0)
+    end
+
+    def test_empty_retval
+      obj = @@klass.new(20, 20, 20, 20)
+      assert(obj.empty.equal?(obj))
     end
 
     def test_empty_argerror
@@ -303,6 +316,14 @@ module RGSSTest
       assert_equal(obj.height, 20.0)
       obj.height = 254.5
       assert_equal(obj.height, 254)
+    end
+
+    def test_set_xywh_retval
+      obj = @@klass.new(20, 20, 20, 20)
+      assert_equal(obj.x = 1.5, 1.5)
+      assert_equal(obj.y = 7.5, 7.5)
+      assert_equal(obj.width = 15.5, 15.5)
+      assert_equal(obj.height = 2.75, 2.75)
     end
 
     def test_set_xywh_typeerror
