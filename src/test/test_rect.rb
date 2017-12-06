@@ -32,8 +32,6 @@ module RGSSTest
     end
 
     def test_instance_methods
-      # Only in lhs: [:empty, :height, :height=, :width, :width=, :x, :x=, :y, :y=]
-      # Only in rhs: [:blue, :blue=, :gray, :gray=, :green, :green=, :red, :red=]
       assert_symset_equal(owned_instance_methods(@@klass), [
         :==, :===, :_dump, :empty, :eql?, :height, :height=, :set, :to_s,
         :width, :width=, :x, :x=, :y, :y=])
@@ -212,7 +210,7 @@ module RGSSTest
       assert_equal(obj._dump(0), expected)
     end
 
-    def test_new_rangeerror
+    def test_set_rangeerror
       obj = @@klass.new(20, 20, 20, 20)
       assert_raise(RangeError) { obj.set(1 << 31, 0, 0, 0) }
       assert_raise(RangeError) { obj.set(0, 1 << 31, 0, 0) }
@@ -222,6 +220,23 @@ module RGSSTest
       assert_raise(RangeError) { obj.set(0, -(1 << 31) - 1, 0, 0) }
       assert_raise(RangeError) { obj.set(0, 0, -(1 << 31) - 1, 0) }
       assert_raise(RangeError) { obj.set(0, 0, 0, -(1 << 31) - 1) }
+    end
+
+    def test_empty
+      obj = @@klass.new(20, 20, 20, 20)
+      obj.empty
+      assert_equal(obj.x, 0)
+      assert_equal(obj.y, 0)
+      assert_equal(obj.width, 0)
+      assert_equal(obj.height, 0)
+    end
+
+    def test_empty_argerror
+      obj = @@klass.new(20, 20, 20, 20)
+      assert_raise(ArgumentError) { obj.empty(30) }
+      assert_raise(ArgumentError) { obj.empty(30, 40) }
+      assert_raise(ArgumentError) { obj.empty(30, 40, 50) }
+      assert_raise(ArgumentError) { obj.empty(30, 40, 50, 60) }
     end
 
     def test_xywh_large
