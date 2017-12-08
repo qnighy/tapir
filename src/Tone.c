@@ -11,10 +11,6 @@
 #include "misc.h"
 #include "rubyfill.h"
 
-void rb_tone_set(
-    VALUE self, double newred, double newgreen, double newblue,
-    double newgray);
-
 static void tone_mark(struct Tone *ptr);
 static VALUE tone_alloc(VALUE klass);
 
@@ -31,10 +27,9 @@ VALUE rb_tone_new2(void) {
   return rb_tone_new(0.0, 0.0, 0.0, 0.0);
 }
 
-void rb_tone_set(
-    VALUE self, double newred, double newgreen, double newblue,
+void tone_set(
+    struct Tone *ptr, double newred, double newgreen, double newblue,
     double newgray) {
-  struct Tone *ptr = rb_tone_data_mut(self);
   ptr->red = clamp_double(newred, -255.0, 255.0);
   ptr->green = clamp_double(newgreen, -255.0, 255.0);
   ptr->blue = clamp_double(newblue, -255.0, 255.0);
@@ -151,16 +146,16 @@ static VALUE tone_alloc(VALUE klass) {
 static VALUE rb_tone_m_initialize(int argc, VALUE *argv, VALUE self) {
   switch(argc) {
     case 3:
-      rb_tone_set(
-          self,
+      tone_set(
+          rb_tone_data_mut(self),
           NUM2DBL(argv[0]),
           NUM2DBL(argv[1]),
           NUM2DBL(argv[2]),
           0.0);
       break;
     case 4:
-      rb_tone_set(
-          self,
+      tone_set(
+          rb_tone_data_mut(self),
           NUM2DBL(argv[0]),
           NUM2DBL(argv[1]),
           NUM2DBL(argv[2]),
@@ -168,7 +163,7 @@ static VALUE rb_tone_m_initialize(int argc, VALUE *argv, VALUE self) {
       break;
 #if RGSS == 3
     case 0:
-      rb_tone_set(self, 0.0, 0.0, 0.0, 0.0);
+      tone_set(rb_tone_data_mut(self), 0.0, 0.0, 0.0, 0.0);
       break;
 #endif
     default:
@@ -232,16 +227,16 @@ static VALUE rb_tone_m_set(int argc, VALUE *argv, VALUE self) {
     // Note: original RGSS wrongly accepts empty argument list.
     // In this case, it works as set(0.0, 0.0, 0.0, 0.0).
     case 3:
-      rb_tone_set(
-          self,
+      tone_set(
+          rb_tone_data_mut(self),
           NUM2DBL(argv[0]),
           NUM2DBL(argv[1]),
           NUM2DBL(argv[2]),
           0.0);
       break;
     case 4:
-      rb_tone_set(
-          self,
+      tone_set(
+          rb_tone_data_mut(self),
           NUM2DBL(argv[0]),
           NUM2DBL(argv[1]),
           NUM2DBL(argv[2]),
@@ -250,7 +245,7 @@ static VALUE rb_tone_m_set(int argc, VALUE *argv, VALUE self) {
 #if RGSS == 3
     case 0:
       // Undocumented, but implemented in RGSS.
-      rb_tone_set(self, 0.0, 0.0, 0.0, 0.0);
+      tone_set(rb_tone_data_mut(self), 0.0, 0.0, 0.0, 0.0);
       break;
     case 1:
       rb_tone_set2(self, argv[0]);

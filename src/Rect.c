@@ -15,10 +15,6 @@
 #define INT2FIX_E(x) \
   INT2NUM((int32_t)(((uint32_t)(x) + 0x40000000U) & 0x7FFFFFFFU) - 0x40000000)
 
-void rb_rect_set(
-    VALUE self, int32_t newx, int32_t newy,
-    int32_t newwidth, int32_t newheight);
-
 static void rect_mark(struct Rect *ptr);
 static VALUE rect_alloc(VALUE klass);
 
@@ -34,16 +30,6 @@ VALUE rb_rect_new(int32_t x, int32_t y, int32_t width, int32_t height) {
 
 VALUE rb_rect_new2(void) {
   return rb_rect_new(0, 0, 0, 0);
-}
-
-void rb_rect_set(
-    VALUE self, int32_t newx, int32_t newy,
-    int32_t newwidth, int32_t newheight) {
-  struct Rect *ptr = rb_rect_data_mut(self);
-  ptr->x = newx;
-  ptr->y = newy;
-  ptr->width = newwidth;
-  ptr->height = newheight;
 }
 
 void rect_set(
@@ -163,13 +149,14 @@ static VALUE rect_alloc(VALUE klass) {
 static VALUE rb_rect_m_initialize(int argc, VALUE *argv, VALUE self) {
   switch(argc) {
     case 4:
-      rb_rect_set(
-          self, NUM2INT(argv[0]), NUM2INT(argv[1]),
+      rect_set(
+          rb_rect_data_mut(self),
+          NUM2INT(argv[0]), NUM2INT(argv[1]),
           NUM2INT(argv[2]), NUM2INT(argv[3]));
       break;
 #if RGSS == 3
     case 0:
-      rb_rect_set(self, 0, 0, 0, 0);
+      rect_set(rb_rect_data_mut(self), 0, 0, 0, 0);
       break;
 #endif
     default:
@@ -225,8 +212,9 @@ static VALUE rb_rect_m_equal(VALUE self, VALUE other) {
 static VALUE rb_rect_m_set(int argc, VALUE *argv, VALUE self) {
   switch(argc) {
     case 4:
-      rb_rect_set(
-          self, NUM2INT(argv[0]), NUM2INT(argv[1]),
+      rect_set(
+          rb_rect_data_mut(self),
+          NUM2INT(argv[0]), NUM2INT(argv[1]),
           NUM2INT(argv[2]), NUM2INT(argv[3]));
       break;
 #if RGSS == 3
@@ -252,7 +240,8 @@ static VALUE rb_rect_m_set(int argc, VALUE *argv, VALUE self) {
  * It returns the rectangle itself.
  */
 static VALUE rb_rect_m_empty(VALUE self) {
-  rb_rect_set(self, 0, 0, 0, 0);
+  struct Rect *ptr = rb_rect_data_mut(self);
+  rect_set(ptr, 0, 0, 0 ,0);
   return self;
 }
 

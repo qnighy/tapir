@@ -28,4 +28,8 @@ VALUE rb_tone_new(double red, double green, double blue, double gray);
 VALUE rb_tone_new2(void);
 void rb_tone_set2(VALUE self, VALUE other);
 
+void tone_set(
+    struct Tone *ptr, double newred, double newgreen, double newblue,
+    double newgray);
+
 #endif /* TONE_H */
