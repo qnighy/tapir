@@ -11,7 +11,6 @@
 #include "misc.h"
 #include "rubyfill.h"
 
-bool rb_tone_equal(VALUE self, VALUE other);
 void rb_tone_set(
     VALUE self, double newred, double newgreen, double newblue,
     double newgray);
@@ -38,16 +37,6 @@ VALUE rb_tone_new(double red, double green, double blue, double gray) {
 }
 VALUE rb_tone_new2(void) {
   return rb_tone_new(0.0, 0.0, 0.0, 0.0);
-}
-
-bool rb_tone_equal(VALUE self, VALUE other) {
-  const struct Tone *ptr = rb_tone_data(self);
-  const struct Tone *other_ptr = rb_tone_data(other);
-  return
-    ptr->red == other_ptr->red &&
-    ptr->green == other_ptr->green &&
-    ptr->blue == other_ptr->blue &&
-    ptr->gray == other_ptr->gray;
 }
 
 void rb_tone_set(
@@ -258,7 +247,14 @@ static VALUE rb_tone_m_equal(VALUE self, VALUE other) {
   // RGSS <= 2 fails comparison when different objects are given.
   rb_tone_data(other);
 #endif
-  return rb_tone_equal(self, other) ? Qtrue : Qfalse;
+  const struct Tone *ptr = rb_tone_data(self);
+  const struct Tone *other_ptr = rb_tone_data(other);
+  bool equal =
+    ptr->red == other_ptr->red &&
+    ptr->green == other_ptr->green &&
+    ptr->blue == other_ptr->blue &&
+    ptr->gray == other_ptr->gray;
+  return equal ? Qtrue : Qfalse;
 }
 
 /*

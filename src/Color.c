@@ -11,7 +11,6 @@
 #include "misc.h"
 #include "rubyfill.h"
 
-bool rb_color_equal(VALUE self, VALUE other);
 void rb_color_set(
     VALUE self, double newred, double newgreen, double newblue,
     double newalpha);
@@ -40,16 +39,6 @@ VALUE rb_color_new(double red, double green, double blue, double alpha) {
 }
 VALUE rb_color_new2(void) {
   return rb_color_new(0.0, 0.0, 0.0, 0.0);
-}
-
-bool rb_color_equal(VALUE self, VALUE other) {
-  const struct Color *ptr = rb_color_data(self);
-  const struct Color *other_ptr = rb_color_data(other);
-  return
-    ptr->red == other_ptr->red &&
-    ptr->green == other_ptr->green &&
-    ptr->blue == other_ptr->blue &&
-    ptr->alpha == other_ptr->alpha;
 }
 
 void rb_color_set(
@@ -268,7 +257,14 @@ static VALUE rb_color_m_equal(VALUE self, VALUE other) {
   // RGSS <= 2 fails comparison when different objects are given.
   rb_color_data(other);
 #endif
-  return rb_color_equal(self, other) ? Qtrue : Qfalse;
+  const struct Color *ptr = rb_color_data(self);
+  const struct Color *other_ptr = rb_color_data(other);
+  bool equal =
+    ptr->red == other_ptr->red &&
+    ptr->green == other_ptr->green &&
+    ptr->blue == other_ptr->blue &&
+    ptr->alpha == other_ptr->alpha;
+  return equal ? Qtrue : Qfalse;
 }
 
 /*

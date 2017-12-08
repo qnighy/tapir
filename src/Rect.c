@@ -15,7 +15,6 @@
 #define INT2FIX_E(x) \
   INT2NUM((int32_t)(((uint32_t)(x) + 0x40000000U) & 0x7FFFFFFFU) - 0x40000000)
 
-bool rb_rect_equal(VALUE self, VALUE other);
 void rb_rect_set(
     VALUE self, int32_t newx, int32_t newy,
     int32_t newwidth, int32_t newheight);
@@ -43,16 +42,6 @@ VALUE rb_rect_new(int32_t x, int32_t y, int32_t width, int32_t height) {
 
 VALUE rb_rect_new2(void) {
   return rb_rect_new(0, 0, 0, 0);
-}
-
-bool rb_rect_equal(VALUE self, VALUE other) {
-  struct Rect *ptr = rb_rect_data_mut(self);
-  const struct Rect *other_ptr = rb_rect_data(other);
-  return
-    ptr->x == other_ptr->x &&
-    ptr->y == other_ptr->y &&
-    ptr->width == other_ptr->width &&
-    ptr->height == other_ptr->height;
 }
 
 void rb_rect_set(
@@ -254,7 +243,14 @@ static VALUE rb_rect_m_equal(VALUE self, VALUE other) {
   // RGSS <= 2 fails comparison when different objects are given.
   rb_rect_data(other);
 #endif
-  return rb_rect_equal(self, other) ? Qtrue : Qfalse;
+  const struct Rect *ptr = rb_rect_data(self);
+  const struct Rect *other_ptr = rb_rect_data(other);
+  bool equal =
+    ptr->x == other_ptr->x &&
+    ptr->y == other_ptr->y &&
+    ptr->width == other_ptr->width &&
+    ptr->height == other_ptr->height;
+  return equal ? Qtrue : Qfalse;
 }
 
 /*
