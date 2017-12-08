@@ -11,10 +11,8 @@
 #include "misc.h"
 #include "rubyfill.h"
 
-VALUE rb_table_new(
-    int32_t dim, int32_t xsize, int32_t ysize, int32_t zsize);
-void rb_table_resize(
-    VALUE self, int32_t new_dim, int32_t new_xsize,
+static void table_resize(
+    struct Table *ptr, int32_t new_dim, int32_t new_xsize,
     int32_t new_ysize, int32_t new_zsize);
 
 static void table_mark(struct Table *ptr);
@@ -44,30 +42,9 @@ fail:
   rb_raise(rb_eArgError, "Multiplied table size is too large.");
 }
 
-VALUE rb_table_new(
-    int32_t dim, int32_t xsize, int32_t ysize, int32_t zsize) {
-  if(xsize < 0) xsize = 0;
-  if(ysize < 0) ysize = 0;
-  if(zsize < 0) zsize = 0;
-  int32_t size = multiply_size(xsize, ysize, zsize);
-  VALUE ret = table_alloc(rb_cTable);
-  struct Table *ptr = rb_table_data_mut(ret);
-  ptr->dim = dim;
-  ptr->xsize = xsize;
-  ptr->ysize = ysize;
-  ptr->zsize = zsize;
-  ptr->size = size;
-  ptr->data = ALLOC_N(int16_t, size);
-  for(int32_t i = 0; i < size; ++i) {
-    ptr->data[i] = 0;
-  }
-  return ret;
-}
-
-void rb_table_resize(
-    VALUE self, int32_t new_dim, int32_t new_xsize,
+static void table_resize(
+    struct Table *ptr, int32_t new_dim, int32_t new_xsize,
     int32_t new_ysize, int32_t new_zsize) {
-  struct Table *ptr = rb_table_data_mut(self);
   if(new_xsize < 0) new_xsize = 0;
   if(new_ysize < 0) new_ysize = 0;
   if(new_zsize < 0) new_zsize = 0;
@@ -179,8 +156,8 @@ static VALUE rb_table_m_initialize(int argc, VALUE *argv, VALUE self) {
     ptr->data = NULL;
   }
   if(1 <= argc && argc <= 3) {
-    rb_table_resize(
-        self, argc,
+    table_resize(
+        ptr, argc,
         0 < argc ? NUM2INT(argv[0]) : 1,
         1 < argc ? NUM2INT(argv[1]) : 1,
         2 < argc ? NUM2INT(argv[2]) : 1);
@@ -207,9 +184,10 @@ static VALUE rb_table_m_initialize_copy(VALUE self, VALUE orig) {
 }
 
 static VALUE rb_table_m_resize(int argc, VALUE *argv, VALUE self) {
+  struct Table *ptr = rb_table_data_mut(self);
   if(1 <= argc && argc <= 3) {
-    rb_table_resize(
-        self, argc,
+    table_resize(
+        ptr, argc,
         0 < argc ? NUM2INT(argv[0]) : 1,
         1 < argc ? NUM2INT(argv[1]) : 1,
         2 < argc ? NUM2INT(argv[2]) : 1);
