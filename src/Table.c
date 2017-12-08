@@ -278,7 +278,7 @@ static VALUE rb_table_m_aref(int argc, VALUE *argv, VALUE self) {
 static VALUE rb_table_m_aset(int argc, VALUE *argv, VALUE self) {
   struct Table *ptr = rb_table_data_mut(self);
   // Note: original RGSS wrongly accepts one less arguments.
-  if(argc == ptr->dim+1) {
+  if(argc == ptr->dim || argc == ptr->dim+1) {
     int32_t x = 0 < argc-1 ? NUM2INT(argv[0]) : 0;
     int32_t y = 1 < argc-1 ? NUM2INT(argv[1]) : 0;
     int32_t z = 2 < argc-1 ? NUM2INT(argv[2]) : 0;
