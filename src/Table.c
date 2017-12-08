@@ -130,8 +130,8 @@ static VALUE rb_table_m_resize(int argc, VALUE *argv, VALUE self);
 static VALUE rb_table_m_xsize(VALUE self);
 static VALUE rb_table_m_ysize(VALUE self);
 static VALUE rb_table_m_zsize(VALUE self);
-static VALUE rb_table_m_get(int argc, VALUE *argv, VALUE self);
-static VALUE rb_table_m_set(int argc, VALUE *argv, VALUE self);
+static VALUE rb_table_m_aref(int argc, VALUE *argv, VALUE self);
+static VALUE rb_table_m_aset(int argc, VALUE *argv, VALUE self);
 static VALUE rb_table_s_old_load(VALUE self, VALUE s);
 static VALUE rb_table_m_old_dump(VALUE self, VALUE lim);
 
@@ -146,8 +146,8 @@ void Init_Table() {
   rb_define_method(rb_cTable, "xsize", rb_table_m_xsize, 0);
   rb_define_method(rb_cTable, "ysize", rb_table_m_ysize, 0);
   rb_define_method(rb_cTable, "zsize", rb_table_m_zsize, 0);
-  rb_define_method(rb_cTable, "[]", rb_table_m_get, -1);
-  rb_define_method(rb_cTable, "[]=", rb_table_m_set, -1);
+  rb_define_method(rb_cTable, "[]", rb_table_m_aref, -1);
+  rb_define_method(rb_cTable, "[]=", rb_table_m_aset, -1);
 
   rb_define_singleton_method(rb_cTable, "_load", rb_table_s_old_load, 1);
   rb_define_method(rb_cTable, "_dump", rb_table_m_old_dump, 1);
@@ -255,7 +255,7 @@ static VALUE rb_table_m_zsize(VALUE self) {
   return INT2NUM(rb_table_zsize(self));
 }
 
-static VALUE rb_table_m_get(int argc, VALUE *argv, VALUE self) {
+static VALUE rb_table_m_aref(int argc, VALUE *argv, VALUE self) {
   const struct Table *ptr = rb_table_data(self);
   if(argc == ptr->dim) {
     int32_t x = 0 < argc ? NUM2INT(argv[0]) : 0;
@@ -275,7 +275,7 @@ static VALUE rb_table_m_get(int argc, VALUE *argv, VALUE self) {
   return Qnil;
 }
 
-static VALUE rb_table_m_set(int argc, VALUE *argv, VALUE self) {
+static VALUE rb_table_m_aset(int argc, VALUE *argv, VALUE self) {
   struct Table *ptr = rb_table_data_mut(self);
   // Note: original RGSS wrongly accepts one less arguments.
   if(argc == ptr->dim+1) {
