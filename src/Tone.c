@@ -14,14 +14,6 @@
 void rb_tone_set(
     VALUE self, double newred, double newgreen, double newblue,
     double newgray);
-double rb_tone_red(VALUE self);
-void rb_tone_set_red(VALUE self, double newval);
-double rb_tone_green(VALUE self);
-void rb_tone_set_green(VALUE self, double newval);
-double rb_tone_blue(VALUE self);
-void rb_tone_set_blue(VALUE self, double newval);
-double rb_tone_gray(VALUE self);
-void rb_tone_set_gray(VALUE self, double newval);
 
 static void tone_mark(struct Tone *ptr);
 static VALUE tone_alloc(VALUE klass);
@@ -60,39 +52,6 @@ void rb_tone_set2(VALUE self, VALUE other) {
   // ptr->green = clamp_double(other_ptr->green, -255.0, 255.0);
   // ptr->blue = clamp_double(other_ptr->blue, -255.0, 255.0);
   // ptr->gray = clamp_double(other_ptr->gray, 0.0, 255.0);
-}
-
-double rb_tone_red(VALUE self) {
-  const struct Tone *ptr = rb_tone_data(self);
-  return ptr->red;
-}
-void rb_tone_set_red(VALUE self, double newval) {
-  struct Tone *ptr = rb_tone_data_mut(self);
-  ptr->red = clamp_double(newval, -255.0, 255.0);
-}
-double rb_tone_green(VALUE self) {
-  const struct Tone *ptr = rb_tone_data(self);
-  return ptr->green;
-}
-void rb_tone_set_green(VALUE self, double newval) {
-  struct Tone *ptr = rb_tone_data_mut(self);
-  ptr->green = clamp_double(newval, -255.0, 255.0);
-}
-double rb_tone_blue(VALUE self) {
-  const struct Tone *ptr = rb_tone_data(self);
-  return ptr->blue;
-}
-void rb_tone_set_blue(VALUE self, double newval) {
-  struct Tone *ptr = rb_tone_data_mut(self);
-  ptr->blue = clamp_double(newval, -255.0, 255.0);
-}
-double rb_tone_gray(VALUE self) {
-  const struct Tone *ptr = rb_tone_data(self);
-  return ptr->gray;
-}
-void rb_tone_set_gray(VALUE self, double newval) {
-  struct Tone *ptr = rb_tone_data_mut(self);
-  ptr->gray = clamp_double(newval, 0.0, 255.0);
 }
 
 static VALUE rb_tone_m_initialize(int argc, VALUE *argv, VALUE self);
@@ -318,7 +277,8 @@ static VALUE rb_tone_m_set(int argc, VALUE *argv, VALUE self) {
  * Returns the red value of the tone.
  */
 static VALUE rb_tone_m_red(VALUE self) {
-  return DBL2NUM(rb_tone_red(self));
+  const struct Tone *ptr = rb_tone_data(self);
+  return DBL2NUM(ptr->red);
 }
 
 /*
@@ -328,7 +288,8 @@ static VALUE rb_tone_m_red(VALUE self) {
  * Sets the red value of the tone.
  */
 static VALUE rb_tone_m_set_red(VALUE self, VALUE newval) {
-  rb_tone_set_red(self, NUM2DBL(newval));
+  struct Tone *ptr = rb_tone_data_mut(self);
+  ptr->red = clamp_double(NUM2DBL(newval), -255.0, 255.0);
   return newval;
 }
 
@@ -339,7 +300,8 @@ static VALUE rb_tone_m_set_red(VALUE self, VALUE newval) {
  * Returns the green value of the tone.
  */
 static VALUE rb_tone_m_green(VALUE self) {
-  return DBL2NUM(rb_tone_green(self));
+  const struct Tone *ptr = rb_tone_data(self);
+  return DBL2NUM(ptr->green);
 }
 
 /*
@@ -349,7 +311,8 @@ static VALUE rb_tone_m_green(VALUE self) {
  * Sets the green value of the tone.
  */
 static VALUE rb_tone_m_set_green(VALUE self, VALUE newval) {
-  rb_tone_set_green(self, NUM2DBL(newval));
+  struct Tone *ptr = rb_tone_data_mut(self);
+  ptr->green = clamp_double(NUM2DBL(newval), -255.0, 255.0);
   return newval;
 }
 
@@ -360,7 +323,8 @@ static VALUE rb_tone_m_set_green(VALUE self, VALUE newval) {
  * Returns the blue value of the tone.
  */
 static VALUE rb_tone_m_blue(VALUE self) {
-  return DBL2NUM(rb_tone_blue(self));
+  const struct Tone *ptr = rb_tone_data(self);
+  return DBL2NUM(ptr->blue);
 }
 
 /*
@@ -370,7 +334,8 @@ static VALUE rb_tone_m_blue(VALUE self) {
  * Sets the blue value of the tone.
  */
 static VALUE rb_tone_m_set_blue(VALUE self, VALUE newval) {
-  rb_tone_set_blue(self, NUM2DBL(newval));
+  struct Tone *ptr = rb_tone_data_mut(self);
+  ptr->blue = clamp_double(NUM2DBL(newval), -255.0, 255.0);
   return newval;
 }
 
@@ -381,7 +346,8 @@ static VALUE rb_tone_m_set_blue(VALUE self, VALUE newval) {
  * Returns the gray value of the tone.
  */
 static VALUE rb_tone_m_gray(VALUE self) {
-  return DBL2NUM(rb_tone_gray(self));
+  const struct Tone *ptr = rb_tone_data(self);
+  return DBL2NUM(ptr->gray);
 }
 
 /*
@@ -391,7 +357,8 @@ static VALUE rb_tone_m_gray(VALUE self) {
  * Sets the gray value of the tone.
  */
 static VALUE rb_tone_m_set_gray(VALUE self, VALUE newval) {
-  rb_tone_set_gray(self, NUM2DBL(newval));
+  struct Tone *ptr = rb_tone_data_mut(self);
+  ptr->gray = clamp_double(NUM2DBL(newval), 0.0, 255.0);
   return newval;
 }
 

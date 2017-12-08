@@ -16,13 +16,6 @@ VALUE rb_table_new(
 void rb_table_resize(
     VALUE self, int32_t new_dim, int32_t new_xsize,
     int32_t new_ysize, int32_t new_zsize);
-int32_t rb_table_dim(VALUE self);
-int32_t rb_table_xsize(VALUE self);
-int32_t rb_table_ysize(VALUE self);
-int32_t rb_table_zsize(VALUE self);
-int16_t rb_table_aref(VALUE self, int32_t x, int32_t y, int32_t z);
-void rb_table_aset(
-    VALUE self, int32_t x, int32_t y, int32_t z, int16_t val);
 
 static void table_mark(struct Table *ptr);
 static void table_free(struct Table *ptr);
@@ -103,37 +96,6 @@ void rb_table_resize(
   ptr->zsize = new_zsize;
   ptr->size = new_size;
   ptr->data = new_data;
-}
-
-int32_t rb_table_dim(VALUE self) {
-  const struct Table *ptr = rb_table_data(self);
-  return ptr->dim;
-}
-
-int32_t rb_table_xsize(VALUE self) {
-  const struct Table *ptr = rb_table_data(self);
-  return ptr->xsize;
-}
-
-int32_t rb_table_ysize(VALUE self) {
-  const struct Table *ptr = rb_table_data(self);
-  return ptr->ysize;
-}
-
-int32_t rb_table_zsize(VALUE self) {
-  const struct Table *ptr = rb_table_data(self);
-  return ptr->zsize;
-}
-
-int16_t rb_table_aref(VALUE self, int32_t x, int32_t y, int32_t z) {
-  const struct Table *ptr = rb_table_data(self);
-  return ptr->data[((z * ptr->ysize) + y) * ptr->xsize + x];
-}
-
-void rb_table_aset(
-    VALUE self, int32_t x, int32_t y, int32_t z, int16_t val) {
-  struct Table *ptr = rb_table_data_mut(self);
-  ptr->data[((z * ptr->ysize) + y) * ptr->xsize + x] = val;
 }
 
 static VALUE rb_table_m_initialize(int argc, VALUE *argv, VALUE self);
@@ -259,13 +221,16 @@ static VALUE rb_table_m_resize(int argc, VALUE *argv, VALUE self) {
   return self;
 }
 static VALUE rb_table_m_xsize(VALUE self) {
-  return INT2NUM(rb_table_xsize(self));
+  const struct Table *ptr = rb_table_data(self);
+  return INT2NUM(ptr->xsize);
 }
 static VALUE rb_table_m_ysize(VALUE self) {
-  return INT2NUM(rb_table_ysize(self));
+  const struct Table *ptr = rb_table_data(self);
+  return INT2NUM(ptr->ysize);
 }
 static VALUE rb_table_m_zsize(VALUE self) {
-  return INT2NUM(rb_table_zsize(self));
+  const struct Table *ptr = rb_table_data(self);
+  return INT2NUM(ptr->zsize);
 }
 
 static VALUE rb_table_m_aref(int argc, VALUE *argv, VALUE self) {

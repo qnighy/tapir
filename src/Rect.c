@@ -18,14 +18,6 @@
 void rb_rect_set(
     VALUE self, int32_t newx, int32_t newy,
     int32_t newwidth, int32_t newheight);
-int32_t rb_rect_x(VALUE self);
-void rb_rect_set_x(VALUE self, int32_t newx);
-int32_t rb_rect_y(VALUE self);
-void rb_rect_set_y(VALUE self, int32_t newy);
-int32_t rb_rect_width(VALUE self);
-void rb_rect_set_width(VALUE self, int32_t newwidth);
-int32_t rb_rect_height(VALUE self);
-void rb_rect_set_height(VALUE self, int32_t newheight);
 
 static void rect_mark(struct Rect *ptr);
 static VALUE rect_alloc(VALUE klass);
@@ -70,39 +62,6 @@ void rb_rect_set2(VALUE self, VALUE other) {
   ptr->y = other_ptr->y;
   ptr->width = other_ptr->width;
   ptr->height = other_ptr->height;
-}
-
-int32_t rb_rect_x(VALUE self) {
-  const struct Rect *ptr = rb_rect_data(self);
-  return ptr->x;
-}
-void rb_rect_set_x(VALUE self, int32_t newval) {
-  struct Rect *ptr = rb_rect_data_mut(self);
-  ptr->x = newval;
-}
-int32_t rb_rect_y(VALUE self) {
-  const struct Rect *ptr = rb_rect_data(self);
-  return ptr->y;
-}
-void rb_rect_set_y(VALUE self, int32_t newval) {
-  struct Rect *ptr = rb_rect_data_mut(self);
-  ptr->y = newval;
-}
-int32_t rb_rect_width(VALUE self) {
-  const struct Rect *ptr = rb_rect_data(self);
-  return ptr->width;
-}
-void rb_rect_set_width(VALUE self, int32_t newval) {
-  struct Rect *ptr = rb_rect_data_mut(self);
-  ptr->width = newval;
-}
-int32_t rb_rect_height(VALUE self) {
-  const struct Rect *ptr = rb_rect_data(self);
-  return ptr->height;
-}
-void rb_rect_set_height(VALUE self, int32_t newval) {
-  struct Rect *ptr = rb_rect_data_mut(self);
-  ptr->height = newval;
 }
 
 static VALUE rb_rect_m_initialize(int argc, VALUE *argv, VALUE self);
@@ -304,8 +263,9 @@ static VALUE rb_rect_m_empty(VALUE self) {
  * Returns the x value of the rectangle.
  */
 static VALUE rb_rect_m_x(VALUE self) {
+  const struct Rect *ptr = rb_rect_data(self);
   // Note: RGSS wrongly wraps it with 31bit.
-  return INT2FIX_E(rb_rect_x(self));
+  return INT2FIX_E(ptr->x);
 }
 
 /*
@@ -315,7 +275,8 @@ static VALUE rb_rect_m_x(VALUE self) {
  * Sets the x value of the rectangle.
  */
 static VALUE rb_rect_m_set_x(VALUE self, VALUE newval) {
-  rb_rect_set_x(self, NUM2INT(newval));
+  struct Rect *ptr = rb_rect_data_mut(self);
+  ptr->x = NUM2INT(newval);
   return newval;
 }
 
@@ -326,8 +287,9 @@ static VALUE rb_rect_m_set_x(VALUE self, VALUE newval) {
  * Returns the y value of the rectangle.
  */
 static VALUE rb_rect_m_y(VALUE self) {
+  const struct Rect *ptr = rb_rect_data(self);
   // Note: RGSS wrongly wraps it with 31bit.
-  return INT2FIX_E(rb_rect_y(self));
+  return INT2FIX_E(ptr->y);
 }
 
 /*
@@ -337,7 +299,8 @@ static VALUE rb_rect_m_y(VALUE self) {
  * Sets the y value of the rectangle.
  */
 static VALUE rb_rect_m_set_y(VALUE self, VALUE newval) {
-  rb_rect_set_y(self, NUM2INT(newval));
+  struct Rect *ptr = rb_rect_data_mut(self);
+  ptr->y = NUM2INT(newval);
   return newval;
 }
 
@@ -348,8 +311,9 @@ static VALUE rb_rect_m_set_y(VALUE self, VALUE newval) {
  * Returns the width value of the rectangle.
  */
 static VALUE rb_rect_m_width(VALUE self) {
+  const struct Rect *ptr = rb_rect_data(self);
   // Note: RGSS wrongly wraps it with 31bit.
-  return INT2FIX_E(rb_rect_width(self));
+  return INT2FIX_E(ptr->width);
 }
 
 /*
@@ -359,7 +323,8 @@ static VALUE rb_rect_m_width(VALUE self) {
  * Sets the width value of the rectangle.
  */
 static VALUE rb_rect_m_set_width(VALUE self, VALUE newval) {
-  rb_rect_set_width(self, NUM2INT(newval));
+  struct Rect *ptr = rb_rect_data_mut(self);
+  ptr->width = NUM2INT(newval);
   return newval;
 }
 
@@ -370,8 +335,9 @@ static VALUE rb_rect_m_set_width(VALUE self, VALUE newval) {
  * Returns the height value of the rectangle.
  */
 static VALUE rb_rect_m_height(VALUE self) {
+  const struct Rect *ptr = rb_rect_data(self);
   // Note: RGSS wrongly wraps it with 31bit.
-  return INT2FIX_E(rb_rect_height(self));
+  return INT2FIX_E(ptr->height);
 }
 
 /*
@@ -381,7 +347,8 @@ static VALUE rb_rect_m_height(VALUE self) {
  * Sets the height value of the rectangle.
  */
 static VALUE rb_rect_m_set_height(VALUE self, VALUE newval) {
-  rb_rect_set_height(self, NUM2INT(newval));
+  struct Rect *ptr = rb_rect_data_mut(self);
+  ptr->height = NUM2INT(newval);
   return newval;
 }
 
