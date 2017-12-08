@@ -11,6 +11,19 @@
 #include "misc.h"
 #include "rubyfill.h"
 
+bool rb_tone_equal(VALUE self, VALUE other);
+void rb_tone_set(
+    VALUE self, double newred, double newgreen, double newblue,
+    double newgray);
+double rb_tone_red(VALUE self);
+void rb_tone_set_red(VALUE self, double newval);
+double rb_tone_green(VALUE self);
+void rb_tone_set_green(VALUE self, double newval);
+double rb_tone_blue(VALUE self);
+void rb_tone_set_blue(VALUE self, double newval);
+double rb_tone_gray(VALUE self);
+void rb_tone_set_gray(VALUE self, double newval);
+
 static void tone_mark(struct Tone *ptr);
 static VALUE tone_alloc(VALUE klass);
 

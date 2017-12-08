@@ -15,6 +15,19 @@
 #define INT2FIX_E(x) \
   INT2NUM((int32_t)(((uint32_t)(x) + 0x40000000U) & 0x7FFFFFFFU) - 0x40000000)
 
+bool rb_rect_equal(VALUE self, VALUE other);
+void rb_rect_set(
+    VALUE self, int32_t newx, int32_t newy,
+    int32_t newwidth, int32_t newheight);
+int32_t rb_rect_x(VALUE self);
+void rb_rect_set_x(VALUE self, int32_t newx);
+int32_t rb_rect_y(VALUE self);
+void rb_rect_set_y(VALUE self, int32_t newy);
+int32_t rb_rect_width(VALUE self);
+void rb_rect_set_width(VALUE self, int32_t newwidth);
+int32_t rb_rect_height(VALUE self);
+void rb_rect_set_height(VALUE self, int32_t newheight);
+
 static void rect_mark(struct Rect *ptr);
 static VALUE rect_alloc(VALUE klass);
 
@@ -46,6 +59,15 @@ void rb_rect_set(
     VALUE self, int32_t newx, int32_t newy,
     int32_t newwidth, int32_t newheight) {
   struct Rect *ptr = rb_rect_data_mut(self);
+  ptr->x = newx;
+  ptr->y = newy;
+  ptr->width = newwidth;
+  ptr->height = newheight;
+}
+
+void rect_set(
+    struct Rect *ptr, int32_t newx, int32_t newy,
+    int32_t newwidth, int32_t newheight) {
   ptr->x = newx;
   ptr->y = newy;
   ptr->width = newwidth;

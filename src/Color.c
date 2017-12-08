@@ -11,6 +11,19 @@
 #include "misc.h"
 #include "rubyfill.h"
 
+bool rb_color_equal(VALUE self, VALUE other);
+void rb_color_set(
+    VALUE self, double newred, double newgreen, double newblue,
+    double newalpha);
+double rb_color_red(VALUE self);
+void rb_color_set_red(VALUE self, double newval);
+double rb_color_green(VALUE self);
+void rb_color_set_green(VALUE self, double newval);
+double rb_color_blue(VALUE self);
+void rb_color_set_blue(VALUE self, double newval);
+double rb_color_alpha(VALUE self);
+void rb_color_set_alpha(VALUE self, double newval);
+
 static void color_mark(struct Color *ptr);
 static VALUE color_alloc(VALUE klass);
 

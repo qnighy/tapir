@@ -153,13 +153,15 @@ static VALUE rb_viewport_m_initialize(int argc, VALUE *argv, VALUE self) {
       rb_rect_set2(ptr->rect, argv[0]);
       break;
     case 4:
-      rb_rect_set(ptr->rect,
+      rect_set(rb_rect_data_mut(ptr->rect),
           NUM2INT(argv[0]), NUM2INT(argv[1]),
           NUM2INT(argv[2]), NUM2INT(argv[3]));
       break;
 #if RGSS == 3
     case 0:
-      rb_rect_set(ptr->rect, 0, 0, window_width, window_height);
+      rect_set(rb_rect_data_mut(ptr->rect),
+          0, 0,
+          window_width, window_height);
       break;
 #endif
     default:
