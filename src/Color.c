@@ -11,10 +11,6 @@
 #include "misc.h"
 #include "rubyfill.h"
 
-void rb_color_set(
-    VALUE self, double newred, double newgreen, double newblue,
-    double newalpha);
-
 static void color_mark(struct Color *ptr);
 static VALUE color_alloc(VALUE klass);
 
@@ -33,10 +29,9 @@ VALUE rb_color_new2(void) {
   return rb_color_new(0.0, 0.0, 0.0, 0.0);
 }
 
-void rb_color_set(
-    VALUE self, double newred, double newgreen, double newblue,
+void color_set(
+    struct Color *ptr, double newred, double newgreen, double newblue,
     double newalpha) {
-  struct Color *ptr = rb_color_data_mut(self);
   // Note: RGB values are expected to be clamped within [0, 255].
   // but original RGSS wrongly uses [-255, 255].
   ptr->red = clamp_double(newred, -255.0, 255.0);
@@ -155,16 +150,16 @@ static VALUE color_alloc(VALUE klass) {
 static VALUE rb_color_m_initialize(int argc, VALUE *argv, VALUE self) {
   switch(argc) {
     case 3:
-      rb_color_set(
-          self,
+      color_set(
+          rb_color_data_mut(self),
           NUM2DBL(argv[0]),
           NUM2DBL(argv[1]),
           NUM2DBL(argv[2]),
           255.0);
       break;
     case 4:
-      rb_color_set(
-          self,
+      color_set(
+          rb_color_data_mut(self),
           NUM2DBL(argv[0]),
           NUM2DBL(argv[1]),
           NUM2DBL(argv[2]),
@@ -172,7 +167,7 @@ static VALUE rb_color_m_initialize(int argc, VALUE *argv, VALUE self) {
       break;
 #if RGSS == 3
     case 0:
-      rb_color_set(self, 0.0, 0.0, 0.0, 0.0);
+      color_set(rb_color_data_mut(self), 0.0, 0.0, 0.0, 0.0);
       break;
 #endif
     default:
@@ -236,16 +231,16 @@ static VALUE rb_color_m_set(int argc, VALUE *argv, VALUE self) {
     // Note: original RGSS wrongly accepts empty argument list.
     // In this case, it works as set(0.0, 0.0, 0.0, 0.0).
     case 3:
-      rb_color_set(
-          self,
+      color_set(
+          rb_color_data_mut(self),
           NUM2DBL(argv[0]),
           NUM2DBL(argv[1]),
           NUM2DBL(argv[2]),
           255.0);
       break;
     case 4:
-      rb_color_set(
-          self,
+      color_set(
+          rb_color_data_mut(self),
           NUM2DBL(argv[0]),
           NUM2DBL(argv[1]),
           NUM2DBL(argv[2]),
@@ -254,7 +249,7 @@ static VALUE rb_color_m_set(int argc, VALUE *argv, VALUE self) {
 #if RGSS == 3
     case 0:
       // Undocumented, but implemented in RGSS.
-      rb_color_set(self, 0.0, 0.0, 0.0, 0.0);
+      color_set(rb_color_data_mut(self), 0.0, 0.0, 0.0, 0.0);
       break;
     case 1:
       rb_color_set2(self, argv[0]);
