@@ -30,6 +30,7 @@ title: ホーム
 ## 類似のプロジェクト、ソフトウェア、サービス
 
 - [Plicy](https://plicy.net/) : RPGツクール2000, VX Ace, MVのゲームを遊べるWebサービス。RGSSによる拡張はサポートされていないようです。
+- [mkxp](https://github.com/Ancurio/mkxp) : まさにTapirの先輩にあたるソフトウェアです。Tapirの開発を開始したときは、既にこのようなソフトウェアがあることは知りませんでした……
 - [ねこRPGXPプレイヤー](https://play.google.com/store/apps/details?id=net.kernys.rgss) : Tapirと同様のRGSS互換エンジンですが、Android用です。活発に開発が続けられているようです。
 - [OpenRGSS](https://github.com/zh99998/OpenRGSS) : RGSS半互換のゲームライブラリで、既存のゲームのランタイムを置き換えられるのではなさそうです。開発は止まっているようです。
 - [FreeRGSS](https://ja.osdn.net/projects/freergss/) : DXRubyベースでRGSS半互換のゲームライブラリで、既存のゲームのランタイムを置き換えられるのではなさそうです。開発は止まっているようです。

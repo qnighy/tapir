@@ -30,6 +30,7 @@ See [how to use](usage.html) page.
 ## Similar projects, software, and services
 
 - [Plicy](https://plicy.net/) : A Web service where you can play RPG Maker 2000, VX Ace, MV games. RGSS extensions doesn't seem to be supported.
+- [mkxp](https://github.com/Ancurio/mkxp) : The very precursor of Tapir. I didn't know it existed when I started development of Tapir...
 - [ねこRPGXPプレイヤー](https://play.google.com/store/apps/details?id=net.kernys.rgss) : RGSS-compatible runtime for Android devices. Looks like actively updated.
 - [OpenRGSS](https://github.com/zh99998/OpenRGSS) : Semi RGSS-compatible game library. Doesn't seem to be a drop-in replacement of the runtime. Seems to be abandoned.
 - [FreeRGSS](https://ja.osdn.net/projects/freergss/) : Semi RGSS-compatible game library via DXRuby. Doesn't seem to be a drop-in replacement of the runtime. Seems to be abandoned.
