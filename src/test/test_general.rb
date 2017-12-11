@@ -37,6 +37,9 @@ module RGSSTest
       assert_equal(
         Zlib::Inflate::inflate($RGSS_SCRIPTS[0][2])[0,10],
         "# PROLOGUE")
+      assert_equal(
+        $RGSS_SCRIPTS[0][3][0,10],
+        "# PROLOGUE")
     end
 
     def test_global_namespaces
