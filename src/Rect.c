@@ -73,9 +73,19 @@ static VALUE rb_rect_m_old_dump(VALUE self, VALUE lim);
 VALUE rb_cRect;
 
 /*
- * Rectangles contain x, y, width and height fields.
+ * A rectangle has four <tt>int32_t</tt> values in its RDATA,
+ * each representing x, y, width and height values.
  *
- * Each field is a signed 32-bit integer.
+ * == Update Hook
+ *
+ * == Bugs
+ *
+ * - Rect#x, Rect#y, Rect#width and Rect#height wrongly chops the MSB
+ *   in the value. Therefore, 32bit values larger than 1073741824 or
+ *   smaller than -1073741825 will only appear as a result of Rect#_dump
+ *   or Rect#to_s.
+ * - In RGSS1 and RGSS2, Rect#==, Rect#=== or Rect#eql? raises TypeError
+ *   when objects other than Rect is given.
  */
 void Init_Rect() {
   rb_cRect = rb_define_class("Rect", rb_cObject);
@@ -142,7 +152,7 @@ static VALUE rect_alloc(VALUE klass) {
 /*
  * call-seq:
  *   Rect.new(x, y, width, height)
- *   Rect.new
+ *   Rect.new (RGSS3 only)
  *
  * Returns a new rectangle. In the second form, it initializes all fields by 0.
  */
@@ -179,8 +189,10 @@ static VALUE rb_rect_m_initialize_copy(VALUE self, VALUE orig) {
 /*
  * call-seq:
  *    rectangle == other -> bool
+ *    rectangle === other -> bool
+ *    rectangle.eql?(other) -> bool
  *
- * Compares it to another rectangle.
+ * Compares it with another rectangle.
  */
 static VALUE rb_rect_m_equal(VALUE self, VALUE other) {
 #if RGSS == 3
@@ -202,7 +214,7 @@ static VALUE rb_rect_m_equal(VALUE self, VALUE other) {
 /*
  * call-seq:
  *    rectangle.set(x, y, width, height) -> rectangle
- *    rectangle.set(other) -> rectangle
+ *    rectangle.set(other) -> rectangle (RGSS3 only)
  *
  * Sets all fields. In the second form, it copies all fields from
  * <code>other</code>.
@@ -346,6 +358,8 @@ static VALUE rb_rect_m_set_height(VALUE self, VALUE newval) {
  *    rectangle.to_s -> string
  *
  * Returns the string representation of the rectangle.
+ *
+ * Same as <code>"(%d, %d, %d, %d)" % [x, y, width, height]</code>.
  */
 static VALUE rb_rect_m_to_s(VALUE self) {
   const struct Rect *ptr = rb_rect_data(self);
@@ -360,6 +374,8 @@ static VALUE rb_rect_m_to_s(VALUE self) {
  *   Rect._load(str) -> rectangle
  *
  * Loads a rectangle from <code>str</code>. Used in <code>Marshal.load</code>.
+ *
+ * Same as <code>Rect.new(*str.unpack("l<l<l<l<"))</code>.
  */
 static VALUE rb_rect_s_old_load(VALUE klass, VALUE str) {
   (void) klass;
@@ -386,6 +402,8 @@ static VALUE rb_rect_s_old_load(VALUE klass, VALUE str) {
  *   rectangle._dump(limit) -> string
  *
  * Dumps a rectangle to a string. Used in <code>Marshal.dump</code>.
+ *
+ * Same as <code>[x, y, width, height].pack("l<l<l<l<")</code>.
  */
 static VALUE rb_rect_m_old_dump(VALUE self, VALUE limit) {
   (void) limit;
