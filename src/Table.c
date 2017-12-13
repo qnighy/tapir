@@ -88,6 +88,15 @@ static VALUE rb_table_s_old_load(VALUE self, VALUE s);
 static VALUE rb_table_m_old_dump(VALUE self, VALUE lim);
 
 VALUE rb_cTable;
+
+/*
+ * A table is 1, 2, or 3-dimensional array of <tt>int16_t</tt> values.
+ *
+ * == Bugs
+ *
+ * - Table.new doesn't check multiplication overflow. Therefore a code like
+ *   <tt>Table.new(65536, 65536)</tt> will generate an ill-formed table.
+ */
 void Init_Table() {
   rb_cTable = rb_define_class("Table", rb_cObject);
   rb_define_alloc_func(rb_cTable, table_alloc);
@@ -149,6 +158,18 @@ static VALUE table_alloc(VALUE klass) {
   return ret;
 }
 
+/*
+ * call-seq:
+ *   Table.new(xsize) -> table
+ *   Table.new(xsize, ysize) -> table
+ *   Table.new(xsize, ysize, zsize) -> table
+ *
+ * Creates a new table of 1, 2, or 3 dimension.
+ *
+ * <code>xsize</code>, <code>ysize</code>, and <code>zsize</code> are
+ * interpreted as <tt>int32_t</tt> values.
+ * Negative values are adjusted to zero.
+ */
 static VALUE rb_table_m_initialize(int argc, VALUE *argv, VALUE self) {
   struct Table *ptr = rb_table_data_mut(self);
   if(ptr->data) {
@@ -183,6 +204,26 @@ static VALUE rb_table_m_initialize_copy(VALUE self, VALUE orig) {
   return Qnil;
 }
 
+/*
+ * call-seq:
+ *   resize(xsize) -> table
+ *   resize(xsize, ysize) -> table
+ *   resize(xsize, ysize, zsize) -> table
+ *
+ * Resizes the table to a specified size.
+ *
+ * <code>xsize</code>, <code>ysize</code>, and <code>zsize</code> are
+ * interpreted as <tt>int32_t</tt> values.
+ * Negative values are adjusted to zero.
+ *
+ * It preserves existing elements. When expanding, new areas are filled by 0.
+ *
+ * It can also change the dimension of the table.
+ * In this case, <code>y</code> and <code>z</code> defaults to 0
+ * if necessary.
+ *
+ * It returns the table itself.
+ */
 static VALUE rb_table_m_resize(int argc, VALUE *argv, VALUE self) {
   struct Table *ptr = rb_table_data_mut(self);
   if(1 <= argc && argc <= 3) {
@@ -198,19 +239,56 @@ static VALUE rb_table_m_resize(int argc, VALUE *argv, VALUE self) {
   }
   return self;
 }
+
+/*
+ * call-seq:
+ *    table.xsize -> integer
+ *
+ * Returns the first component of the size.
+ */
 static VALUE rb_table_m_xsize(VALUE self) {
   const struct Table *ptr = rb_table_data(self);
   return INT2NUM(ptr->xsize);
 }
+
+/*
+ * call-seq:
+ *    table.ysize -> integer
+ *
+ * Returns the second component of the size.
+ * If the dimension is 1, it returns 1.
+ */
 static VALUE rb_table_m_ysize(VALUE self) {
   const struct Table *ptr = rb_table_data(self);
   return INT2NUM(ptr->ysize);
 }
+
+/*
+ * call-seq:
+ *    table.zsize -> integer
+ *
+ * Returns the third component of the size.
+ * If the dimension is 1 or 2, it returns 1.
+ */
 static VALUE rb_table_m_zsize(VALUE self) {
   const struct Table *ptr = rb_table_data(self);
   return INT2NUM(ptr->zsize);
 }
 
+/*
+ * call-seq:
+ *    table[x] -> integer
+ *    table[x, y] -> integer
+ *    table[x, y, z] -> integer
+ *
+ * Returns an element of the table.
+ * <code>x</code>, <code>y</code> and <code>z</code> are
+ * interpreted as <tt>int32_t</tt> values.
+ *
+ * The number of the arguments must match the dimension of the table.
+ *
+ * If the index is out of bounds, <code>nil</code> is returned.
+ */
 static VALUE rb_table_m_aref(int argc, VALUE *argv, VALUE self) {
   const struct Table *ptr = rb_table_data(self);
   if(argc == ptr->dim) {
@@ -231,6 +309,27 @@ static VALUE rb_table_m_aref(int argc, VALUE *argv, VALUE self) {
   return Qnil;
 }
 
+/*
+ * call-seq:
+ *    table[] = newval -> newval
+ *    table[x] = newval -> newval
+ *    table[x, y] = newval -> newval
+ *    table[x, y, z] = newval -> newval
+ *
+ * Modifies an element of the table.
+ * <code>x</code>, <code>y</code> and <code>z</code> are
+ * interpreted as <tt>int32_t</tt> values.
+ *
+ * <code>newval</code> is first interpreted as an <tt>int32_t</tt> value,
+ * and then casted to <tt>int16_t</tt> value by wrapping.
+ *
+ * Usually, the number of the arguments must be exactly one more than
+ * the dimension of the table.
+ * However, there is an RGSS bug that this method also accepts one
+ * less arguments. In this case, the last index is assumed to be 0.
+ *
+ * If the index is out of bounds, it does nothing.
+ */
 static VALUE rb_table_m_aset(int argc, VALUE *argv, VALUE self) {
   struct Table *ptr = rb_table_data_mut(self);
   // Note: original RGSS wrongly accepts one less arguments.
@@ -254,6 +353,14 @@ static VALUE rb_table_m_aset(int argc, VALUE *argv, VALUE self) {
   return Qnil;
 }
 
+/*
+ * call-seq:
+ *   Table._load(str) -> table
+ *
+ * Loads a table from <code>str</code>. Used in <code>Marshal.load</code>.
+ *
+ * See Table#_dump for the format.
+ */
 static VALUE rb_table_s_old_load(VALUE klass, VALUE str) {
   (void) klass;
   VALUE ret = table_alloc(rb_cTable);
@@ -294,6 +401,19 @@ static VALUE rb_table_s_old_load(VALUE klass, VALUE str) {
   return ret;
 }
 
+/*
+ * call-seq:
+ *   table._dump(limit) -> string
+ *
+ * Dumps a table to a string. Used in <code>Marshal.dump</code>.
+ *
+ * Same as <code>[xsize, ysize, zsize, size, *contents].pack("l<l<l<l<s*<")</code>, where
+ *
+ * - <code>size = xsize * ysize * zsize</code>
+ * - <code>contents[x + xsize * (y + ysize * z)] = table[x, y, z]</code> (if dimension is 3)
+ * - <code>contents[x + xsize * y] = table[x, y]</code> (if dimension is 2)
+ * - <code>contents[x] = table[x]</code> (if dimension is 1)
+ */
 static VALUE rb_table_m_old_dump(VALUE self, VALUE limit) {
   (void) limit;
   const struct Table *ptr = rb_table_data(self);
