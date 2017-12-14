@@ -43,5 +43,8 @@ test-violin:
 test-xylophone:
 	$(MAKE) test -C xylophone
 
+rdoc:
+	rdoc --op doc/rdoc src/*.c
+
 .PHONY: \
-	test test-accordion test-violin test-xylophone
+	test test-accordion test-violin test-xylophone rdoc
