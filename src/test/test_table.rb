@@ -248,13 +248,16 @@ module RGSSTest
 
     def test_aset_retval
       obj = @@klass.new(10)
-      assert_equal(obj[0] = 1.5, 1.5)
+      assert_equal(obj.send(:[]=, 0, 1.5), 1)
+      assert_equal(obj.send(:[]=, 0, 70000), 4464)
 
       obj = @@klass.new(10, 10)
-      assert_equal(obj[0, 0] = 2.5, 2.5)
+      assert_equal(obj.send(:[]=, 0, 0, 2.5), 2)
+      assert_equal(obj.send(:[]=, 0, 0, -40000), 25536)
 
       obj = @@klass.new(10, 10, 10)
-      assert_equal(obj[0, 0, 0] = 3.5, 3.5)
+      assert_equal(obj.send(:[]=, 0, 0, 0, 3.5), 3)
+      assert_equal(obj.send(:[]=, 0, 0, 100000000), -7936)
     end
 
     def test_aset_lessarg

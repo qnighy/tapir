@@ -99,20 +99,26 @@ module RGSSTest
       tilemap, obj = generate
 
       b = Bitmap.new(32, 32)
-      assert_equal(obj[0] = b, b)
-      assert_equal(obj[0] = nil, nil)
+      assert_equal(obj.send(:[]=, 0, b), b)
+      assert_equal(obj.send(:[]=, 0, nil), nil)
 
       b = Bitmap.new(32, 32)
-      assert_equal(obj[@@len-1] = b, b)
-      assert_equal(obj[@@len-1] = nil, nil)
+      assert_equal(obj.send(:[]=, @@len-1, b), b)
+      assert_equal(obj.send(:[]=, @@len-1, nil), nil)
 
       b = Bitmap.new(32, 32)
-      assert_equal(obj[-1] = b, b)
-      assert_equal(obj[-1] = nil, nil)
+      assert_equal(obj.send(:[]=, -1, b), nil)
+      assert_equal(obj.send(:[]=, -1, nil), nil)
 
       b = Bitmap.new(32, 32)
-      assert_equal(obj[@@len] = b, b)
-      assert_equal(obj[@@len] = nil, nil)
+      assert_equal(obj.send(:[]=, @@len, b), nil)
+      assert_equal(obj.send(:[]=, @@len, nil), nil)
+    end
+
+    def test_aset_retval_2
+      tilemap, obj = generate
+      assert_equal(obj.send(:[]=, -1, "hoge"), nil)
+      assert_equal(obj.send(:[]=, @@len, "hoge"), nil)
     end
 
     def test_aset_nil

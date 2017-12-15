@@ -331,20 +331,32 @@ module RGSSTest
 
     def test_set_rgba_retval
       obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
-      assert_equal(obj.red = 3.25, 3.25)
-      assert_equal(obj.green = 7.5, 7.5)
-      assert_equal(obj.blue = 15.5, 15.5)
-      assert_equal(obj.alpha = 2.75, 2.75)
+      assert_equal(obj.send(:red=, 3.25), 3.25)
+      assert_equal(obj.send(:green=, 7.5), 7.5)
+      assert_equal(obj.send(:blue=, 15.5), 15.5)
+      assert_equal(obj.send(:alpha=, 2.75), 2.75)
 
-      assert_equal(obj.red = -300.0, -300.0)
-      assert_equal(obj.green = -310.0, -310.0)
-      assert_equal(obj.blue = -320.0, -320.0)
-      assert_equal(obj.alpha = -330.0, -330.0)
+      assert_equal(obj.send(:red=, -300.0), -300.0)
+      assert_equal(obj.send(:green=, -310.0), -310.0)
+      assert_equal(obj.send(:blue=, -320.0), -320.0)
+      assert_equal(obj.send(:alpha=, -330.0), -330.0)
 
-      assert_equal(obj.red = 300.0, 300.0)
-      assert_equal(obj.green = 310.0, 310.0)
-      assert_equal(obj.blue = 320.0, 320.0)
-      assert_equal(obj.alpha = 330.0, 330.0)
+      assert_equal(obj.send(:red=, 300.0), 300.0)
+      assert_equal(obj.send(:green=, 310.0), 310.0)
+      assert_equal(obj.send(:blue=, 320.0), 320.0)
+      assert_equal(obj.send(:alpha=, 330.0), 330.0)
+    end
+
+    def test_set_rgba_retval_2
+      obj = @@klass.new(20.0, 20.0, 20.0, 20.0)
+      val = Object.new
+      def val.to_f
+        1000.0
+      end
+      assert_equal(obj.send(:red=, val), val)
+      assert_equal(obj.send(:green=, val), val)
+      assert_equal(obj.send(:blue=, val), val)
+      assert_equal(obj.send(:alpha=, val), val)
     end
 
     def test_rgba_argerror

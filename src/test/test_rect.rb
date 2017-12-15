@@ -320,10 +320,22 @@ module RGSSTest
 
     def test_set_xywh_retval
       obj = @@klass.new(20, 20, 20, 20)
-      assert_equal(obj.x = 1.5, 1.5)
-      assert_equal(obj.y = 7.5, 7.5)
-      assert_equal(obj.width = 15.5, 15.5)
-      assert_equal(obj.height = 2.75, 2.75)
+      assert_equal(obj.send(:x=, 1.5), 1.5)
+      assert_equal(obj.send(:y=, 7.5), 7.5)
+      assert_equal(obj.send(:width=, 15.5), 15.5)
+      assert_equal(obj.send(:height=, 2.75), 2.75)
+    end
+
+    def test_set_xywh_retval_2
+      obj = @@klass.new(20, 20, 20, 20)
+      val = Object.new
+      def val.to_int
+        1000
+      end
+      assert_equal(obj.send(:x=, val), val)
+      assert_equal(obj.send(:y=, val), val)
+      assert_equal(obj.send(:width=, val), val)
+      assert_equal(obj.send(:height=, val), val)
     end
 
     def test_set_xywh_typeerror
