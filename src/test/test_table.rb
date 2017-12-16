@@ -250,14 +250,17 @@ module RGSSTest
       obj = @@klass.new(10)
       assert_equal(obj.send(:[]=, 0, 1.5), 1)
       assert_equal(obj.send(:[]=, 0, 70000), 4464)
+      assert_equal(obj.send(:[]=, -1, 1.5), nil)
 
       obj = @@klass.new(10, 10)
       assert_equal(obj.send(:[]=, 0, 0, 2.5), 2)
       assert_equal(obj.send(:[]=, 0, 0, -40000), 25536)
+      assert_equal(obj.send(:[]=, 0, -1, 2.5), nil)
 
       obj = @@klass.new(10, 10, 10)
       assert_equal(obj.send(:[]=, 0, 0, 0, 3.5), 3)
       assert_equal(obj.send(:[]=, 0, 0, 100000000), -7936)
+      assert_equal(obj.send(:[]=, 0, 0, -1, 3.5), nil)
     end
 
     def test_aset_lessarg
