@@ -86,13 +86,13 @@ static VALUE bitmaparray_alloc(VALUE klass) {
 static VALUE rb_bitmaparray_m_aref(VALUE self, VALUE index) {
   const struct BitmapArray *ptr = rb_bitmaparray_data(self);
   int iindex = NUM2INT(index);
-  if(iindex < 0 || 9 <= iindex) return Qnil;
+  if(iindex < 0 || BITMAP_ARRAY_LENGTH <= iindex) return Qnil;
   return ptr->data[iindex];
 }
 static VALUE rb_bitmaparray_m_aset(VALUE self, VALUE index, VALUE newval) {
   struct BitmapArray *ptr = rb_bitmaparray_data_mut(self);
   int iindex = NUM2INT(index);
-  if(iindex < 0 || 9 <= iindex) return Qnil;
+  if(iindex < 0 || BITMAP_ARRAY_LENGTH <= iindex) return Qnil;
   if(newval != Qnil) rb_bitmap_data(newval);
   ptr->data[iindex] = newval;
   return newval;
