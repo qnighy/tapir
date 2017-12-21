@@ -32,8 +32,28 @@ static VALUE rb_bitmaparray_m_aref(VALUE self, VALUE index);
 static VALUE rb_bitmaparray_m_aset(VALUE self, VALUE index, VALUE newval);
 
 VALUE rb_cBitmapArray;
-
+/*
+ * Document-class:  Tilemap::BitmapArray
+ *
+ * Special array class used in Tilemap (RGSS2 and RGSS3 only; for RGSS1, see TilemapAutotiles)
+ *
+ * The length of the array is always 9 for RGSS2 and RGSS3.
+ */
+/*
+ * Document-class:  TilemapAutotiles
+ *
+ * Special array class used in Tilemap (RGSS1 only; for RGSS2 and RGSS3, see Tilemap::BitmapArray)
+ *
+ * The length of the array is always 7 for RGSS1.
+ */
 void Init_BitmapArray(void) {
+#if 0
+  // To fake rdoc
+  rb_cTilemap = rb_define_class("Tilemap", rb_cObject);
+  rb_cTilemapAutotiles = rb_define_class("TilemapAutotiles", rb_cObject);
+  rb_define_method(rb_cTilemapAutotiles, "[]", rb_bitmaparray_m_aref, 1);
+  rb_define_method(rb_cTilemapAutotiles, "[]=", rb_bitmaparray_m_aset, 2);
+#endif
 #if RGSS >= 2
   rb_cBitmapArray = rb_define_class_under(
       rb_cTilemap, "BitmapArray", rb_cObject);
@@ -83,12 +103,25 @@ static VALUE bitmaparray_alloc(VALUE klass) {
   return ret;
 }
 
+/* call-seq:
+ *   bitmaparray[index]
+ *
+ * Returns the <code>index</code>-th element of the BitmapArray, or <code>nil</code> when the index is out of bounds.
+ */
 static VALUE rb_bitmaparray_m_aref(VALUE self, VALUE index) {
   const struct BitmapArray *ptr = rb_bitmaparray_data(self);
   int iindex = NUM2INT(index);
   if(iindex < 0 || BITMAP_ARRAY_LENGTH <= iindex) return Qnil;
   return ptr->data[iindex];
 }
+
+/* call-seq:
+ *   bitmaparray[index] = newval -> newval
+ *
+ * Modifies the <code>index</code>-th element of the BitmapArray. Does nothing when the index is out of bounds.
+ *
+ * An element must be an instance of Bitmap or +nil+.
+ */
 static VALUE rb_bitmaparray_m_aset(VALUE self, VALUE index, VALUE newval) {
   struct BitmapArray *ptr = rb_bitmaparray_data_mut(self);
   int iindex = NUM2INT(index);
