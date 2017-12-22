@@ -12,10 +12,19 @@
 #include "font_lookup.h"
 #include "openres.h"
 #include "misc.h"
+#include "rubyfill.h"
 
 static void font_mark(struct Font *ptr);
 static void font_free(struct Font *ptr);
 static VALUE font_alloc(VALUE klass);
+
+static double as_double(VALUE val) {
+  if(TYPE(val) == T_FLOAT) {
+    return NUM2DBL(val);
+  } else {
+    return NUM2INT(val);
+  }
+}
 
 static void font_invalidate_cache(struct Font *ptr) {
   if(ptr->cache) {
@@ -28,7 +37,7 @@ VALUE rb_font_new(void) {
   VALUE ret = font_alloc(rb_cFont);
   struct Font *ptr = rb_font_data_mut(ret);
   ptr->name = rb_cv_get(rb_cFont, "@@default_name");
-  ptr->size = NUM2INT(rb_cv_get(rb_cFont, "@@default_size"));
+  rb_funcall(ret, rb_intern("size="), 1, rb_cv_get(rb_cFont, "@@default_size"));
   ptr->bold = RTEST(rb_cv_get(rb_cFont, "@@default_bold"));
   ptr->italic = RTEST(rb_cv_get(rb_cFont, "@@default_italic"));
 #if RGSS == 3
@@ -75,12 +84,15 @@ TTF_Font *rb_font_to_sdl(VALUE self) {
   }
 #if RGSS == 3
   // Note: Font#size seems to be px under 96dpi. multiplying 3/4 to convert to pt.
-  int ptsize = ptr->size * 3 / 4;
+  double ptsize = as_double(ptr->size) * 0.75;
 #else
-  int ptsize = ptr->size;
+  double ptsize = as_double(ptr->size);
 #endif
+  if(!(6.0 <= ptsize && ptsize < 97.0)) {
+    rb_raise(rb_eRuntimeError, "Invalid Font#size");
+  }
   ((struct Font *)ptr)->cache = loadFont(
-      StringValueCStr(name), ptsize, ptr->bold, ptr->italic);
+      StringValueCStr(name), (int)ptsize, ptr->bold, ptr->italic);
   return ptr->cache;
 }
 
@@ -187,7 +199,7 @@ static void font_free(struct Font *ptr) {
 static VALUE font_alloc(VALUE klass) {
   struct Font *ptr = ALLOC(struct Font);
   ptr->name = Qnil;
-  ptr->size = 0;
+  ptr->size = Qnil;
   ptr->bold = false;
   ptr->italic = false;
 #if RGSS == 3
@@ -228,11 +240,13 @@ static VALUE rb_font_m_initialize(int argc, VALUE *argv, VALUE self) {
   } else {
     ptr->name = rb_cv_get(rb_cFont, "@@default_name");
   }
+  VALUE newsize;
   if(argc > 1) {
-    ptr->size = NUM2INT(argv[1]);
+    newsize = argv[1];
   } else {
-    ptr->size = NUM2INT(rb_cv_get(rb_cFont, "@@default_size"));
+    newsize = rb_cv_get(rb_cFont, "@@default_size");
   }
+  rb_funcall(self, rb_intern("size="), 1, newsize);
   ptr->bold = RTEST(rb_cv_get(rb_cFont, "@@default_bold"));
   ptr->italic = RTEST(rb_cv_get(rb_cFont, "@@default_italic"));
 #if RGSS == 3
@@ -289,12 +303,17 @@ static VALUE rb_font_m_set_name(VALUE self, VALUE newval) {
 
 static VALUE rb_font_m_size(VALUE self) {
   const struct Font *ptr = rb_font_data(self);
-  return INT2NUM(ptr->size);
+  return ptr->size;
 }
 
 static VALUE rb_font_m_set_size(VALUE self, VALUE newval) {
   struct Font *ptr = rb_font_data_mut(self);
-  ptr->size = NUM2INT(newval);
+  double size = as_double(newval);
+  // Note: this misses NaN
+  if(size < 6.0 || 97.0 <= size) {
+    rb_raise(rb_eArgError, "bad value for size");
+  }
+  ptr->size = newval;
   font_invalidate_cache(ptr);
   return newval;
 }

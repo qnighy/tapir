@@ -19,8 +19,7 @@ extern VALUE rb_cFont;
 extern void Init_Font(void);
 
 struct Font {
-  VALUE name;
-  int size;
+  VALUE name, size;
   bool bold, italic;
 #if RGSS == 3
   bool outline;
