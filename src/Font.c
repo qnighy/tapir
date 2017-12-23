@@ -185,6 +185,7 @@ struct Font *rb_font_data_mut(VALUE obj) {
 
 static void font_mark(struct Font *ptr) {
   rb_gc_mark(ptr->name);
+  rb_gc_mark(ptr->size);
   rb_gc_mark(ptr->color);
 #if RGSS == 3
   rb_gc_mark(ptr->out_color);
