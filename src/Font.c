@@ -125,7 +125,16 @@ static VALUE rb_font_m_set_out_color(VALUE self, VALUE newval);
 VALUE rb_cFont;
 
 /*
- * Font family and style.
+ * A font consists of the following data:
+ *
+ * - Its *name*, a mere Ruby value (expected to be a String or an array of String)
+ * - Its *size*, a mere Ruby value (expected to be an Integer or a Float)
+ * - Whether it's *bold* or not, a boolean value
+ * - Whether it's *italic* or not, a boolean value
+ * - Its *color*, a Color value
+ * - Whether the *shadow* is rendered or not, a boolean value (RGSS2 or RGSS3 only)
+ * - Whether the *outline* is rendered or not, a boolean value (RGSS3 only)
+ * - Its <b>outline color</b>, a Color value (RGSS3 only)
  */
 void Init_Font(void) {
   rb_cFont = rb_define_class("Font", rb_cObject);
