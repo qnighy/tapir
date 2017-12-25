@@ -238,6 +238,17 @@ static VALUE font_alloc(VALUE klass) {
  *   Font.new(name, size)
  *
  * Creates a new font with optional name and size.
+ *
+ * It actually does the following things:
+ *
+ * - Calls Font#name= with Font.default_name or the first argument.
+ * - Calls Font#size= with Font.default_size or the second argument.
+ * - Calls Font#bold= with Font.default_bold.
+ * - Calls Font#italic= with Font.default_italic.
+ * - Copies Font.default_color's content to Font#color.
+ * - Calls Font#shadow= with Font.default_shadow. (RGSS2 and RGSS3 only)
+ * - Calls Font#outline= with Font.default_outline. (RGSS3 only)
+ * - Copies Font.default_out_color's content to Font#out_color. (RGSS3 only)
  */
 static VALUE rb_font_m_initialize(int argc, VALUE *argv, VALUE self) {
   struct Font *ptr = rb_font_data_mut(self);
