@@ -135,6 +135,10 @@ VALUE rb_cFont;
  * - Whether the *shadow* is rendered or not, a boolean value (RGSS2 or RGSS3 only)
  * - Whether the *outline* is rendered or not, a boolean value (RGSS3 only)
  * - Its <b>outline color</b>, a Color value (RGSS3 only)
+ *
+ * == Bugs
+ *
+ * - Font#size= can accept an object which is neither Integer or Float, if it implements <tt>to_int</tt>.
  */
 void Init_Font(void) {
   rb_cFont = rb_define_class("Font", rb_cObject);
