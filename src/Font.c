@@ -331,6 +331,17 @@ static VALUE rb_font_m_size(VALUE self) {
   return ptr->size;
 }
 
+
+/*
+ * call-seq:
+ *   font.size = newval -> newval
+ *
+ * Modifies the size of the font.
+ * _newval_ is expected to be an integer or a Float.
+ *
+ * ArgumentError is raised if the new value is out of
+ * <code>(6.0...97.0)</code> range.
+ */
 static VALUE rb_font_m_set_size(VALUE self, VALUE newval) {
   struct Font *ptr = rb_font_data_mut(self);
   double size = as_double(newval);
