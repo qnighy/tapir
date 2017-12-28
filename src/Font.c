@@ -139,6 +139,7 @@ VALUE rb_cFont;
  * == Bugs
  *
  * - Font#size= can accept an object which is neither Integer or Float, if it implements <tt>to_int</tt>.
+ * - Font#size= can accept NaN.
  */
 void Init_Font(void) {
   rb_cFont = rb_define_class("Font", rb_cObject);
