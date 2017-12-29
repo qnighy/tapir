@@ -479,6 +479,26 @@ module RGSSTest
       assert_raise(TypeError) { obj.color = Tone.new(0.0, 0.0, 0.0, 0.0) }
     end
 
+    def test_color_hook
+      myFont = Class.new(Font) do
+        def color=(c)
+          @color = c
+          super
+        end
+      end
+      f = myFont.new
+      c = f.color
+      if RGSS == 3
+        f.instance_variable_set(:@color, nil)
+        c.set(Color.new(10, 20, 10, 30))
+        assert_equal(f.instance_variable_get(:@color), c)
+        assert(f.instance_variable_get(:@color).equal?(c))
+      end
+      f.instance_variable_set(:@color, nil)
+      c.red = 50
+      assert(f.instance_variable_get(:@color).equal?(c))
+    end
+
     if RGSS >= 2
     def test_set_shadow
       obj = @@klass.new
@@ -517,6 +537,26 @@ module RGSSTest
       obj.out_color = Color.new(77.0, 88.0, 99.0, 110.0)
       assert_equal(obj.out_color, Color.new(77.0, 88.0, 99.0, 110.0))
       assert(obj.out_color.equal?(c))
+    end
+    end # if RGSS == 3
+
+    if RGSS == 3
+    def test_out_color_hook
+      myFont = Class.new(Font) do
+        def out_color=(c)
+          @out_color = c
+          super
+        end
+      end
+      f = myFont.new
+      c = f.out_color
+      f.instance_variable_set(:@out_color, nil)
+      c.set(Color.new(10, 20, 10, 30))
+      assert_equal(f.instance_variable_get(:@out_color), c)
+      assert(f.instance_variable_get(:@out_color).equal?(c))
+      f.instance_variable_set(:@out_color, nil)
+      c.red = 50
+      assert(f.instance_variable_get(:@out_color).equal?(c))
     end
     end # if RGSS == 3
 
