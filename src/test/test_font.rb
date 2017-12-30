@@ -598,6 +598,117 @@ module RGSSTest
       end
     end
 
+    def test_set_default_name
+      restore_defaults do
+        @@klass.default_name = name = "DejaVu Mono"
+        assert(@@klass.default_name.equal?(name))
+        @@klass.default_name = name = "\x80\xE0\x00"
+        assert(@@klass.default_name.equal?(name))
+        @@klass.default_name = name = :hoge
+        assert(@@klass.default_name.equal?(name))
+        @@klass.default_name = name = nil
+        assert(@@klass.default_name.equal?(name))
+      end
+    end
+
+    def test_set_default_size
+      restore_defaults do
+        @@klass.default_size = 31
+        assert_equal(@@klass.default_size, 31)
+        assert_equal(@@klass.default_size.class, Fixnum)
+        @@klass.default_size = 90
+        assert_equal(@@klass.default_size, 90)
+        assert_equal(@@klass.default_size.class, Fixnum)
+        @@klass.default_size = 28.0
+        assert_equal(@@klass.default_size, 28.0)
+        assert_equal(@@klass.default_size.class, Float)
+        @@klass.default_size = 50.5
+        assert_equal(@@klass.default_size, 50.5)
+        assert_equal(@@klass.default_size.class, Float)
+      end
+    end
+
+    def test_set_default_size_int_range
+      restore_defaults do
+        assert_nothing_raised(ArgumentError) { @@klass.default_size = 95 }
+        assert_nothing_raised(ArgumentError) { @@klass.default_size = 96 }
+        assert_raise(ArgumentError) { @@klass.default_size = 97 }
+        assert_raise(ArgumentError) { @@klass.default_size = 98 }
+        assert_nothing_raised(ArgumentError) { @@klass.default_size = 7 }
+        assert_nothing_raised(ArgumentError) { @@klass.default_size = 6 }
+        assert_raise(ArgumentError) { @@klass.default_size = 5 }
+        assert_raise(ArgumentError) { @@klass.default_size = 4 }
+      end
+    end
+
+    def test_set_default_size_float_range
+      restore_defaults do
+        assert_nothing_raised(ArgumentError) { @@klass.default_size = 96.8 }
+        assert_nothing_raised(ArgumentError) { @@klass.default_size = 96.9 }
+        assert_raise(ArgumentError) { @@klass.default_size = 97.0 }
+        assert_raise(ArgumentError) { @@klass.default_size = 97.1 }
+        assert_nothing_raised(ArgumentError) { @@klass.default_size = 6.1 }
+        assert_nothing_raised(ArgumentError) { @@klass.default_size = 6.0 }
+        assert_raise(ArgumentError) { @@klass.default_size = 5.9 }
+        assert_raise(ArgumentError) { @@klass.default_size = 5.8 }
+      end
+    end
+
+    def test_set_default_size_nan
+      restore_defaults do
+        assert_nothing_raised(ArgumentError) {
+          @@klass.default_size = 0.0 / 0.0
+        }
+      end
+    end
+
+    def test_set_default_size_typeerror
+      restore_defaults do
+        assert_raise(TypeError) { @@klass.default_size = "55" }
+      end
+    end
+
+    def test_set_default_size_float
+      restore_defaults do
+        @@klass.default_size = 21.75
+        assert_equal(@@klass.default_size, 21.75)
+
+        @@klass.default_size = 21.0
+        assert_equal(@@klass.default_size.class, Float)
+
+        @@klass.default_size = 21
+        assert_equal(@@klass.default_size.class, Fixnum)
+      end
+    end
+
+    def test_set_default_size_int_proxy
+      restore_defaults do
+        x = Object.new
+        def x.to_int
+          10
+        end
+        y = Object.new
+        @@klass.default_size = x
+        assert_equal(@@klass.default_size, x)
+        assert_raise(TypeError) { @@klass.default_size = y }
+      end
+    end
+
+    def test_set_default_size_float_proxy
+      restore_defaults do
+        x = Object.new
+        def x.to_f
+          10.0
+        end
+        y = Object.new
+        def y.class
+          Float
+        end
+        assert_raise(TypeError) { @@klass.default_size = x }
+        assert_raise(TypeError) { @@klass.default_size = y }
+      end
+    end
+
     # TODO: add more tests
   end
 end
